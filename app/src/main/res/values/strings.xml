@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">adsfa</string>
+    <string name="app_name">SnapYak</string>
+    <string name="title_section1">Feed</string>
+    <string name="title_section2">Peak</string>
+    <string name="title_section3">Me</string>
     <string name="hello_world">Hello world!</string>
+    <string name="action_camera">Camera</string>
+    <string name="title_activity_camera">CameraActivity</string>
     <string name="action_settings">Settings</string>
+    <string name="openCamera">Open Camera</string>
 
 </resources>

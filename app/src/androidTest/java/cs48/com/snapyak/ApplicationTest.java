@@ -1,4 +1,4 @@
-package com.example.timothy.adsfa;
+package cs48.com.snapyak;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
