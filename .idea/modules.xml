@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Lethe.iml" filepath="$PROJECT_DIR$/Lethe.iml" />
+      <module fileurl="file://$PROJECT_DIR$/adsfa.iml" filepath="$PROJECT_DIR$/adsfa.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
