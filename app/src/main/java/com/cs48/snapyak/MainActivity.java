@@ -39,6 +39,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setUpActionBar();
+
+
     }
 
     private void setUpActionBar() {
@@ -93,7 +95,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_camera ){
+        if (id == R.id.action_camera) {
             return true;
         }
 
