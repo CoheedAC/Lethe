@@ -1,4 +1,4 @@
-package cs48.com.snapyak;
+package com.cs48.snapyak;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
