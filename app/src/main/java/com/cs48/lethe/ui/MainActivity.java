@@ -14,11 +14,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import com.cs48.lethe.R;
-
-import java.util.Locale;
 
 
 public class MainActivity extends ActionBarActivity implements ActionBar.TabListener {
@@ -161,9 +158,9 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         @Override
         public CharSequence getPageTitle(int position) {
-            Locale l = Locale.getDefault();
             // Comment out to hide tab title text
             /*
+            Locale l = Locale.getDefault();
             switch (position) {
                 case 0:
                     return getString(R.string.title_section1).toUpperCase(l);
@@ -188,7 +185,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
          * fragment.
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
-        private ImageView mImageView;
 
         /**
          * Returns a new instance of this fragment for the given section

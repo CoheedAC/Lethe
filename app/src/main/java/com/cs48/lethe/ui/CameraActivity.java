@@ -9,6 +9,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cs48.lethe.R;
@@ -19,19 +21,35 @@ import java.io.File;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
-public class CameraActivity extends ActionBarActivity {
+public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekBarChangeListener {
 
     private static final String TAG = CameraActivity.class.getSimpleName();
     private static final int IMAGE_CAPTURE_REQUEST = 100;
+
+    private final int MIN_HOURS = 6;
+    private final int MAX_HOURS = 24;
+    private int imageTimer;
+
     private Uri mImageUri;
 
     @InjectView(R.id.imageView) ImageView mImageView;
+    @InjectView(R.id.timerTextView) TextView mTimerTextView;
+    @InjectView(R.id.seekBar) SeekBar mSeekBar;
+    @InjectView(R.id.minHourTextView) TextView mMinHourTextView;
+    @InjectView(R.id.maxHourTextView) TextView mMaxHourTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
         ButterKnife.inject(this);
+
+        mMinHourTextView.setText(MIN_HOURS + "");
+        mMaxHourTextView.setText(MAX_HOURS + "");
+
+        mSeekBar.setOnSeekBarChangeListener(this);
+        mSeekBar.setMax(MAX_HOURS - MIN_HOURS);
+        mSeekBar.setProgress(mSeekBar.getMax());
 
         // Displays back button
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -79,6 +97,24 @@ public class CameraActivity extends ActionBarActivity {
         }
     }
 
+    // Changes timer text when user scrolls seekbar
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress,
+                                  boolean fromUser) {
+        mTimerTextView.setText("Set Timer: " + (progress + MIN_HOURS) + " hours");
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+
+    }
+
+    // Stores the progress with MIN_HOURS as a lower boundary in a variable
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+        imageTimer = (seekBar.getProgress() + MIN_HOURS);
+    }
+
     // Delete image on back button or cancel of camera
     public boolean deleteImage() {
         File imageToDelete = new File(mImageUri.getPath());
@@ -101,12 +137,20 @@ public class CameraActivity extends ActionBarActivity {
 
         // returns to main screen and prints out image location if user presses post button
         if (id == R.id.action_post) {
+            sendImageDataToServer();
             Toast.makeText(this, mImageUri.toString(), Toast.LENGTH_LONG).show();
             Log.d(TAG, mImageUri.toString());
             finish();
             return true;
         }
-
         return super.onOptionsItemSelected(item);
+    }
+
+    // Unimplemented
+    private void sendImageDataToServer() {
+        File imageFile = new File(mImageUri.getPath()); // stored as jpg
+        double longitude = 0;
+        double latitude = 0;
+        // send imageTimer
     }
 }
