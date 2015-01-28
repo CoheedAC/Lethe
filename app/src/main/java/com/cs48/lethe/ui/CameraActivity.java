@@ -1,4 +1,4 @@
-package com.cs48.snapyak;
+package com.cs48.lethe.ui;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -11,22 +11,27 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.cs48.snapyak.utils.FileUtilities;
+import com.cs48.lethe.R;
+import com.cs48.lethe.utils.FileUtilities;
 
 import java.io.File;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+
 public class CameraActivity extends ActionBarActivity {
 
-    public static final String TAG = CameraActivity.class.getSimpleName();
+    private static final String TAG = CameraActivity.class.getSimpleName();
     private static final int IMAGE_CAPTURE_REQUEST = 100;
-    private ImageView mImageView;
     private Uri mImageUri;
+
+    @InjectView(R.id.imageView) ImageView mImageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
-        mImageView = (ImageView) findViewById(R.id.imageView);
+        ButterKnife.inject(this);
 
         // Displays back button
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

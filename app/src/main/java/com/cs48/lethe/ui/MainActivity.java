@@ -1,7 +1,6 @@
-package com.cs48.snapyak;
+package com.cs48.lethe.ui;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -17,11 +16,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.cs48.lethe.R;
+
 import java.util.Locale;
 
 
 public class MainActivity extends ActionBarActivity implements ActionBar.TabListener {
 
+    // For debugging purposes
     public static final String TAG = MainActivity.class.getSimpleName();
 
     /**
@@ -39,15 +41,12 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
      */
     ViewPager mViewPager;
 
-    // Camera member variables
-    private static final int IMAGE_CAPTURE_REQUEST = 100;
-    public static final int RESULT_LOAD_IMAGE = 1000;
-    private Uri mImageUri;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        setTitle("Home");
         setUpActionBar();
     }
 

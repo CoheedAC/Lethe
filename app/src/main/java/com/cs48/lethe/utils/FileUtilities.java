@@ -1,4 +1,4 @@
-package com.cs48.snapyak.utils;
+package com.cs48.lethe.utils;
 
 import android.net.Uri;
 import android.os.Environment;
