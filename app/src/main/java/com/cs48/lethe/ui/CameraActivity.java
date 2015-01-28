@@ -16,7 +16,13 @@ import android.widget.Toast;
 import com.cs48.lethe.R;
 import com.cs48.lethe.utils.FileUtilities;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -31,6 +37,7 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
     private int imageTimer;
 
     private Uri mImageUri;
+    private static String boundary = "--------------------Boundary";
 
     @InjectView(R.id.imageView) ImageView mImageView;
     @InjectView(R.id.timerTextView) TextView mTimerTextView;
@@ -141,7 +148,7 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
 
         // returns to main screen and prints out image location if user presses post button
         if (id == R.id.action_post) {
-            sendImageDataToServer();
+            sendImageDataToServer(); //remove this if crashing
             Toast.makeText(this, mImageUri.toString(), Toast.LENGTH_LONG).show();
             Log.d(TAG, mImageUri.toString());
             finish();
@@ -152,9 +159,70 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
 
     // Unimplemented
     private void sendImageDataToServer() {
+        String imagePath = mImageUri.getPath();
         File imageFile = new File(mImageUri.getPath()); // stored as jpg
-        double longitude = 0;
-        double latitude = 0;
-        // send imageTimer
+        try{
+            URL address = new URL("https://frozen-sea-8879.herokuapp.com/sendPic");
+            HttpURLConnection connection = (HttpURLConnection)(address.openConnection());
+
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+            connection.setUseCaches(false);
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Connection","Keep-Alive");
+            connection.setRequestProperty("Content-Type","multipart/form-data;boundary="+boundary);
+
+            DataOutputStream requestBody = (DataOutputStream)connection.getOutputStream();
+
+            String latitude = generateForSimpleText("latitude","45.5");
+            String longitude = generateForSimpleText("longitude","43.3");
+
+            requestBody.writeBytes(latitude+longitude); // write lat and long to stream
+
+            String frontBoilerForImage = generateImageBoilerplateFront("Test.jpg");
+            requestBody.writeBytes(frontBoilerForImage);
+
+            //now encode image
+            FileInputStream imageAsStream = new FileInputStream(imagePath);
+            int bytesAvailable = imageAsStream.available();
+            int bufferSize = Math.min(bytesAvailable, 1*1024*1024);
+            byte[] buffer = new byte[bufferSize];
+            int bytesRead = imageAsStream.read(buffer,0,bufferSize);
+            while(bytesRead>0){
+                requestBody.write(buffer,0,bufferSize);
+                bytesAvailable = imageAsStream.available();
+                bufferSize = Math.min(bytesAvailable, 1*1024*1024);
+                bytesRead = imageAsStream.read(buffer,0,bufferSize);
+            } //use buffer, write until image data is exhausted
+            //finished writing image
+
+            String endBoilerForImage = generateImageBoilerPlateEnd();
+            requestBody.writeBytes(endBoilerForImage); //finish image
+
+            imageAsStream.close();
+            requestBody.flush();
+            requestBody.close();
+
+            DataInputStream results = (DataInputStream)connection.getInputStream();
+            String str =  results.readLine();
+            Toast.makeText(this,str, Toast.LENGTH_LONG).show();
+
+        }
+        catch (Exception e){
+            Toast.makeText(this, e.getLocalizedMessage() , Toast.LENGTH_LONG).show();
+        }
+
     }
+
+    private String generateForSimpleText(String name, String value){
+        return ("--" + boundary + "\r\nContent-Disposition: form-data; name=\"" + name + "\"\r\n\r\n" +value+"\r\n");
+    }
+    private String generateImageBoilerplateFront(String filename){
+        return ("--" +boundary +"\r\nContent-Disposition: form-data; name=\"avatar\"; filename=\""+filename+"\"\r\nContent-Type: image/jpeg\r\n\r\n");
+    }
+    private String generateImageBoilerPlateEnd(){
+        return ("\r\n--" + boundary + "--");
+    }
+
+
 }
