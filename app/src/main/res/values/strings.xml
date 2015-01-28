@@ -6,5 +6,7 @@
     <string name="title_section2">Peek</string>
     <string name="title_section3">Me</string>
     <string name="action_camera">Camera</string>
+    <string name="title_activity_camera">CameraActivity</string>
+    <string name="action_post">Post</string>
 
 </resources>

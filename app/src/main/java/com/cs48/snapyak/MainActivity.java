@@ -1,5 +1,7 @@
 package com.cs48.snapyak;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -13,11 +15,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import java.util.Locale;
 
 
 public class MainActivity extends ActionBarActivity implements ActionBar.TabListener {
+
+    public static final String TAG = MainActivity.class.getSimpleName();
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -34,13 +39,16 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
      */
     ViewPager mViewPager;
 
+    // Camera member variables
+    private static final int IMAGE_CAPTURE_REQUEST = 100;
+    public static final int RESULT_LOAD_IMAGE = 1000;
+    private Uri mImageUri;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setUpActionBar();
-
-
     }
 
     private void setUpActionBar() {
@@ -79,7 +87,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         }
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -94,8 +101,11 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
+        // Starts camera activity
         if (id == R.id.action_camera) {
+            Intent intent = new Intent(this, CameraActivity.class);
+            startActivity(intent);
+
             return true;
         }
 
@@ -164,6 +174,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
          * fragment.
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
+        private ImageView mImageView;
 
         /**
          * Returns a new instance of this fragment for the given section
@@ -183,9 +194,10 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+            View rootView = inflater.inflate(R.layout.activity_main, container, false);
             return rootView;
         }
+
     }
 
 }
