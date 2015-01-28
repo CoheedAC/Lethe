@@ -47,6 +47,9 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
         mMinHourTextView.setText(MIN_HOURS + "");
         mMaxHourTextView.setText(MAX_HOURS + "");
 
+
+        // Offset seekbar by MIN_HOURS because seekbar
+        // can only start at 0 (but allowed to set max value)
         mSeekBar.setOnSeekBarChangeListener(this);
         mSeekBar.setMax(MAX_HOURS - MIN_HOURS);
         mSeekBar.setProgress(mSeekBar.getMax());
@@ -78,6 +81,7 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
     public boolean onSupportNavigateUp(){
         deleteImage();
         startCamera();
+        mSeekBar.setProgress(mSeekBar.getMax());
         return true;
     }
 
@@ -115,7 +119,7 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
         imageTimer = (seekBar.getProgress() + MIN_HOURS);
     }
 
-    // Delete image on back button or cancel of camera
+    // Delete image from path location
     public boolean deleteImage() {
         File imageToDelete = new File(mImageUri.getPath());
         return imageToDelete.delete();

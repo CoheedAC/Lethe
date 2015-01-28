@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Lethe</string>
-    <string name="title_section1">Feed</string>
+    <string name="app_name">PicLyfe</string>
+    <string name="title_section1">Home</string>
     <string name="title_section2">Peek</string>
     <string name="title_section3">Me</string>
     <string name="title_section4">More</string>

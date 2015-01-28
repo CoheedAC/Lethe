@@ -51,8 +51,10 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         // Set up the action bar.
         final ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+
+        // Show app icon
         actionBar.setDisplayShowHomeEnabled(true);
-        actionBar.setIcon(R.drawable.ic_action_crop);
+        actionBar.setIcon(R.drawable.ic_launcher);
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
@@ -120,9 +122,27 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
     @Override
     public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+        int position = tab.getPosition();
+
         // When the given tab is selected, switch to the corresponding page in
         // the ViewPager.
-        mViewPager.setCurrentItem(tab.getPosition());
+        mViewPager.setCurrentItem(position);
+
+        // Changes title based upon which tab is selected
+        switch (position) {
+            case 0:
+                setTitle(R.string.title_section1);
+                break;
+            case 1:
+                setTitle(R.string.title_section2);
+                break;
+            case 2:
+                setTitle(R.string.title_section3);
+                break;
+            case 3:
+                setTitle(R.string.title_section4);
+                break;
+        }
     }
 
     @Override
@@ -147,6 +167,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
+
             return PlaceholderFragment.newInstance(position + 1);
         }
 
