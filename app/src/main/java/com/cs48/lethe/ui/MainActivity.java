@@ -54,6 +54,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         // Set up the action bar.
         final ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        actionBar.setDisplayShowHomeEnabled(true);
+        actionBar.setIcon(R.drawable.ic_action_crop);
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
@@ -73,6 +75,12 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             }
         });
 
+        final int[] ICONS = new int[] {
+                R.drawable.ic_action_picture,
+                R.drawable.ic_action_map,
+                R.drawable.ic_action_person
+        };
+
         // For each of the sections in the app, add a tab to the action bar.
         for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
             // Create a tab with text corresponding to the page title defined by
@@ -82,6 +90,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             actionBar.addTab(
                     actionBar.newTab()
                             .setText(mSectionsPagerAdapter.getPageTitle(i))
+                            .setIcon(ICONS[i])
                             .setTabListener(this));
         }
     }
