@@ -66,7 +66,7 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
         // create Intent to take a picture and return control to the calling application
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-        File imageFile = FileUtilities.saveImageFile(); // create a file to save the image
+        File imageFile = FileUtilities.saveImageFile(this); // create a file to save the image
         mImageUri = FileUtilities.getImageUri(imageFile); // gets Uri of saved image
         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mImageUri); // set the image file name
 
@@ -76,12 +76,24 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
         }
     }
 
-    // Deletes captured image and restarts the camera when the back button is pressed
-    @Override
-    public boolean onSupportNavigateUp(){
+    private void goBack() {
         deleteImage();
         startCamera();
         mSeekBar.setProgress(mSeekBar.getMax());
+        Log.d(TAG, "Back button pressed");
+        Toast.makeText(this, "Back button pressed", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        goBack();
+    }
+
+    // Deletes captured image and restarts the camera when the back button is pressed
+    @Override
+    public boolean onSupportNavigateUp(){
+        goBack();
         return true;
     }
 

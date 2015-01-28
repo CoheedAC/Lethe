@@ -1,8 +1,11 @@
 package com.cs48.lethe.utils;
 
+import android.content.Context;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
+
+import com.cs48.lethe.R;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -123,14 +126,15 @@ public class FileUtilities{
     /**
      * Create a File for saving an image or video
      */
-    public static File saveImageFile() {
+    public static File saveImageFile(Context context) {
         // To be safe, you should check that the SDCard is mounted
         // using Environment.getExternalStorageState() before doing this.
 
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state)) {
             File imageStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                    Environment.DIRECTORY_PICTURES), "SnapYak");
+                    Environment.DIRECTORY_PICTURES), context.getResources().getString(R.string.app_name));
+
 
             // This location works best if you want the created images to be shared
             // between applications and persist after your app has been uninstalled.
