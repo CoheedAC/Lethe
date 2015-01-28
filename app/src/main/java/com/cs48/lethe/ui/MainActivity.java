@@ -78,7 +78,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         final int[] ICONS = new int[] {
                 R.drawable.ic_action_picture,
                 R.drawable.ic_action_map,
-                R.drawable.ic_action_person
+                R.drawable.ic_action_person,
+                R.drawable.ic_action_share
         };
 
         // For each of the sections in the app, add a tab to the action bar.
@@ -155,12 +156,14 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 3;
+            return 4;
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
             Locale l = Locale.getDefault();
+            // Comment out to hide tab title text
+            /*
             switch (position) {
                 case 0:
                     return getString(R.string.title_section1).toUpperCase(l);
@@ -168,8 +171,11 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                     return getString(R.string.title_section2).toUpperCase(l);
                 case 2:
                     return getString(R.string.title_section3).toUpperCase(l);
+                case 3:
+                    return getString(R.string.title_section4).toUpperCase(l);
             }
-            return null;
+            */
+            return "";
         }
     }
 

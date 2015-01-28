@@ -5,6 +5,7 @@
     <string name="title_section1">Feed</string>
     <string name="title_section2">Peek</string>
     <string name="title_section3">Me</string>
+    <string name="title_section4">More</string>
     <string name="action_camera">Camera</string>
     <string name="title_activity_camera">Post a Picture</string>
     <string name="action_post">Post</string>
