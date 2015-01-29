@@ -134,8 +134,6 @@ public class FileUtilities{
         if (Environment.MEDIA_MOUNTED.equals(state)) {
             File imageStorageDir = new File(Environment.getExternalStoragePublicDirectory(
                     Environment.DIRECTORY_PICTURES), context.getResources().getString(R.string.app_name));
-
-
             // This location works best if you want the created images to be shared
             // between applications and persist after your app has been uninstalled.
 

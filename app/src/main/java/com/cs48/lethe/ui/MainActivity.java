@@ -1,6 +1,8 @@
 package com.cs48.lethe.ui;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -9,16 +11,18 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.cs48.lethe.R;
 
+import java.util.List;
+import java.util.Vector;
 
-public class MainActivity extends ActionBarActivity implements ActionBar.TabListener {
+
+public class MainActivity extends ActionBarActivity implements ActionBar.TabListener,
+        FeedFragment.OnFragmentInteractionListener, PeekFragment.OnFragmentInteractionListener,
+        MeFragment.OnFragmentInteractionListener, MoreFragment.OnFragmentInteractionListener {
 
     // For debugging purposes
     public static final String TAG = MainActivity.class.getSimpleName();
@@ -31,12 +35,14 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
      * may be best to switch to a
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
-    SectionsPagerAdapter mSectionsPagerAdapter;
+    private SectionsPagerAdapter mSectionsPagerAdapter;
+    private List<String> fragments = new Vector<>();
+    private Context mContext = this;
 
     /**
      * The {@link ViewPager} that will host the section contents.
      */
-    ViewPager mViewPager;
+    private ViewPager mViewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +51,11 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         setTitle("Home");
         setUpActionBar();
+
+        fragments.add(FeedFragment.class.getName());
+        fragments.add(PeekFragment.class.getName());
+        fragments.add(MeFragment.class.getName());
+        fragments.add(MoreFragment.class.getName());
     }
 
     private void setUpActionBar() {
@@ -74,7 +85,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             }
         });
 
-        final int[] ICONS = new int[] {
+        final int[] ICONS = new int[]{
                 R.drawable.ic_action_picture,
                 R.drawable.ic_action_map,
                 R.drawable.ic_action_person,
@@ -153,11 +164,16 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
     }
 
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
+
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+    class SectionsPagerAdapter extends FragmentPagerAdapter {
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -165,15 +181,11 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         @Override
         public Fragment getItem(int position) {
-            // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
-
-            return PlaceholderFragment.newInstance(position + 1);
+            return Fragment.instantiate(mContext, fragments.get(position));
         }
 
         @Override
         public int getCount() {
-            // Show 3 total pages.
             return 4;
         }
 
@@ -196,39 +208,4 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             return "";
         }
     }
-
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
-
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        public PlaceholderFragment() {
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.activity_main, container, false);
-            return rootView;
-        }
-
-    }
-
 }

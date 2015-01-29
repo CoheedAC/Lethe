@@ -42,7 +42,9 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
+
         ButterKnife.inject(this);
+
 
         mMinHourTextView.setText(MIN_HOURS + "");
         mMaxHourTextView.setText(MAX_HOURS + "");
@@ -76,6 +78,7 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
         }
     }
 
+    // Deletes stored image and restarts the camera
     private void goBack() {
         deleteImage();
         startCamera();
@@ -84,13 +87,14 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
         Toast.makeText(this, "Back button pressed", Toast.LENGTH_LONG).show();
     }
 
+    // Hardware back button
     @Override
     public void onBackPressed() {
         super.onBackPressed();
         goBack();
     }
 
-    // Deletes captured image and restarts the camera when the back button is pressed
+    // Navigation back button in action bar
     @Override
     public boolean onSupportNavigateUp(){
         goBack();
