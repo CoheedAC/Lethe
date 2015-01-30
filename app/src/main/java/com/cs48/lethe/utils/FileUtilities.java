@@ -34,6 +34,8 @@ public class FileUtilities {
         ApplicationSettings settings = new ApplicationSettings(context);
         String storageType = settings.getStoragePreference();
         String subdirectory = getSubdirectoryName(context);
+        if(true)//TEMPORARY!!! Just to get demo working. Not long term solution.
+             return getExternalStoragePublicDirectory(subdirectory);
 
         if (storageType.equals(StorageType.INTERNAL)) {
             /**
