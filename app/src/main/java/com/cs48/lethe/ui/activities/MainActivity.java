@@ -1,4 +1,4 @@
-package com.cs48.lethe.ui;
+package com.cs48.lethe.ui.activities;
 
 import android.content.Context;
 import android.content.Intent;
@@ -15,6 +15,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.cs48.lethe.R;
+import com.cs48.lethe.ui.fragments.FeedFragment;
+import com.cs48.lethe.ui.fragments.MeFragment;
+import com.cs48.lethe.ui.fragments.MoreFragment;
+import com.cs48.lethe.ui.fragments.PeekFragment;
 
 import java.util.List;
 import java.util.Vector;
@@ -49,13 +53,13 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        setTitle("Home");
-        setUpActionBar();
-
         fragments.add(FeedFragment.class.getName());
         fragments.add(PeekFragment.class.getName());
         fragments.add(MeFragment.class.getName());
         fragments.add(MoreFragment.class.getName());
+
+        setTitle("Home");
+        setUpActionBar();
     }
 
     private void setUpActionBar() {

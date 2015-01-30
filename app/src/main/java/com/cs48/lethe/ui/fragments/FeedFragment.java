@@ -1,4 +1,4 @@
-package com.cs48.lethe.ui;
+package com.cs48.lethe.ui.fragments;
 
 import android.app.Activity;
 import android.net.Uri;
@@ -7,18 +7,19 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.GridView;
 
 import com.cs48.lethe.R;
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link PeekFragment.OnFragmentInteractionListener} interface
+ * {@link FeedFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link PeekFragment#newInstance} factory method to
+ * Use the {@link FeedFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class PeekFragment extends Fragment {
+public class FeedFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -30,17 +31,19 @@ public class PeekFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
+    private GridView mGridView;
+
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment PeekFragment.
+     * @return A new instance of fragment FeedFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static PeekFragment newInstance(String param1, String param2) {
-        PeekFragment fragment = new PeekFragment();
+    public static FeedFragment newInstance(String param1, String param2) {
+        FeedFragment fragment = new FeedFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -48,7 +51,7 @@ public class PeekFragment extends Fragment {
         return fragment;
     }
 
-    public PeekFragment() {
+    public FeedFragment() {
         // Required empty public constructor
     }
 
@@ -65,7 +68,11 @@ public class PeekFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_peek, container, false);
+
+        View rootView = inflater.inflate(R.layout.fragment_feed, container, false);
+        mGridView = (GridView) rootView.findViewById(R.id.feedGridView);
+
+        return inflater.inflate(R.layout.fragment_feed, container, false);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
