@@ -25,6 +25,7 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
 
     private static final String TAG = CameraActivity.class.getSimpleName();
     private static final int IMAGE_CAPTURE_REQUEST = 100;
+    public static final int CAMERA_ACTIVITY_REQUEST = 101;
 
     private final int MIN_HOURS = 6;
     private final int MAX_HOURS = 24;
@@ -169,6 +170,7 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
             sendImageDataToServer();
             Toast.makeText(this, mImageUri.toString(), Toast.LENGTH_LONG).show();
             Log.d(TAG, mImageUri.toString());
+            setResult(RESULT_OK);
             finish();
             return true;
         }

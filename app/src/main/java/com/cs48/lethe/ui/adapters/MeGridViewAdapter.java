@@ -1,7 +1,6 @@
 package com.cs48.lethe.ui.adapters;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,21 +41,15 @@ public class MeGridViewAdapter extends BaseAdapter {
 
     // create a new ImageView for each item referenced by the Adapter
     public View getView(int position, View convertView, ViewGroup parent) {
-        ImageView imageView;
+        ImageView imageView = (ImageView) convertView;
         if (convertView == null) {  // if it's not recycled, initialize some attributes
             imageView = new ImageView(mContext);
-
             GridView.LayoutParams imageParams = new GridView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     300);
-
             imageView.setLayoutParams(imageParams);
-//            imageView.setLayoutParams(new (GridView()).LayoutParams());
             imageView.setScaleType(ImageView.ScaleType.FIT_XY);
             int pad = 10;
             imageView.setPadding(pad, pad, pad, pad);
-            imageView.setBackgroundColor(Color.parseColor("#7DCFB1"));
-        } else {
-            imageView = (ImageView) convertView;
         }
 
         Uri imageUri = FileUtilities.getImageUri(images[position]);

@@ -47,10 +47,6 @@ public class MeFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public void updateGrid() {
-        mGridView.invalidateViews();
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,6 +74,7 @@ public class MeFragment extends Fragment {
         int id = item.getItemId();
         if (id == R.id.action_delete_images) {
             FileUtilities.deleteAllImages(getActivity());
+            updateGridView();
             Toast.makeText(getActivity(), "Deleted all images", Toast.LENGTH_LONG).show();
             return true;
         }
@@ -85,6 +82,7 @@ public class MeFragment extends Fragment {
             try {
                 File[] files = FileUtilities.listFiles(getActivity());
                 FileUtilities.copyFile(getActivity(), files[0].getAbsolutePath(), 50);
+                updateGridView();
                 Toast.makeText(getActivity(), "Copied first image", Toast.LENGTH_LONG).show();
                 return true;
             } catch (Exception e) {
@@ -93,6 +91,12 @@ public class MeFragment extends Fragment {
             }
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void updateGridView() {
+//        mGridAdapter.notifyDataSetChanged();
+        mGridView.setAdapter(new MeGridViewAdapter(getActivity()));
+//        mGridAdapter.notifyDataSetInvalidated();
     }
 
     // TODO: Rename method, update argument and hook method into UI event
