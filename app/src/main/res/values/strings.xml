@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-<<<<<<< HEAD
     <string name="app_name">PicLyfe</string>
-=======
-    <string name="app_name">Project Lethe</string>
->>>>>>> origin/mergeTestBranch
     <string name="title_section1">Home</string>
     <string name="title_section2">Peek</string>
     <string name="title_section3">Me</string>
