@@ -11,6 +11,7 @@ import com.cs48.lethe.R;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -103,7 +104,7 @@ public class FileUtilities {
     Returns app subdirectory in the external public storage. If directory doesn't exist, then it's created.
     */
     public static File getExternalStoragePublicDirectory(String subdirectory) {
-        File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), subdirectory);
+        File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/" + subdirectory);
         if (!dir.exists()) {
             if (!dir.mkdirs()) {
                 Log.d(TAG, "Failed to make directory.");
@@ -115,8 +116,37 @@ public class FileUtilities {
     /**
      Returns string of app name
      */
-    private static String getSubdirectoryName(Context context) {
+    public static String getSubdirectoryName(Context context) {
         return context.getResources().getString(R.string.app_name).replace(" ", "");
+    }
+
+    public static void deleteAllImages(Context context) {
+        String sub = getSubdirectoryName(context);
+        File dir = getExternalStoragePublicDirectory(sub);
+        for (File file: dir.listFiles())
+            file.delete();
+        File dir2 = context.getExternalFilesDir(sub);
+        for (File file: dir2.listFiles())
+            file.delete();
+    }
+
+    public static void copyFile (Context context, String path, int numCopies) throws IOException{
+        File dir = getFileDirectory(context);
+        for (int i = 0; i < numCopies; i++) {
+            File dst = new File(dir + "/IMG_" + (i+1) + ".jpg");
+
+            InputStream in = new FileInputStream(path);
+            OutputStream out = new FileOutputStream(dst);
+
+            // Transfer bytes from in to out
+            byte[] buf = new byte[1024];
+            int len;
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+            in.close();
+            out.close();
+        }
     }
 
     /**

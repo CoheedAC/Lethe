@@ -1,11 +1,8 @@
 package com.cs48.lethe.ui.activities;
 
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
@@ -15,13 +12,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.cs48.lethe.R;
+import com.cs48.lethe.ui.adapters.TabsPagerAdapter;
 import com.cs48.lethe.ui.fragments.FeedFragment;
 import com.cs48.lethe.ui.fragments.MeFragment;
 import com.cs48.lethe.ui.fragments.MoreFragment;
 import com.cs48.lethe.ui.fragments.PeekFragment;
-
-import java.util.List;
-import java.util.Vector;
 
 
 public class MainActivity extends ActionBarActivity implements ActionBar.TabListener,
@@ -39,9 +34,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
      * may be best to switch to a
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
-    private SectionsPagerAdapter mSectionsPagerAdapter;
-    private List<String> fragments = new Vector<>();
-    private Context mContext = this;
+    private TabsPagerAdapter mTabsPagerAdapter;
 
     /**
      * The {@link ViewPager} that will host the section contents.
@@ -53,10 +46,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        fragments.add(FeedFragment.class.getName());
-        fragments.add(PeekFragment.class.getName());
-        fragments.add(MeFragment.class.getName());
-        fragments.add(MoreFragment.class.getName());
 
         setTitle("Home");
         setUpActionBar();
@@ -73,11 +62,11 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        mTabsPagerAdapter = new TabsPagerAdapter(getSupportFragmentManager(), this);
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
+        mViewPager.setAdapter(mTabsPagerAdapter);
 
         // When swiping between different sections, select the corresponding
         // tab. We can also use ActionBar.Tab#select() to do this if we have
@@ -97,14 +86,14 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         };
 
         // For each of the sections in the app, add a tab to the action bar.
-        for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
+        for (int i = 0; i < mTabsPagerAdapter.getCount(); i++) {
             // Create a tab with text corresponding to the page title defined by
             // the adapter. Also specify this Activity object, which implements
             // the TabListener interface, as the callback (listener) for when
             // this tab is selected.
             actionBar.addTab(
                     actionBar.newTab()
-                            .setText(mSectionsPagerAdapter.getPageTitle(i))
+                            .setText(mTabsPagerAdapter.getPageTitle(i))
                             .setIcon(ICONS[i])
                             .setTabListener(this));
         }
@@ -114,6 +103,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        menu.getItem(0).setVisible(false);
+        menu.getItem(1).setVisible(false);
         return true;
     }
 
@@ -127,10 +118,10 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         // Starts camera activity
         if (id == R.id.action_camera) {
             Intent intent = new Intent(this, CameraActivity.class);
-            startActivity(intent);
-
+            startActivityForResult(intent,5);
             return true;
         }
+
 
         return super.onOptionsItemSelected(item);
     }
@@ -170,46 +161,5 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
     @Override
     public void onFragmentInteraction(Uri uri) {
-
-    }
-
-    /**
-     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
-     */
-    class SectionsPagerAdapter extends FragmentPagerAdapter {
-
-        public SectionsPagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            return Fragment.instantiate(mContext, fragments.get(position));
-        }
-
-        @Override
-        public int getCount() {
-            return 4;
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            // Comment out to hide tab title text
-            /*
-            Locale l = Locale.getDefault();
-            switch (position) {
-                case 0:
-                    return getString(R.string.title_section1).toUpperCase(l);
-                case 1:
-                    return getString(R.string.title_section2).toUpperCase(l);
-                case 2:
-                    return getString(R.string.title_section3).toUpperCase(l);
-                case 3:
-                    return getString(R.string.title_section4).toUpperCase(l);
-            }
-            */
-            return "";
-        }
     }
 }

@@ -7,7 +7,6 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.GridView;
 
 import com.cs48.lethe.R;
 
@@ -30,8 +29,6 @@ public class FeedFragment extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
-
-    private GridView mGridView;
 
     /**
      * Use this factory method to create a new instance of
@@ -68,9 +65,6 @@ public class FeedFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-
-        View rootView = inflater.inflate(R.layout.fragment_feed, container, false);
-        mGridView = (GridView) rootView.findViewById(R.id.feedGridView);
 
         return inflater.inflate(R.layout.fragment_feed, container, false);
     }

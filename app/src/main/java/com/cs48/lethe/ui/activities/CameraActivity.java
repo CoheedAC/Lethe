@@ -45,10 +45,8 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
 
         ButterKnife.inject(this);
 
-
         mMinHourTextView.setText(MIN_HOURS + "");
         mMaxHourTextView.setText(MAX_HOURS + "");
-
 
         // Offset seekbar by MIN_HOURS because seekbar
         // can only start at 0 (but allowed to set max value)
@@ -81,23 +79,16 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
     }
 
     /**
-     Deletes stored image and restarts the camera
+     Hardware back button
      */
-    private void goBack() {
+    @Override
+    public void onBackPressed() {
         deleteImage();
         startCamera();
         mSeekBar.setProgress(mSeekBar.getMax());
         Log.d(TAG, "Back button pressed");
         Toast.makeText(this, "Back button pressed", Toast.LENGTH_LONG).show();
-    }
-
-    /**
-     Hardware back button
-     */
-    @Override
-    public void onBackPressed() {
         super.onBackPressed();
-        goBack();
     }
 
     /**
@@ -105,7 +96,7 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
      */
     @Override
     public boolean onSupportNavigateUp(){
-        goBack();
+        onBackPressed();
         return true;
     }
 
@@ -118,7 +109,7 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
             if (resultCode == RESULT_OK) {
                 Toast.makeText(this, "Pressed OKAY", Toast.LENGTH_SHORT).show();
                 mImageView.setImageURI(mImageUri);
-             // if user cancels image capture, then return to main screen
+                // if user cancels image capture, then return to main screen
             }else if (resultCode == RESULT_CANCELED) {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
                 finish();
