@@ -2,10 +2,13 @@ package com.cs48.lethe.ui;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.NetworkOnMainThreadException;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.util.Xml;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
@@ -21,11 +24,15 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+
 
 public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekBarChangeListener {
 
@@ -100,6 +107,8 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
             // If user presses okay on camera, then it saves it to storage
             if (resultCode == RESULT_OK) {
                 mImageView.setImageURI(mImageUri);
+                //sendImageDataToServer();
+
              // if user cancels image capture, then return to main screen
             }else if (resultCode == RESULT_CANCELED) {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
@@ -148,7 +157,7 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
 
         // returns to main screen and prints out image location if user presses post button
         if (id == R.id.action_post) {
-            sendImageDataToServer(); //remove this if crashing
+            new ImageClass().execute();
             Toast.makeText(this, mImageUri.toString(), Toast.LENGTH_LONG).show();
             Log.d(TAG, mImageUri.toString());
             finish();
@@ -158,60 +167,78 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
     }
 
     // Unimplemented
-    private void sendImageDataToServer() {
-        String imagePath = mImageUri.getPath();
-        File imageFile = new File(mImageUri.getPath()); // stored as jpg
-        try{
-            URL address = new URL("https://frozen-sea-8879.herokuapp.com/sendPic");
-            HttpURLConnection connection = (HttpURLConnection)(address.openConnection());
+    private class ImageClass extends AsyncTask<String, String, Integer> {
 
-            connection.setDoInput(true);
-            connection.setDoOutput(true);
-            connection.setUseCaches(false);
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Connection","Keep-Alive");
-            connection.setRequestProperty("Content-Type","multipart/form-data;boundary="+boundary);
+        protected Integer doInBackground(String... params) {
+            String imagePath = mImageUri.getPath();
+            File imageFile = new File(mImageUri.getPath()); // stored as jpg
+            Log.d("TFirst","ad");
+            try {
 
-            DataOutputStream requestBody = (DataOutputStream)connection.getOutputStream();
+                URL address = new URL("https://frozen-sea-8879.herokuapp.com/sendPic");
+                HttpURLConnection connection = (HttpURLConnection) (address.openConnection());
 
-            String latitude = generateForSimpleText("latitude","45.5");
-            String longitude = generateForSimpleText("longitude","43.3");
+                connection.setDoInput(true);
+                connection.setDoOutput(true);
+                connection.setUseCaches(false);
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty("Connection", "Keep-Alive");
+                connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+                Log.d("TFirst","ad");
+                OutputStream requestBody = connection.getOutputStream();
+                Log.d("Progress","MADEITTODATA");
 
-            requestBody.writeBytes(latitude+longitude); // write lat and long to stream
 
-            String frontBoilerForImage = generateImageBoilerplateFront("Test.jpg");
-            requestBody.writeBytes(frontBoilerForImage);
+                String latitude = generateForSimpleText("latitude", "45.5");
+                String longitude = generateForSimpleText("longitude", "43.3");
+                String combined = latitude + longitude;
+                byte[] writer = combined.getBytes();
+                requestBody.write(writer, 0, writer.length);
 
-            //now encode image
-            FileInputStream imageAsStream = new FileInputStream(imagePath);
-            int bytesAvailable = imageAsStream.available();
-            int bufferSize = Math.min(bytesAvailable, 1*1024*1024);
-            byte[] buffer = new byte[bufferSize];
-            int bytesRead = imageAsStream.read(buffer,0,bufferSize);
-            while(bytesRead>0){
-                requestBody.write(buffer,0,bufferSize);
-                bytesAvailable = imageAsStream.available();
-                bufferSize = Math.min(bytesAvailable, 1*1024*1024);
-                bytesRead = imageAsStream.read(buffer,0,bufferSize);
-            } //use buffer, write until image data is exhausted
-            //finished writing image
 
-            String endBoilerForImage = generateImageBoilerPlateEnd();
-            requestBody.writeBytes(endBoilerForImage); //finish image
 
-            imageAsStream.close();
-            requestBody.flush();
-            requestBody.close();
+                String frontBoilerForImage = generateImageBoilerplateFront("Test.jpg");
+                writer = frontBoilerForImage.getBytes();
+                requestBody.write(writer, 0, writer.length);
 
-            DataInputStream results = (DataInputStream)connection.getInputStream();
-            String str =  results.readLine();
-            Toast.makeText(this,str, Toast.LENGTH_LONG).show();
+                //now encode image
+                FileInputStream imageAsStream = new FileInputStream(imagePath);
+                int bytesAvailable = imageAsStream.available();
+                int bufferSize = Math.min(bytesAvailable, 1 * 1024 * 1024);
+                byte[] buffer = new byte[bufferSize];
+                int bytesRead = imageAsStream.read(buffer, 0, bufferSize);
+                while (bytesRead > 0) {
+                    requestBody.write(buffer, 0, bufferSize);
+                    bytesAvailable = imageAsStream.available();
+                    bufferSize = Math.min(bytesAvailable, 1 * 1024 * 1024);
+                    bytesRead = imageAsStream.read(buffer, 0, bufferSize);
+                } //use buffer, write until image data is exhausted
+                //finished writing image
 
+                String endBoilerForImage = generateImageBoilerPlateEnd();
+                writer = endBoilerForImage.getBytes();
+                requestBody.write(writer, 0, writer.length); //finish image
+
+                imageAsStream.close();
+                requestBody.flush();
+                requestBody.close();
+                Log.d("Progress","END");
+                DataInputStream results = (DataInputStream) connection.getInputStream();
+                connection.disconnect();
+                //String str =  results.readLine();
+                //Toast.makeText(this,str, Toast.LENGTH_LONG).show();
+
+            } catch (NetworkOnMainThreadException e) {
+                    Log.d("Error","NetworkMain");
+
+            } catch (Exception e) {
+                Log.d("Error","GeneralException");
+                Log.d("Error",e.getLocalizedMessage());
+                // test.setText(e.getMessage());
+                //cToast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+            }
+            return 0;
         }
-        catch (Exception e){
-            Toast.makeText(this, e.getLocalizedMessage() , Toast.LENGTH_LONG).show();
-        }
-
     }
 
     private String generateForSimpleText(String name, String value){
