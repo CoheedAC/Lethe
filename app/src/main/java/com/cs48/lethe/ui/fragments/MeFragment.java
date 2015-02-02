@@ -28,6 +28,7 @@ import java.io.File;
  * create an instance of this fragment.
  */
 public class MeFragment extends Fragment {
+
     private MeGridViewAdapter mGridAdapter;
     private GridView mGridView;
 

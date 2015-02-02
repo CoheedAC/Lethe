@@ -93,7 +93,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             // this tab is selected.
             actionBar.addTab(
                     actionBar.newTab()
-                            .setText(mTabsPagerAdapter.getPageTitle(i))
+//                            .setText(mTabsPagerAdapter.getPageTitle(i))
                             .setIcon(ICONS[i])
                             .setTabListener(this));
         }
@@ -118,20 +118,11 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         // Starts camera activity
         if (id == R.id.action_camera) {
             Intent intent = new Intent(this, CameraActivity.class);
-            startActivityForResult(intent,CameraActivity.CAMERA_ACTIVITY_REQUEST);
+            startActivity(intent);
             return true;
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == CameraActivity.CAMERA_ACTIVITY_REQUEST || resultCode == RESULT_OK) {
-            MeFragment meFragment = (MeFragment) getSupportFragmentManager().getFragments().get(2);
-            meFragment.updateGridView();
-        }
     }
 
     @Override

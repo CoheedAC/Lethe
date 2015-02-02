@@ -15,14 +15,14 @@ import java.io.File;
 /**
  * Created by maxkohne on 1/29/15.
  */
-public class MeGridViewAdapter extends BaseAdapter {
+public class FeedGridViewAdapter extends BaseAdapter {
 
     public static final String TAG = MeGridViewAdapter.class.getSimpleName();
 
     private File[] images;
     private Context mContext;
 
-    public MeGridViewAdapter(Context context) {
+    public FeedGridViewAdapter(Context context) {
         mContext = context;
         images = FileUtilities.listFiles(context);
     }
