@@ -19,6 +19,7 @@ public class ApplicationSettings {
 
     public String getStoragePreference() {
         // StorageType.INTERAL is bugged right now. DO NOT USE IT.
+        // use PRIVATE_EXTERNAL as main storage
         return mSharedPreferences.getString("Storage", StorageType.PRIVATE_EXTERNAL);
     }
 

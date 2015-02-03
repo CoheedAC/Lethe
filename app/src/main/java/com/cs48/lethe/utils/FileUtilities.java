@@ -17,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -34,44 +35,34 @@ public class FileUtilities {
     public static File getFileDirectory(Context context) {
         ApplicationSettings settings = new ApplicationSettings(context);
         String storageType = settings.getStoragePreference();
-        String subdirectory = getSubdirectoryName(context);
 
-        if (storageType.equals(StorageType.INTERNAL)) {
+        if (storageType.equals(StorageType.INTERNAL) || !isExternalStorageAvailable()) {
             /**
-            Returns the absolute path to the directory on the filesystem
-            where files created with openFileOutput(String, int) are stored.
-            In other words, this is internal storage.
+             Returns the absolute path to the directory on the filesystem
+             where files created with openFileOutput(String, int) are stored.
+             In other words, this is internal storage.
              */
             return context.getFilesDir();
-
+        } else if (storageType.equals(StorageType.PRIVATE_EXTERNAL)) {
+            /**
+             This is like getFilesDir() in that these files will be deleted
+             when the application is uninstalled. However, external files are
+             not always available: they will disappear if the user mounts the
+             external storage on a computer or removes it.
+             */
+            return context.getExternalFilesDir(getSubdirectoryName(context));
         } else {
-            if (isExternalStorageAvailable()) {
-                if (storageType.equals(StorageType.PRIVATE_EXTERNAL)) {
-                    /**
-                    This is like getFilesDir() in that these files will be deleted
-                    when the application is uninstalled. However, external files are
-                    not always available: they will disappear if the user mounts the
-                    external storage on a computer or removes it.
-                     */
-                    return context.getExternalFilesDir(subdirectory);
-
-                } else {
-                    /**
-                    This is where the user will typically place and manage their own files,
-                    so you should be careful about what you put here to ensure you don't erase
-                    their files or get in the way of their own organization.
-                     */
-                    return getExternalStoragePublicDirectory(subdirectory);
-                }
-            } else {
-                // Internal storage
-                return context.getFilesDir();
-            }
+            /**
+             This is where the user will typically place and manage their own files,
+             so you should be careful about what you put here to ensure you don't erase
+             their files or get in the way of their own organization.
+             */
+            return getExternalStoragePublicDirectory(context);
         }
     }
 
     /**
-     Returns true if external storage is mounted. False otherwise.
+     * Returns true if external storage is mounted. False otherwise.
      */
     public static boolean isExternalStorageAvailable() {
         String state = Environment.getExternalStorageState();
@@ -87,7 +78,7 @@ public class FileUtilities {
     }
 
     /**
-     Returns an array of jpg files that are saved in the storage directory
+     * Returns an array of jpg files that are saved in the storage directory
      */
     public static File[] listFiles(Context context) {
         File fileDirectory = getFileDirectory(context);
@@ -101,10 +92,10 @@ public class FileUtilities {
     }
 
     /**
-    Returns app subdirectory in the external public storage. If directory doesn't exist, then it's created.
-    */
-    public static File getExternalStoragePublicDirectory(String subdirectory) {
-        File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/" + subdirectory);
+     * Returns app subdirectory in the external public storage. If directory doesn't exist, then it's created.
+     */
+    public static File getExternalStoragePublicDirectory(Context context) {
+        File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/" + getSubdirectoryName(context));
         if (!dir.exists()) {
             if (!dir.mkdirs()) {
                 Log.d(TAG, "Failed to make directory.");
@@ -114,7 +105,7 @@ public class FileUtilities {
     }
 
     /**
-     Returns string of app name
+     * Returns string of app name
      */
     public static String getSubdirectoryName(Context context) {
         return context.getResources().getString(R.string.app_name).replace(" ", "");
@@ -122,18 +113,23 @@ public class FileUtilities {
 
     public static void deleteAllImages(Context context) {
         String sub = getSubdirectoryName(context);
-        File dir = getExternalStoragePublicDirectory(sub);
-        for (File file: dir.listFiles())
+        File dir = getExternalStoragePublicDirectory(context);
+        for (File file : dir.listFiles())
             file.delete();
         File dir2 = context.getExternalFilesDir(sub);
-        for (File file: dir2.listFiles())
+        for (File file : dir2.listFiles())
             file.delete();
     }
 
-    public static void copyFile (Context context, String path, int numCopies) throws IOException{
+    public static boolean deleteImage(Context context, Uri deleteUri) {
+        File imageFile = new File(deleteUri.getPath());
+        return imageFile.delete();
+    }
+
+    public static void copyFile(Context context, String path, int numCopies) throws IOException {
         File dir = getFileDirectory(context);
         for (int i = 0; i < numCopies; i++) {
-            File dst = new File(dir + "/IMG_" + (i+1) + ".jpg");
+            File dst = new File(dir + "/IMG_" + (i + 1) + ".jpg");
 
             InputStream in = new FileInputStream(path);
             OutputStream out = new FileOutputStream(dst);
@@ -149,12 +145,24 @@ public class FileUtilities {
         }
     }
 
+    public static void saveImageForSharing(Context context, String imagePath) throws IOException {
+        File imageSource = new File(imagePath);
+        File imageDestination = new File(getExternalStoragePublicDirectory(context) + "/" + imageSource.getName());
+
+        FileInputStream inStream = new FileInputStream(imageSource);
+        FileOutputStream outStream = new FileOutputStream(imageDestination);
+        FileChannel inChannel = inStream.getChannel();
+        FileChannel outChannel = outStream.getChannel();
+        inChannel.transferTo(0, inChannel.size(), outChannel);
+        inStream.close();
+        outStream.close();
+    }
+
     /**
-     Copies the image to the public storage directory and returns the Uri
+     * Copies the image to the public storage directory and returns the Uri
      */
     public static Uri saveImageForSharing(Context context, Bitmap bitmap, String imageName) {
-        String subdirectory = getSubdirectoryName(context);
-        File fileToWrite = new File(getExternalStoragePublicDirectory(subdirectory), imageName);
+        File fileToWrite = new File(getExternalStoragePublicDirectory(context), imageName);
 
         try {
             FileOutputStream outputStream = new FileOutputStream(fileToWrite);

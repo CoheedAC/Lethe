@@ -1,17 +1,23 @@
 package com.cs48.lethe.ui.fragments;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.GridView;
 
 import com.cs48.lethe.R;
+import com.cs48.lethe.ui.activities.PictureActivity;
 import com.cs48.lethe.ui.adapters.FeedGridViewAdapter;
 import com.cs48.lethe.ui.adapters.MeGridViewAdapter;
+import com.cs48.lethe.utils.FileUtilities;
+
+import java.io.File;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -49,6 +55,19 @@ public class FeedFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_feed, container, false);
         mGridView = (GridView) rootView.findViewById(R.id.feedGridView);
         mGridView.setAdapter(new FeedGridViewAdapter(getActivity()));
+
+        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent fullPictureIntent = new Intent(getActivity(), PictureActivity.class);
+                File[] images = FileUtilities.listFiles(getActivity());
+                fullPictureIntent.putExtra("uri", FileUtilities.getImageUri(images[position]).getPath());
+                fullPictureIntent.putExtra("view_only", true);
+                fullPictureIntent.putExtra("position", position);
+                startActivity(fullPictureIntent);
+            }
+        });
+
 
         return rootView;
     }

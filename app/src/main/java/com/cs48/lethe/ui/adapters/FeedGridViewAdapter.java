@@ -17,8 +17,6 @@ import java.io.File;
  */
 public class FeedGridViewAdapter extends BaseAdapter {
 
-    public static final String TAG = MeGridViewAdapter.class.getSimpleName();
-
     private File[] images;
     private Context mContext;
 
@@ -50,11 +48,11 @@ public class FeedGridViewAdapter extends BaseAdapter {
             imageView.setScaleType(ImageView.ScaleType.FIT_XY);
             int padding = 10;
             imageView.setPadding(padding, padding, padding, padding);
-//            imageView.setBackgroundColor(Color.BLACK);
+
+            Uri imageUri = FileUtilities.getImageUri(images[position]);
+            imageView.setImageURI(imageUri);
         }
 
-        Uri imageUri = FileUtilities.getImageUri(images[position]);
-        imageView.setImageURI(imageUri);
         return imageView;
     }
 

@@ -4,8 +4,6 @@
              android:layout_height="match_parent"
              tools:context="com.cs48.lethe.ui.fragments.FeedFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-
     <GridView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -13,4 +11,5 @@
         android:layout_gravity="left|top"
         android:numColumns="3"
         android:padding="5dp"/>
+
 </FrameLayout>

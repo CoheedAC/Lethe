@@ -1,6 +1,7 @@
 package com.cs48.lethe.ui.fragments;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -10,10 +11,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
 
 import com.cs48.lethe.R;
+import com.cs48.lethe.ui.activities.PictureActivity;
 import com.cs48.lethe.ui.adapters.MeGridViewAdapter;
 import com.cs48.lethe.utils.FileUtilities;
 
@@ -60,7 +63,19 @@ public class MeFragment extends Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_me, container, false);
         mGridView = (GridView) rootView.findViewById(R.id.meGridView);
-        mGridView.setAdapter(new MeGridViewAdapter(getActivity()));
+        mGridAdapter = new MeGridViewAdapter(getActivity());
+        mGridView.setAdapter(mGridAdapter);
+        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent fullPictureIntent = new Intent(getActivity(), PictureActivity.class);
+                File[] images = FileUtilities.listFiles(getActivity());
+                fullPictureIntent.putExtra("uri", FileUtilities.getImageUri(images[position]).getPath());
+                fullPictureIntent.putExtra("view_only", false);
+                fullPictureIntent.putExtra("position", position);
+                startActivity(fullPictureIntent);
+            }
+        });
 
         return rootView;
     }
@@ -95,9 +110,8 @@ public class MeFragment extends Fragment {
     }
 
     public void updateGridView() {
-//        mGridAdapter.notifyDataSetChanged();
-        mGridView.setAdapter(new MeGridViewAdapter(getActivity()));
-//        mGridAdapter.notifyDataSetInvalidated();
+        mGridAdapter = new MeGridViewAdapter(getActivity());
+        mGridView.setAdapter(mGridAdapter);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
