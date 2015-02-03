@@ -1,7 +1,6 @@
 package com.cs48.lethe.utils;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
@@ -12,7 +11,6 @@ import com.cs48.lethe.R;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,7 +25,6 @@ import java.util.Date;
 public class FileUtilities {
 
     public static final String TAG = FileUtilities.class.getSimpleName();
-
 
     /**
      * Returns directory where images will be stored
@@ -69,14 +66,6 @@ public class FileUtilities {
         return (Environment.MEDIA_MOUNTED.equals(state)) ? true : false;
     }
 
-    private static void copyFile(InputStream in, OutputStream out) throws IOException {
-        byte[] buffer = new byte[1024];
-        int read;
-        while ((read = in.read(buffer)) != -1) {
-            out.write(buffer, 0, read);
-        }
-    }
-
     /**
      * Returns an array of jpg files that are saved in the storage directory
      */
@@ -111,6 +100,10 @@ public class FileUtilities {
         return context.getResources().getString(R.string.app_name).replace(" ", "");
     }
 
+    /**
+     * Deletes all images in all directories related to the app.
+     * (i.e. private and public external storage).
+     */
     public static void deleteAllImages(Context context) {
         String sub = getSubdirectoryName(context);
         File dir = getExternalStoragePublicDirectory(context);
@@ -121,11 +114,17 @@ public class FileUtilities {
             file.delete();
     }
 
+    /**
+     * Deletes the image from a given Uri path
+     */
     public static boolean deleteImage(Context context, Uri deleteUri) {
         File imageFile = new File(deleteUri.getPath());
         return imageFile.delete();
     }
 
+    /**
+     * Copies a file numCopies amount of times in the same directory.
+     */
     public static void copyFile(Context context, String path, int numCopies) throws IOException {
         File dir = getFileDirectory(context);
         for (int i = 0; i < numCopies; i++) {
@@ -145,6 +144,9 @@ public class FileUtilities {
         }
     }
 
+    /**
+     * Copies the image to the public storage directory and returns the Uri
+     */
     public static void saveImageForSharing(Context context, String imagePath) throws IOException {
         File imageSource = new File(imagePath);
         File imageDestination = new File(getExternalStoragePublicDirectory(context) + "/" + imageSource.getName());
@@ -157,44 +159,6 @@ public class FileUtilities {
         inStream.close();
         outStream.close();
     }
-
-    /**
-     * Copies the image to the public storage directory and returns the Uri
-     */
-    public static Uri saveImageForSharing(Context context, Bitmap bitmap, String imageName) {
-        File fileToWrite = new File(getExternalStoragePublicDirectory(context), imageName);
-
-        try {
-            FileOutputStream outputStream = new FileOutputStream(fileToWrite);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
-            outputStream.flush();
-            outputStream.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            return Uri.fromFile(fileToWrite);
-        }
-    }
-
-    /*
-    public static void saveImage(Context context, Bitmap bitmap, String name) {
-        File fileDirectory = getFileDirectory(context);
-        File fileToWrite = new File(fileDirectory, name);
-
-        try {
-            FileOutputStream outputStream = new FileOutputStream(fileToWrite);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
-            outputStream.flush();
-            outputStream.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    */
 
     /**
      * Return URI from image file
