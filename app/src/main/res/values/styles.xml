@@ -3,90 +3,211 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <item name="actionBarItemBackground">@drawable/selectable_background_yikyak</item>
-        <item name="popupMenuStyle">@style/PopupMenu.Yikyak</item>
-        <item name="dropDownListViewStyle">@style/DropDownListView.Yikyak</item>
-        <item name="actionBarTabStyle">@style/ActionBarTabStyle.Yikyak</item>
-        <item name="actionDropDownStyle">@style/DropDownNav.Yikyak</item>
-        <item name="actionBarStyle">@style/ActionBar.Solid.Yikyak</item>
-        <item name="actionModeBackground">@drawable/cab_background_top_yikyak</item>
-        <item name="actionModeSplitBackground">@drawable/cab_background_bottom_yikyak</item>
-        <item name="actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Yikyak</item>
-        <item name="actionBarTabTextStyle">@style/MyActionBarTabText</item>
-        <item name="actionOverflowButtonStyle">@style/myCustomMenuTextApearance</item>
 
-        <!-- Light.DarkActionBar specific -->
-        <item name="actionBarWidgetTheme">@style/Theme.Yikyak.Widget</item>
+        <!--<item name="actionBarItemBackground">@drawable/selectable_background_yikyak</item>-->
+        <!--<item name="popupMenuStyle">@style/PopupMenu.Yikyak</item>-->
+        <!--<item name="dropDownListViewStyle">@style/DropDownListView.Yikyak</item>-->
+        <!--<item name="actionBarTabStyle">@style/ActionBarTabStyle.Yikyak</item>-->
+        <!--<item name="actionDropDownStyle">@style/DropDownNav.Yikyak</item>-->
+        <!--<item name="actionBarStyle">@style/ActionBar.Solid.Yikyak</item>-->
+        <!--<item name="actionModeBackground">@drawable/cab_background_top_yikyak</item>-->
+        <!--<item name="actionModeSplitBackground">@drawable/cab_background_bottom_yikyak</item>-->
+        <!--<item name="actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Yikyak</item>-->
+        <!--<item name="actionBarTabTextStyle">@style/MyActionBarTabText</item>-->
+        <!--<item name="actionOverflowButtonStyle">@style/myCustomMenuTextApearance</item>-->
+        <!--<item name="actionBarWidgetTheme">@style/Theme.Yikyak.Widget</item>-->
+
+
+
+
+        <!--<item name="actionBarItemBackground">@drawable/selectable_background_facebook</item>-->
+        <!--<item name="popupMenuStyle">@style/PopupMenu.Facebook</item>-->
+        <!--<item name="dropDownListViewStyle">@style/DropDownListView.Facebook</item>-->
+        <!--<item name="actionBarTabStyle">@style/ActionBarTabStyle.Facebook</item>-->
+        <!--<item name="actionDropDownStyle">@style/DropDownNav.Facebook</item>-->
+        <!--<item name="actionBarStyle">@style/ActionBar.Solid.Facebook</item>-->
+        <!--<item name="actionModeBackground">@drawable/cab_background_top_facebook</item>-->
+        <!--<item name="actionModeSplitBackground">@drawable/cab_background_bottom_facebook</item>-->
+        <!--<item name="actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Facebook</item>-->
+        <!--<item name="actionBarWidgetTheme">@style/Theme.Facebook.Widget</item>-->
+
+
+
+        <item name="actionBarItemBackground">@drawable/selectable_background_orange</item>
+        <item name="popupMenuStyle">@style/PopupMenu.Orange</item>
+        <item name="dropDownListViewStyle">@style/DropDownListView.Orange</item>
+        <item name="actionBarTabStyle">@style/ActionBarTabStyle.Orange</item>
+        <item name="actionDropDownStyle">@style/DropDownNav.Orange</item>
+        <item name="actionBarStyle">@style/ActionBar.Solid.Orange</item>
+        <item name="actionModeBackground">@drawable/cab_background_top_orange</item>
+        <item name="actionModeSplitBackground">@drawable/cab_background_bottom_orange</item>
+        <item name="actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Orange</item>
+        <item name="actionBarWidgetTheme">@style/Theme.Orange.Widget</item>
+
+
     </style>
 
-    <style name="myCustomMenuTextApearance" parent="@android:style/TextAppearance.Widget.IconMenu.Item">
-        <item name="android:textColor">#60D6B2</item>
-    </style>
+    <!--<style name="myCustomMenuTextApearance" parent="@android:style/TextAppearance.Widget.IconMenu.Item">-->
+        <!--<item name="android:textColor">#60D6B2</item>-->
+    <!--</style>-->
 
-    <style name="ActionBar.Solid.Yikyak" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
-        <item name="background">@drawable/ab_solid_yikyak</item>
-        <item name="backgroundStacked">@drawable/ab_stacked_solid_yikyak</item>
-        <item name="backgroundSplit">@drawable/ab_bottom_solid_yikyak</item>
-        <item name="progressBarStyle">@style/ProgressBar.Yikyak</item>
-    </style>
+    <!--<style name="ActionBar.Solid.Yikyak" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">-->
+        <!--<item name="background">@drawable/ab_solid_yikyak</item>-->
+        <!--<item name="backgroundStacked">@drawable/ab_stacked_solid_yikyak</item>-->
+        <!--<item name="backgroundSplit">@drawable/ab_bottom_solid_yikyak</item>-->
+        <!--<item name="progressBarStyle">@style/ProgressBar.Yikyak</item>-->
+    <!--</style>-->
 
-    <style name="ActionBar.Transparent.Yikyak" parent="@style/Widget.AppCompat.ActionBar">
-        <item name="background">@drawable/ab_transparent_yikyak</item>
-        <item name="progressBarStyle">@style/ProgressBar.Yikyak</item>
-    </style>
+    <!--<style name="ActionBar.Transparent.Yikyak" parent="@style/Widget.AppCompat.ActionBar">-->
+        <!--<item name="background">@drawable/ab_transparent_yikyak</item>-->
+        <!--<item name="progressBarStyle">@style/ProgressBar.Yikyak</item>-->
+    <!--</style>-->
 
-    <style name="PopupMenu.Yikyak" parent="@style/Widget.AppCompat.PopupMenu">
-        <item name="android:popupBackground">@drawable/menu_dropdown_panel_yikyak</item>
-    </style>
+    <!--<style name="PopupMenu.Yikyak" parent="@style/Widget.AppCompat.PopupMenu">-->
+        <!--<item name="android:popupBackground">@drawable/menu_dropdown_panel_yikyak</item>-->
+    <!--</style>-->
 
-    <style name="DropDownListView.Yikyak" parent="@style/Widget.AppCompat.ListView.DropDown">
-        <item name="android:listSelector">@drawable/selectable_background_yikyak</item>
-    </style>
+    <!--<style name="DropDownListView.Yikyak" parent="@style/Widget.AppCompat.ListView.DropDown">-->
+        <!--<item name="android:listSelector">@drawable/selectable_background_yikyak</item>-->
+    <!--</style>-->
 
-    <style name="ActionBarTabStyle.Yikyak" parent="@style/Widget.AppCompat.ActionBar.TabView">
-        <item name="android:background">@drawable/tab_indicator_ab_yikyak</item>
-    </style>
+    <!--<style name="ActionBarTabStyle.Yikyak" parent="@style/Widget.AppCompat.ActionBar.TabView">-->
+        <!--<item name="android:background">@drawable/tab_indicator_ab_yikyak</item>-->
+    <!--</style>-->
 
     <!-- ActionBar tabs text styles -->
-    <style name="MyActionBarTabText" parent="@style/Widget.AppCompat.ActionBar.TabText">
-        <item name="android:textColor">#60D6B2</item>
+    <!--<style name="MyActionBarTabText" parent="@style/Widget.AppCompat.ActionBar.TabText">-->
+        <!--<item name="android:textColor">#60D6B2</item>-->
+    <!--</style>-->
+
+    <!--<style name="DropDownNav.Yikyak" parent="@style/Widget.AppCompat.Spinner.DropDown.ActionBar">-->
+        <!--<item name="android:background">@drawable/spinner_background_ab_yikyak</item>-->
+        <!--<item name="android:popupBackground">@drawable/menu_dropdown_panel_yikyak</item>-->
+        <!--<item name="android:dropDownSelector">@drawable/selectable_background_yikyak</item>-->
+    <!--</style>-->
+
+    <!--<style name="ProgressBar.Yikyak" parent="@style/Widget.AppCompat.ProgressBar.Horizontal">-->
+        <!--<item name="android:progressDrawable">@drawable/progress_horizontal_yikyak</item>-->
+    <!--</style>-->
+
+    <!--<style name="ActionButton.CloseMode.Yikyak" parent="@style/Widget.AppCompat.ActionButton.CloseMode">-->
+        <!--<item name="android:background">@drawable/btn_cab_done_yikyak</item>-->
+    <!--</style>-->
+
+    <!--<style name="Theme.Yikyak.Widget" parent="@style/Theme.AppCompat">-->
+        <!--<item name="popupMenuStyle">@style/PopupMenu.Yikyak</item>-->
+        <!--<item name="dropDownListViewStyle">@style/DropDownListView.Yikyak</item>-->
+    <!--</style>-->
+
+    <!--<style name="FullscreenTheme" parent="android:Theme.NoTitleBar">-->
+        <!--<item name="android:windowContentOverlay">@null</item>-->
+        <!--<item name="android:windowBackground">@null</item>-->
+        <!--<item name="metaButtonBarStyle">@style/ButtonBar</item>-->
+        <!--<item name="metaButtonBarButtonStyle">@style/ButtonBarButton</item>-->
+    <!--</style>-->
+
+    <!--<style name="ButtonBar">-->
+        <!--<item name="android:paddingLeft">2dp</item>-->
+        <!--<item name="android:paddingTop">5dp</item>-->
+        <!--<item name="android:paddingRight">2dp</item>-->
+        <!--<item name="android:paddingBottom">0dp</item>-->
+        <!--<item name="android:background">@android:drawable/bottom_bar</item>-->
+    <!--</style>-->
+
+    <!--<style name="ButtonBarButton" />-->
+
+
+
+
+
+    <!--<style name="ActionBar.Solid.Facebook" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">-->
+        <!--<item name="background">@drawable/ab_solid_facebook</item>-->
+        <!--<item name="backgroundStacked">@drawable/ab_stacked_solid_facebook</item>-->
+        <!--<item name="backgroundSplit">@drawable/ab_bottom_solid_facebook</item>-->
+        <!--<item name="progressBarStyle">@style/ProgressBar.Facebook</item>-->
+    <!--</style>-->
+
+    <!--<style name="ActionBar.Transparent.Facebook" parent="@style/Widget.AppCompat.ActionBar">-->
+        <!--<item name="background">@drawable/ab_transparent_facebook</item>-->
+        <!--<item name="progressBarStyle">@style/ProgressBar.Facebook</item>-->
+    <!--</style>-->
+
+    <!--<style name="PopupMenu.Facebook" parent="@style/Widget.AppCompat.PopupMenu">-->
+        <!--<item name="android:popupBackground">@drawable/menu_dropdown_panel_facebook</item>-->
+    <!--</style>-->
+
+    <!--<style name="DropDownListView.Facebook" parent="@style/Widget.AppCompat.ListView.DropDown">-->
+        <!--<item name="android:listSelector">@drawable/selectable_background_facebook</item>-->
+    <!--</style>-->
+
+    <!--<style name="ActionBarTabStyle.Facebook" parent="@style/Widget.AppCompat.ActionBar.TabView">-->
+        <!--<item name="android:background">@drawable/tab_indicator_ab_facebook</item>-->
+    <!--</style>-->
+
+    <!--<style name="DropDownNav.Facebook" parent="@style/Widget.AppCompat.Spinner.DropDown.ActionBar">-->
+        <!--<item name="android:background">@drawable/spinner_background_ab_facebook</item>-->
+        <!--<item name="android:popupBackground">@drawable/menu_dropdown_panel_facebook</item>-->
+        <!--<item name="android:dropDownSelector">@drawable/selectable_background_facebook</item>-->
+    <!--</style>-->
+
+    <!--<style name="ProgressBar.Facebook" parent="@style/Widget.AppCompat.ProgressBar.Horizontal">-->
+        <!--<item name="android:progressDrawable">@drawable/progress_horizontal_facebook</item>-->
+    <!--</style>-->
+
+    <!--<style name="ActionButton.CloseMode.Facebook" parent="@style/Widget.AppCompat.ActionButton.CloseMode">-->
+        <!--<item name="android:background">@drawable/btn_cab_done_facebook</item>-->
+    <!--</style>-->
+
+    <!--<style name="Theme.Facebook.Widget" parent="@style/Theme.AppCompat">-->
+        <!--<item name="popupMenuStyle">@style/PopupMenu.Facebook</item>-->
+        <!--<item name="dropDownListViewStyle">@style/DropDownListView.Facebook</item>-->
+    <!--</style>-->
+
+
+
+    <style name="ActionBar.Solid.Orange" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
+        <item name="background">@drawable/ab_solid_orange</item>
+        <item name="backgroundStacked">@drawable/ab_stacked_solid_orange</item>
+        <item name="backgroundSplit">@drawable/ab_bottom_solid_orange</item>
+        <item name="progressBarStyle">@style/ProgressBar.Orange</item>
     </style>
 
-    <style name="DropDownNav.Yikyak" parent="@style/Widget.AppCompat.Spinner.DropDown.ActionBar">
-        <item name="android:background">@drawable/spinner_background_ab_yikyak</item>
-        <item name="android:popupBackground">@drawable/menu_dropdown_panel_yikyak</item>
-        <item name="android:dropDownSelector">@drawable/selectable_background_yikyak</item>
+    <style name="ActionBar.Transparent.Orange" parent="@style/Widget.AppCompat.ActionBar">
+        <item name="background">@drawable/ab_transparent_orange</item>
+        <item name="progressBarStyle">@style/ProgressBar.Orange</item>
     </style>
 
-    <style name="ProgressBar.Yikyak" parent="@style/Widget.AppCompat.ProgressBar.Horizontal">
-        <item name="android:progressDrawable">@drawable/progress_horizontal_yikyak</item>
+    <style name="PopupMenu.Orange" parent="@style/Widget.AppCompat.PopupMenu">
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_orange</item>
     </style>
 
-    <style name="ActionButton.CloseMode.Yikyak" parent="@style/Widget.AppCompat.ActionButton.CloseMode">
-        <item name="android:background">@drawable/btn_cab_done_yikyak</item>
+    <style name="DropDownListView.Orange" parent="@style/Widget.AppCompat.ListView.DropDown">
+        <item name="android:listSelector">@drawable/selectable_background_orange</item>
     </style>
 
-    <!-- this style is only referenced in a Light.DarkActionBar based theme -->
-    <style name="Theme.Yikyak.Widget" parent="@style/Theme.AppCompat">
-        <item name="popupMenuStyle">@style/PopupMenu.Yikyak</item>
-        <item name="dropDownListViewStyle">@style/DropDownListView.Yikyak</item>
+    <style name="ActionBarTabStyle.Orange" parent="@style/Widget.AppCompat.ActionBar.TabView">
+        <item name="android:background">@drawable/tab_indicator_ab_orange</item>
     </style>
 
-    <style name="FullscreenTheme" parent="android:Theme.NoTitleBar">
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowBackground">@null</item>
-        <item name="metaButtonBarStyle">@style/ButtonBar</item>
-        <item name="metaButtonBarButtonStyle">@style/ButtonBarButton</item>
+    <style name="DropDownNav.Orange" parent="@style/Widget.AppCompat.Spinner.DropDown.ActionBar">
+        <item name="android:background">@drawable/spinner_background_ab_orange</item>
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_orange</item>
+        <item name="android:dropDownSelector">@drawable/selectable_background_orange</item>
     </style>
 
-    <style name="ButtonBar">
-        <item name="android:paddingLeft">2dp</item>
-        <item name="android:paddingTop">5dp</item>
-        <item name="android:paddingRight">2dp</item>
-        <item name="android:paddingBottom">0dp</item>
-        <item name="android:background">@android:drawable/bottom_bar</item>
+    <style name="ProgressBar.Orange" parent="@style/Widget.AppCompat.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/progress_horizontal_orange</item>
     </style>
 
-    <style name="ButtonBarButton" />
+    <style name="ActionButton.CloseMode.Orange" parent="@style/Widget.AppCompat.ActionButton.CloseMode">
+        <item name="android:background">@drawable/btn_cab_done_orange</item>
+    </style>
+
+    <style name="Theme.Orange.Widget" parent="@style/Theme.AppCompat">
+        <item name="popupMenuStyle">@style/PopupMenu.Orange</item>
+        <item name="dropDownListViewStyle">@style/DropDownListView.Orange</item>
+    </style>
+
+
 
 </resources>

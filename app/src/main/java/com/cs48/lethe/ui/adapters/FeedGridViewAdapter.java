@@ -47,7 +47,7 @@ public class FeedGridViewAdapter extends BaseAdapter {
                     300);
             imageView.setLayoutParams(imageParams);
             imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-            int padding = 10;
+            int padding = 5;
             imageView.setPadding(padding, padding, padding, padding);
         }
 
