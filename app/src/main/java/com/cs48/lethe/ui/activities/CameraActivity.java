@@ -170,7 +170,7 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
 
         // Returns to main screen and prints out image location if user presses post button
         if (id == R.id.action_post) {
-            new ImageClass().execute();//send request with imagedata to server
+//            new ImageClass().execute();//send request with imagedata to server
             Toast.makeText(this, mImageUri.toString(), Toast.LENGTH_LONG).show();
             Log.d(TAG, mImageUri.toString());
             setResult(RESULT_OK);
