@@ -1,6 +1,10 @@
 package com.cs48.lethe.ui.activities;
 
+import android.content.Context;
 import android.content.Intent;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -203,8 +207,8 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
                 Log.d("Progress","MADEITTODATA");
 
 
-                String latitude = generateForSimpleText("latitude", "45.5");
-                String longitude = generateForSimpleText("longitude", "43.3");
+                String latitude = generateForSimpleText("latitude", getLatitude());
+                String longitude = generateForSimpleText("longitude", getLongitude());
                 String combined = latitude + longitude;
                 byte[] writer = combined.getBytes();
                 requestBody.write(writer, 0, writer.length);
@@ -263,5 +267,16 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
     }
     private String generateImageBoilerPlateEnd(){
         return ("\r\n--" + boundary + "--");
+    }
+    private String getLatitude(){
+        LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+        Location location = lm.getLastKnownLocation(lm.getBestProvider(new Criteria(),true));
+        return String.valueOf(location.getLatitude());
+
+    }
+    private String getLongitude(){
+        LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+        Location location = lm.getLastKnownLocation(lm.getBestProvider(new Criteria(),true));
+        return String.valueOf(location.getLatitude());
     }
 }
