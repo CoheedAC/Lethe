@@ -11,26 +11,27 @@ import android.widget.ImageView;
 import com.cs48.lethe.utils.FileUtilities;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * Created by maxkohne on 1/29/15.
  */
 public class FeedGridViewAdapter extends BaseAdapter {
 
-    private File[] images;
+    private List<File> mImageList;
     private Context mContext;
 
     public FeedGridViewAdapter(Context context) {
         mContext = context;
-        images = FileUtilities.listFiles(context);
+        mImageList = FileUtilities.listFiles(mContext);
     }
 
     public int getCount() {
-        return images.length;
+        return mImageList.size();
     }
 
     public Object getItem(int position) {
-        return images[position];
+        return mImageList.get(position);
     }
 
     public long getItemId(int position) {
@@ -48,12 +49,17 @@ public class FeedGridViewAdapter extends BaseAdapter {
             imageView.setScaleType(ImageView.ScaleType.FIT_XY);
             int padding = 10;
             imageView.setPadding(padding, padding, padding, padding);
-
-            Uri imageUri = FileUtilities.getImageUri(images[position]);
-            imageView.setImageURI(imageUri);
         }
 
+        Uri imageUri = Uri.fromFile(mImageList.get(position));
+        imageView.setImageURI(imageUri);
+
         return imageView;
+    }
+
+    public void update() {
+        mImageList = FileUtilities.listFiles(mContext);
+        notifyDataSetChanged();
     }
 
 }

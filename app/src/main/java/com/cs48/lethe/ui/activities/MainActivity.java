@@ -3,6 +3,7 @@ package com.cs48.lethe.ui.activities;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
@@ -17,6 +18,8 @@ import com.cs48.lethe.ui.fragments.FeedFragment;
 import com.cs48.lethe.ui.fragments.MeFragment;
 import com.cs48.lethe.ui.fragments.MoreFragment;
 import com.cs48.lethe.ui.fragments.PeekFragment;
+
+import java.util.List;
 
 
 public class MainActivity extends ActionBarActivity implements ActionBar.TabListener,
@@ -45,7 +48,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
 
         setTitle("Home");
         setUpActionBar();
@@ -117,12 +119,31 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         // Starts camera activity
         if (id == R.id.action_camera) {
-            Intent intent = new Intent(this, CameraActivity.class);
-            startActivity(intent);
+            Intent cameraIntent = new Intent(this, CameraActivity.class);
+            startActivityForResult(cameraIntent, CameraActivity.IMAGE_POST_REQUEST);
             return true;
         }
-
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Dynamically refreshes grid of me and feed fragment after posting a pic to the server
+        if (requestCode == CameraActivity.IMAGE_POST_REQUEST && resultCode == RESULT_OK) {
+            List<Fragment> fragmentList = getSupportFragmentManager().getFragments();
+            if (fragmentList != null) {
+                for (Fragment fragment: fragmentList) {
+                    if (fragment instanceof MeFragment) {
+                        ((MeFragment) fragment).update();
+                    }if (fragment instanceof  FeedFragment) {
+                        ((FeedFragment) fragment).update();
+                    }
+                }
+            }
+
+        }
     }
 
     @Override

@@ -7,10 +7,12 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.cs48.lethe.utils.FileUtilities;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * Created by maxkohne on 1/29/15.
@@ -19,20 +21,20 @@ public class MeGridViewAdapter extends BaseAdapter {
 
     public static final String TAG = MeGridViewAdapter.class.getSimpleName();
 
-    private File[] images;
+    private List<File> mImageList;
     private Context mContext;
 
     public MeGridViewAdapter(Context context) {
         mContext = context;
-        images = FileUtilities.listFiles(context);
+        mImageList = FileUtilities.listFiles(context);
     }
 
     public int getCount() {
-        return images.length;
+        return mImageList.size();
     }
 
     public Object getItem(int position) {
-        return images[position];
+        return mImageList.get(position);
     }
 
     public long getItemId(int position) {
@@ -50,12 +52,32 @@ public class MeGridViewAdapter extends BaseAdapter {
             imageView.setScaleType(ImageView.ScaleType.FIT_XY);
             int padding = 10;
             imageView.setPadding(padding, padding, padding, padding);
-//            imageView.setBackgroundColor(Color.BLACK);
         }
 
-        Uri imageUri = FileUtilities.getImageUri(images[position]);
+        Uri imageUri = Uri.fromFile(mImageList.get(position));
         imageView.setImageURI(imageUri);
         return imageView;
+    }
+
+    public void update() {
+        mImageList = FileUtilities.listFiles(mContext);
+        notifyDataSetChanged();
+    }
+
+    public void deleteAllImages() {
+        FileUtilities.deleteAllImages(mContext);
+        update();
+        Toast.makeText(mContext, "Deleted all images", Toast.LENGTH_LONG).show();
+    }
+
+    public void copyImage() {
+        try {
+            FileUtilities.copyFile(mContext, mImageList.get(0).getAbsolutePath(), 50);
+            update();
+            Toast.makeText(mContext, "Copied first image", Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Toast.makeText(mContext, "No image to copy", Toast.LENGTH_LONG).show();
+        }
     }
 
 }

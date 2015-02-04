@@ -17,7 +17,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by maxkohne on 1/27/15.
@@ -69,7 +72,7 @@ public class FileUtilities {
     /**
      * Returns an array of jpg files that are saved in the storage directory
      */
-    public static File[] listFiles(Context context) {
+    public static List<File> listFiles(Context context) {
         File fileDirectory = getFileDirectory(context);
         File[] filteredFiles = fileDirectory.listFiles(new FileFilter() {
             @Override
@@ -77,7 +80,7 @@ public class FileUtilities {
                 return (file.getAbsolutePath().contains(".jpg")) ? true : false;
             }
         });
-        return filteredFiles;
+        return new ArrayList<File>(Arrays.asList(filteredFiles));
     }
 
     /**
@@ -158,13 +161,6 @@ public class FileUtilities {
         inChannel.transferTo(0, inChannel.size(), outChannel);
         inStream.close();
         outStream.close();
-    }
-
-    /**
-     * Return URI from image file
-     */
-    public static Uri getImageUri(File imageFile) {
-        return Uri.fromFile(imageFile);
     }
 
     /**

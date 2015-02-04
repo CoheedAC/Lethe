@@ -14,8 +14,6 @@ import android.widget.GridView;
 import com.cs48.lethe.R;
 import com.cs48.lethe.ui.activities.PictureActivity;
 import com.cs48.lethe.ui.adapters.FeedGridViewAdapter;
-import com.cs48.lethe.ui.adapters.MeGridViewAdapter;
-import com.cs48.lethe.utils.FileUtilities;
 
 import java.io.File;
 
@@ -29,12 +27,12 @@ import java.io.File;
  */
 public class FeedFragment extends Fragment {
 
-    private MeGridViewAdapter mGridAdapter;
+    private FeedGridViewAdapter mGridAdapter;
     private GridView mGridView;
 
     private OnFragmentInteractionListener mListener;
 
-    public static FeedFragment newInstance(String param1, String param2) {
+    public static FeedFragment newInstance() {
         FeedFragment fragment = new FeedFragment();
         return fragment;
     }
@@ -54,22 +52,29 @@ public class FeedFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_feed, container, false);
         mGridView = (GridView) rootView.findViewById(R.id.feedGridView);
-        mGridView.setAdapter(new FeedGridViewAdapter(getActivity()));
+        mGridAdapter = new FeedGridViewAdapter(getActivity());
+        mGridView.setAdapter(mGridAdapter);
 
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent fullPictureIntent = new Intent(getActivity(), PictureActivity.class);
-                File[] images = FileUtilities.listFiles(getActivity());
-                fullPictureIntent.putExtra("uri", FileUtilities.getImageUri(images[position]).getPath());
-                fullPictureIntent.putExtra("view_only", true);
-                fullPictureIntent.putExtra("position", position);
-                startActivity(fullPictureIntent);
+                Intent showImageIntent = new Intent(getActivity(), PictureActivity.class);
+
+                File imageFile = (File) mGridAdapter.getItem(position);
+                showImageIntent.putExtra("uri", imageFile.getAbsolutePath());
+                showImageIntent.putExtra("position", position);
+                showImageIntent.setAction(PictureActivity.VIEW_ONLY);
+
+                startActivity(showImageIntent);
             }
         });
 
 
         return rootView;
+    }
+
+    public void update() {
+        mGridAdapter.update();
     }
 
     // TODO: Rename method, update argument and hook method into UI event

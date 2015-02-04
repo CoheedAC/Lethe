@@ -30,8 +30,9 @@ import butterknife.InjectView;
 
 public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekBarChangeListener {
 
-    private static final String TAG = CameraActivity.class.getSimpleName();
-    private static final int IMAGE_CAPTURE_REQUEST = 100;
+    public static final String TAG = CameraActivity.class.getSimpleName();
+    public static final int IMAGE_CAPTURE_REQUEST = 100;
+    public static final int IMAGE_POST_REQUEST = 200;
 
     private final String boundary = "---------------------Boundary";
     private final int MIN_HOURS = 6;
@@ -77,7 +78,7 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
         Intent imageCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
         File imageFile = FileUtilities.saveImageFile(this); // create a file to save the image
-        mImageUri = FileUtilities.getImageUri(imageFile); // gets Uri of saved image
+        mImageUri = Uri.fromFile(imageFile); // gets Uri of saved image
         imageCaptureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mImageUri); // set the image file name
 
         // start the image capture Intent
@@ -95,6 +96,7 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
 
     private void goBack() {
         deleteImage();
+        setResult(RESULT_CANCELED);
         startCamera();
         mSeekBar.setProgress(mSeekBar.getMax());
     }
@@ -168,9 +170,10 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
 
         // Returns to main screen and prints out image location if user presses post button
         if (id == R.id.action_post) {
-            new ImageClass().execute();//send request with imagedata to server
+//            new ImageClass().execute(); //send request with imagedata to server
             Toast.makeText(this, mImageUri.toString(), Toast.LENGTH_LONG).show();
             Log.d(TAG, mImageUri.toString());
+            setResult(RESULT_OK);
             finish();
             return true;
         }

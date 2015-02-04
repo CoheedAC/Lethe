@@ -13,12 +13,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.Toast;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.ui.activities.PictureActivity;
 import com.cs48.lethe.ui.adapters.MeGridViewAdapter;
-import com.cs48.lethe.utils.FileUtilities;
 
 import java.io.File;
 
@@ -57,6 +55,10 @@ public class MeFragment extends Fragment {
         setHasOptionsMenu(true);
     }
 
+    public void update() {
+        mGridAdapter.update();
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -68,12 +70,14 @@ public class MeFragment extends Fragment {
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent fullPictureIntent = new Intent(getActivity(), PictureActivity.class);
-                File[] images = FileUtilities.listFiles(getActivity());
-                fullPictureIntent.putExtra("uri", FileUtilities.getImageUri(images[position]).getPath());
-                fullPictureIntent.putExtra("view_only", false);
-                fullPictureIntent.putExtra("position", position);
-                startActivity(fullPictureIntent);
+                Intent showImageIntent = new Intent(getActivity(), PictureActivity.class);
+
+                File imageFile = (File) mGridAdapter.getItem(position);
+                showImageIntent.putExtra("uri", imageFile.getAbsolutePath());
+                showImageIntent.putExtra("position", position);
+                showImageIntent.setAction(PictureActivity.VIEW_OVERLAY);
+
+                startActivity(showImageIntent);
             }
         });
 
@@ -89,29 +93,13 @@ public class MeFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_delete_images) {
-            FileUtilities.deleteAllImages(getActivity());
-            updateGridView();
-            Toast.makeText(getActivity(), "Deleted all images", Toast.LENGTH_LONG).show();
+            mGridAdapter.deleteAllImages();
             return true;
         }
         if (id == R.id.action_copy_images) {
-            try {
-                File[] files = FileUtilities.listFiles(getActivity());
-                FileUtilities.copyFile(getActivity(), files[0].getAbsolutePath(), 50);
-                updateGridView();
-                Toast.makeText(getActivity(), "Copied first image", Toast.LENGTH_LONG).show();
-                return true;
-            } catch (Exception e) {
-                Toast.makeText(getActivity(), "No image to copy", Toast.LENGTH_LONG).show();
-                return false;
-            }
+            mGridAdapter.copyImage();
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    public void updateGridView() {
-        mGridAdapter = new MeGridViewAdapter(getActivity());
-        mGridView.setAdapter(mGridAdapter);
     }
 
     // TODO: Rename method, update argument and hook method into UI event

@@ -1,5 +1,6 @@
 package com.cs48.lethe.ui.activities;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -25,7 +26,9 @@ public class PictureActivity extends ActionBarActivity {
     @InjectView(R.id.saveButton)
     ImageButton mCopyButton;
 
-    private boolean viewOnly;
+    public static final String VIEW_ONLY = "VIEW_ONLY";
+    public static final String VIEW_OVERLAY = "VIEW_OVERLAY";
+
     private Uri mImageUri;
     private int mImagePosition;
 
@@ -36,11 +39,13 @@ public class PictureActivity extends ActionBarActivity {
 
         ButterKnife.inject(this);
 
+        // Hide action bar
         getSupportActionBar().hide();
 
-        Bundle extras = getIntent().getExtras();
+        // Get intent and extras
+        Intent intent = getIntent();
+        Bundle extras = intent.getExtras();
         if (extras != null) {
-            viewOnly = extras.getBoolean("view_only");
             mImageUri = Uri.parse(extras.getString("uri"));
             mImagePosition = extras.getInt("position");
 
@@ -52,16 +57,23 @@ public class PictureActivity extends ActionBarActivity {
                 }
             });
 
-            if (!viewOnly) {
+            if (intent.getAction().equals(VIEW_OVERLAY)) {
                 showPictureOverlay();
             } else {
-                mDeleteButton.setVisibility(View.GONE);
-                mCopyButton.setVisibility(View.GONE);
+                hidePictureOverlay();
             }
         }
     }
 
+    private void hidePictureOverlay() {
+        mDeleteButton.setVisibility(View.GONE);
+        mCopyButton.setVisibility(View.GONE);
+    }
+
     private void showPictureOverlay() {
+        mDeleteButton.setVisibility(View.VISIBLE);
+        mCopyButton.setVisibility(View.VISIBLE);
+
         mDeleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -79,7 +91,6 @@ public class PictureActivity extends ActionBarActivity {
                     Toast.makeText(PictureActivity.this, "Saved to shared storage.", Toast.LENGTH_SHORT).show();
                 } catch (IOException e) {
                     Toast.makeText(PictureActivity.this, "Cannot copy to shared storage.", Toast.LENGTH_SHORT).show();
-                    e.printStackTrace();
                 }
             }
         });
