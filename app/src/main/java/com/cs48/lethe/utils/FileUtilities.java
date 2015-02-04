@@ -35,13 +35,6 @@ public class FileUtilities {
     public static File getFileDirectory(Context context) {
         ApplicationSettings settings = new ApplicationSettings(context);
         String storageType = settings.getStoragePreference();
-<<<<<<< HEAD
-        String subdirectory = getSubdirectoryName(context);
-        if(true)//TEMPORARY!!! Just to get demo working. Not long term solution.
-             return getExternalStoragePublicDirectory(subdirectory);
-=======
->>>>>>> MaxBranch
-
         if (storageType.equals(StorageType.INTERNAL) || !isExternalStorageAvailable()) {
             /**
              Returns the absolute path to the directory on the filesystem
