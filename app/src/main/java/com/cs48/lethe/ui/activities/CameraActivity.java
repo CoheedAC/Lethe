@@ -277,6 +277,6 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
     private String getLongitude(){
         LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
         Location location = lm.getLastKnownLocation(lm.getBestProvider(new Criteria(),true));
-        return String.valueOf(location.getLatitude());
+        return String.valueOf(location.getLongitude());
     }
 }
