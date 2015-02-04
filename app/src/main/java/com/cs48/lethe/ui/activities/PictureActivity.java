@@ -29,6 +29,8 @@ public class PictureActivity extends ActionBarActivity {
     public static final String VIEW_ONLY = "VIEW_ONLY";
     public static final String VIEW_OVERLAY = "VIEW_OVERLAY";
 
+    public static final int FULL_IMAGE_REQUEST = 99;
+
     private Uri mImageUri;
     private int mImagePosition;
 
@@ -79,6 +81,7 @@ public class PictureActivity extends ActionBarActivity {
             public void onClick(View v) {
                 FileUtilities.deleteImage(PictureActivity.this, mImageUri);
                 Toast.makeText(PictureActivity.this, "Deleted image #" + (mImagePosition + 1), Toast.LENGTH_SHORT).show();
+                setResult(RESULT_OK);
                 finish();
             }
         });

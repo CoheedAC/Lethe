@@ -77,7 +77,7 @@ public class MeFragment extends Fragment {
                 showImageIntent.putExtra("position", position);
                 showImageIntent.setAction(PictureActivity.VIEW_OVERLAY);
 
-                startActivity(showImageIntent);
+                startActivityForResult(showImageIntent, PictureActivity.FULL_IMAGE_REQUEST);
             }
         });
 
@@ -87,6 +87,16 @@ public class MeFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.getItem(0).setVisible(true);
         menu.getItem(1).setVisible(true);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // updates the grid if the user deletes the image in the full screen view
+        if (requestCode == PictureActivity.FULL_IMAGE_REQUEST && resultCode == PictureActivity.RESULT_OK) {
+            update();
+        }
     }
 
     @Override
