@@ -6,6 +6,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -44,6 +47,7 @@ public class FeedFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -61,20 +65,32 @@ public class FeedFragment extends Fragment {
                 Intent showImageIntent = new Intent(getActivity(), PictureActivity.class);
 
                 File imageFile = (File) mGridAdapter.getItem(position);
-                showImageIntent.putExtra("uri", imageFile.getAbsolutePath());
+                showImageIntent.setData(Uri.fromFile(imageFile));
                 showImageIntent.putExtra("position", position);
                 showImageIntent.setAction(PictureActivity.VIEW_ONLY);
 
                 startActivity(showImageIntent);
             }
         });
-
-
         return rootView;
     }
 
     public void update() {
         mGridAdapter.update();
+    }
+
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.getItem(1).setVisible(true);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_delete_images) {
+            mGridAdapter.clearCache();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     // TODO: Rename method, update argument and hook method into UI event

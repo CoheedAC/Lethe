@@ -9,6 +9,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.cs48.lethe.R;
 import com.cs48.lethe.utils.FileUtilities;
 
 import java.io.File;
@@ -26,7 +27,7 @@ public class MeGridViewAdapter extends BaseAdapter {
 
     public MeGridViewAdapter(Context context) {
         mContext = context;
-        mImageList = FileUtilities.listFiles(context);
+        mImageList = FileUtilities.getPostedImages(context);
     }
 
     public int getCount() {
@@ -50,8 +51,7 @@ public class MeGridViewAdapter extends BaseAdapter {
                     300);
             imageView.setLayoutParams(imageParams);
             imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-            int padding = 5;
-            imageView.setPadding(padding, padding, padding, padding);
+            imageView.setBackgroundColor(mContext.getResources().getColor(R.color.image_load));
         }
 
         Uri imageUri = Uri.fromFile(mImageList.get(position));
@@ -60,12 +60,12 @@ public class MeGridViewAdapter extends BaseAdapter {
     }
 
     public void update() {
-        mImageList = FileUtilities.listFiles(mContext);
+        mImageList = FileUtilities.getPostedImages(mContext);
         notifyDataSetChanged();
     }
 
     public void deleteAllImages() {
-        FileUtilities.deleteAllImages(mContext);
+        FileUtilities.deletePostedImages(mContext);
         update();
         Toast.makeText(mContext, "Deleted all images", Toast.LENGTH_LONG).show();
     }

@@ -57,7 +57,7 @@ public class FileUtilities {
              so you should be careful about what you put here to ensure you don't erase
              their files or get in the way of their own organization.
              */
-            return getExternalStoragePublicDirectory(context);
+            return getSharedExternalDirectory(context);
         }
     }
 
@@ -70,9 +70,42 @@ public class FileUtilities {
     }
 
     /**
+     * Returns string of app name
+     */
+    public static String getSubdirectoryName(Context context) {
+        return context.getResources().getString(R.string.app_name).replace(" ", "");
+    }
+
+    /**
+     * Returns app subdirectory in the external public storage. If directory doesn't exist, then it's created.
+     */
+    public static File getSharedExternalDirectory(Context context) {
+        File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/" + getSubdirectoryName(context));
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
+                Log.d(TAG, "Failed to make directory.");
+            }
+        }
+        return dir;
+    }
+
+    /**
+     * Returns app subdirectory in the external public storage. If directory doesn't exist, then it's created.
+     */
+    public static File getCachedDirectory() {
+        File dir = new File(Environment.getExternalStorageDirectory(), "cache");
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
+                Log.d(TAG, "Failed to make directory.");
+            }
+        }
+        return dir;
+    }
+
+    /**
      * Returns an array of jpg files that are saved in the storage directory
      */
-    public static List<File> listFiles(Context context) {
+    public static List<File> getPostedImages(Context context) {
         File fileDirectory = getFileDirectory(context);
         File[] filteredFiles = fileDirectory.listFiles(new FileFilter() {
             @Override
@@ -84,43 +117,44 @@ public class FileUtilities {
     }
 
     /**
-     * Returns app subdirectory in the external public storage. If directory doesn't exist, then it's created.
+     * Returns an array of jpg files that are saved in the storage directory
      */
-    public static File getExternalStoragePublicDirectory(Context context) {
-        File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/" + getSubdirectoryName(context));
-        if (!dir.exists()) {
-            if (!dir.mkdirs()) {
-                Log.d(TAG, "Failed to make directory.");
+    public static List<File> getCachedImages() {
+        File cachedDirectory = getCachedDirectory();
+        Log.d(TAG, cachedDirectory.getAbsolutePath());
+        File[] filteredFiles = cachedDirectory.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                return (file.getAbsolutePath().contains(".jpg")) ? true : false;
             }
-        }
-        return dir;
+        });
+        return new ArrayList<>(Arrays.asList(filteredFiles));
     }
 
-    /**
-     * Returns string of app name
-     */
-    public static String getSubdirectoryName(Context context) {
-        return context.getResources().getString(R.string.app_name).replace(" ", "");
+    public static void deleteCachedImages() {
+        File cachedDirectory = getCachedDirectory();
+        for (File cachedFile : cachedDirectory.listFiles())
+            cachedFile.delete();
     }
 
     /**
      * Deletes all images in all directories related to the app.
      * (i.e. private and public external storage).
      */
-    public static void deleteAllImages(Context context) {
-        String sub = getSubdirectoryName(context);
-        File dir = getExternalStoragePublicDirectory(context);
-        for (File file : dir.listFiles())
-            file.delete();
-        File dir2 = context.getExternalFilesDir(sub);
-        for (File file : dir2.listFiles())
-            file.delete();
+    public static void deletePostedImages(Context context) {
+        String subdirectory = getSubdirectoryName(context);
+        File sharedExternalDirectory = getSharedExternalDirectory(context);
+        for (File sharedFile : sharedExternalDirectory.listFiles())
+            sharedFile.delete();
+        File externalFilesDir = context.getExternalFilesDir(subdirectory);
+        for (File savedFile : externalFilesDir.listFiles())
+            savedFile.delete();
     }
 
     /**
      * Deletes the image from a given Uri path
      */
-    public static boolean deleteImage(Context context, Uri deleteUri) {
+    public static boolean deleteImage(Uri deleteUri) {
         File imageFile = new File(deleteUri.getPath());
         return imageFile.delete();
     }
@@ -152,7 +186,7 @@ public class FileUtilities {
      */
     public static void saveImageForSharing(Context context, String imagePath) throws IOException {
         File imageSource = new File(imagePath);
-        File imageDestination = new File(getExternalStoragePublicDirectory(context) + "/" + imageSource.getName());
+        File imageDestination = new File(getSharedExternalDirectory(context) + "/" + imageSource.getName());
 
         FileInputStream inStream = new FileInputStream(imageSource);
         FileOutputStream outStream = new FileOutputStream(imageDestination);
@@ -166,11 +200,40 @@ public class FileUtilities {
     /**
      * Create a File for saving an image or video
      */
-    public static File saveImageFile(Context context) {
+    public static File savePostedImage(Context context) {
         File fileDirectory = getFileDirectory(context);
+        return new File(fileDirectory.getPath() + File.separator + getImageFileName());
+    }
+
+    /**
+     * Create a File for saving an image or video
+     */
+    public static File saveCachedImage(Context context) {
+        File fileDirectory = getCachedDirectory();
+        return new File(fileDirectory.getPath() + File.separator + getImageFileName());
+    }
+
+    /**
+     * Returns a string of a file name based upon the timestamp
+     */
+    private static String getImageFileName() {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageName = "IMG_" + timeStamp + ".jpg";
-        return new File(fileDirectory.getPath() + File.separator + imageName);
+        return "IMG_" + timeStamp + ".jpg";
+    }
+
+    public static String getFileName(String absolutePath) {
+        String reverse = new StringBuilder(absolutePath).reverse().toString();
+        String result;
+        int index = reverse.indexOf("/");
+        if (index != -1) {
+            result = absolutePath.substring(absolutePath.length() - index);
+            index = result.indexOf("jpg");
+            if (index != -1)
+                result = result.substring(0,index + 3);
+            return result;
+        } else {
+            return null;
+        }
     }
 
 }

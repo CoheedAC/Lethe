@@ -10,6 +10,7 @@
         android:id="@+id/feedGridView"
         android:layout_gravity="left|top"
         android:numColumns="3"
-        android:padding="2dp"/>
+        android:verticalSpacing="3dp"
+        android:horizontalSpacing="3dp"/>
 
 </FrameLayout>

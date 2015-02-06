@@ -3,5 +3,6 @@
 
     <color name="yik_yak">#7DCFB1</color>
     <color name="black_overlay">#66000000</color>
+    <color name="image_load">#D6D6D6</color>
 
 </resources>

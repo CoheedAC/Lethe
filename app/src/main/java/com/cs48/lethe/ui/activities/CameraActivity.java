@@ -1,51 +1,39 @@
 package com.cs48.lethe.ui.activities;
 
 import android.content.Intent;
+import android.location.Location;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.NetworkOnMainThreadException;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
-import android.widget.SeekBar;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.utils.FileUtilities;
+import com.cs48.lethe.utils.UploadImage;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
-public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekBarChangeListener {
+public class CameraActivity extends ActionBarActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     public static final String TAG = CameraActivity.class.getSimpleName();
     public static final int IMAGE_CAPTURE_REQUEST = 100;
     public static final int IMAGE_POST_REQUEST = 200;
 
-    private final String boundary = "---------------------Boundary";
-    private final int MIN_HOURS = 6;
-    private final int MAX_HOURS = 24;
-    private int imageTimer;
-
+    private GoogleApiClient mGoogleApiClient;
+    private Location mLocation;
     private Uri mImageUri;
 
     @InjectView(R.id.imageView) ImageView mImageView;
-    @InjectView(R.id.timerTextView) TextView mTimerTextView;
-    @InjectView(R.id.seekBar) SeekBar mSeekBar;
-    @InjectView(R.id.minHourTextView) TextView mMinHourTextView;
-    @InjectView(R.id.maxHourTextView) TextView mMaxHourTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,20 +42,27 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
 
         ButterKnife.inject(this);
 
-        mMinHourTextView.setText(MIN_HOURS + "");
-        mMaxHourTextView.setText(MAX_HOURS + "");
-
-        // Offset seekbar by MIN_HOURS because seekbar
-        // can only start at 0 (but allowed to set max value)
-        mSeekBar.setOnSeekBarChangeListener(this);
-        mSeekBar.setMax(MAX_HOURS - MIN_HOURS);
-        mSeekBar.setProgress(mSeekBar.getMax());
-
         // Displays back button
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        buildGoogleApiClient();
+
         // Starts image capture
         startCamera();
+    }
+
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mGoogleApiClient.connect();
     }
 
     /**
@@ -77,12 +72,18 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
         // create Intent to take a picture and return control to the calling application
         Intent imageCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-        File imageFile = FileUtilities.saveImageFile(this); // create a file to save the image
+        File imageFile = FileUtilities.savePostedImage(this); // create a file to save the image
         mImageUri = Uri.fromFile(imageFile); // gets Uri of saved image
         imageCaptureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mImageUri); // set the image file name
 
         // start the image capture Intent
         startActivityForResult(imageCaptureIntent, IMAGE_CAPTURE_REQUEST);
+    }
+
+    private void goBack() {
+        FileUtilities.deleteImage(mImageUri);
+        setResult(RESULT_CANCELED);
+        startCamera();
     }
 
     /**
@@ -92,13 +93,6 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
     public void onBackPressed() {
         goBack();
         super.onBackPressed();
-    }
-
-    private void goBack() {
-        deleteImage();
-        setResult(RESULT_CANCELED);
-        startCamera();
-        mSeekBar.setProgress(mSeekBar.getMax());
     }
 
     /**
@@ -124,36 +118,6 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    /**
-     * Changes timer text when user scrolls seekbar
-     */
-    @Override
-    public void onProgressChanged(SeekBar seekBar, int progress,
-                                  boolean fromUser) {
-        mTimerTextView.setText("Set Timer: " + (progress + MIN_HOURS) + " hours");
-    }
-
-    @Override
-    public void onStartTrackingTouch(SeekBar seekBar) {
-
-    }
-
-    /**
-     * Stores the progress with MIN_HOURS as a lower boundary in a variable
-     */
-    @Override
-    public void onStopTrackingTouch(SeekBar seekBar) {
-        imageTimer = (seekBar.getProgress() + MIN_HOURS);
-    }
-
-    /**
-     * Delete image from path location
-     */
-    public boolean deleteImage() {
-        File imageToDelete = new File(mImageUri.getPath());
-        return imageToDelete.delete();
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -170,8 +134,7 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
 
         // Returns to main screen and prints out image location if user presses post button
         if (id == R.id.action_post) {
-//            new ImageClass().execute(); //send request with imagedata to server
-            Toast.makeText(this, mImageUri.toString(), Toast.LENGTH_LONG).show();
+            new UploadImage(this).execute(mImageUri.getPath()); //send request with imagedata to server
             Log.d(TAG, mImageUri.toString());
             setResult(RESULT_OK);
             finish();
@@ -180,88 +143,19 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
         return super.onOptionsItemSelected(item);
     }
 
-    // Unimplemented
-    private class ImageClass extends AsyncTask<String, String, Integer> {
-
-        protected Integer doInBackground(String... params) {
-            String imagePath = mImageUri.getPath();
-            File imageFile = new File(mImageUri.getPath()); // stored as jpg
-            Log.d("TFirst","ad");
-            try {
-
-                URL address = new URL("https://frozen-sea-8879.herokuapp.com/sendPic");
-                HttpURLConnection connection = (HttpURLConnection) (address.openConnection());
-
-                connection.setDoInput(true);
-                connection.setDoOutput(true);
-                connection.setUseCaches(false);
-                connection.setRequestMethod("POST");
-                connection.setRequestProperty("Connection", "Keep-Alive");
-                connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
-                Log.d("TFirst","ad");
-                OutputStream requestBody = connection.getOutputStream();
-                Log.d("Progress","MADEITTODATA");
-
-
-                String latitude = generateForSimpleText("latitude", "45.5");
-                String longitude = generateForSimpleText("longitude", "43.3");
-                String combined = latitude + longitude;
-                byte[] writer = combined.getBytes();
-                requestBody.write(writer, 0, writer.length);
-
-
-
-                String frontBoilerForImage = generateImageBoilerplateFront("Test.jpg");
-                writer = frontBoilerForImage.getBytes();
-                requestBody.write(writer, 0, writer.length);
-
-                //now encode image
-                FileInputStream imageAsStream = new FileInputStream(imagePath);
-                int bytesAvailable = imageAsStream.available();
-                int bufferSize = Math.min(bytesAvailable, 1 * 1024 * 1024);
-                byte[] buffer = new byte[bufferSize];
-                int bytesRead = imageAsStream.read(buffer, 0, bufferSize);
-                while (bytesRead > 0) {
-                    requestBody.write(buffer, 0, bufferSize);
-                    bytesAvailable = imageAsStream.available();
-                    bufferSize = Math.min(bytesAvailable, 1 * 1024 * 1024);
-                    bytesRead = imageAsStream.read(buffer, 0, bufferSize);
-                } //use buffer, write until image data is exhausted
-                //finished writing image
-
-                String endBoilerForImage = generateImageBoilerPlateEnd();
-                writer = endBoilerForImage.getBytes();
-                requestBody.write(writer, 0, writer.length); //finish image
-
-                imageAsStream.close();
-                requestBody.flush();
-                requestBody.close();
-                Log.d("Progress","END");
-                DataInputStream results = (DataInputStream) connection.getInputStream();
-                connection.disconnect();
-                //String str =  results.readLine();
-                //Toast.makeText(this,str, Toast.LENGTH_LONG).show();
-
-            } catch (NetworkOnMainThreadException e) {
-                Log.d("Error","NetworkMain");
-
-            } catch (Exception e) {
-                Log.d("Error","GeneralException");
-                Log.d("Error",e.getLocalizedMessage());
-                // test.setText(e.getMessage());
-                //cToast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-            }
-            return 0;
-        }
+    @Override
+    public void onConnected(Bundle bundle) {
+        Log.e(TAG, "Connection succes");
+        mLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
     }
 
-    private String generateForSimpleText(String name, String value){
-        return ("--" + boundary + "\r\nContent-Disposition: form-data; name=\"" + name + "\"\r\n\r\n" +value+"\r\n");
+    @Override
+    public void onConnectionSuspended(int i) {
+        Log.e(TAG, "Connection suspended");
     }
-    private String generateImageBoilerplateFront(String filename){
-        return ("--" +boundary +"\r\nContent-Disposition: form-data; name=\"avatar\"; filename=\""+filename+"\"\r\nContent-Type: image/jpeg\r\n\r\n");
-    }
-    private String generateImageBoilerPlateEnd(){
-        return ("\r\n--" + boundary + "--");
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.e(TAG, "Connection failed: " + connectionResult.toString());
     }
 }
