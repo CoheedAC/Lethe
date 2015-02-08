@@ -22,9 +22,9 @@ import android.widget.Toast;
 import com.cs48.lethe.R;
 import com.cs48.lethe.utils.FileUtilities;
 
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -174,7 +174,7 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
 
         // Returns to main screen and prints out image location if user presses post button
         if (id == R.id.action_post) {
-//            new ImageClass().execute();//send request with imagedata to server
+            //new ImageClass().execute();//send request with imagedata to server
             Toast.makeText(this, mImageUri.toString(), Toast.LENGTH_LONG).show();
             Log.d(TAG, mImageUri.toString());
             setResult(RESULT_OK);
@@ -202,6 +202,7 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
                 connection.setRequestMethod("POST");
                 connection.setRequestProperty("Connection", "Keep-Alive");
                 connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+                connection.setRequestProperty("Accept", "text/html; charset=utf-8");
                 Log.d("TFirst","ad");
                 OutputStream requestBody = connection.getOutputStream();
                 Log.d("Progress","MADEITTODATA");
@@ -241,7 +242,25 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
                 requestBody.flush();
                 requestBody.close();
                 Log.d("Progress","END");
-                DataInputStream results = (DataInputStream) connection.getInputStream();
+
+                Log.d("ConnectionType",connection.getHeaderField("Content-Type"));
+                Log.d("Response Code:", String.valueOf(connection.getResponseCode()));
+
+                try {
+                    InputStream ISIS = connection.getInputStream();
+                }
+                catch(Exception e){
+                    InputStream ISIS = connection.getErrorStream();
+                    Log.d("ad","yolo");
+                    buffer = new byte[ISIS.available()];
+                    ISIS.read(buffer,0,bufferSize);
+                    Log.d("ad","yoloswag");
+                    Log.d("RESPONSE:",new String(buffer));
+                }
+
+
+
+                //DataInputStream results = (DataInputStream) connection.getInputStream();
                 connection.disconnect();
                 //String str =  results.readLine();
                 //Toast.makeText(this,str, Toast.LENGTH_LONG).show();
@@ -271,12 +290,18 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
     private String getLatitude(){
         LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
         Location location = lm.getLastKnownLocation(lm.getBestProvider(new Criteria(),true));
+        if(location == null){
+            return "0.0";
+        }
         return String.valueOf(location.getLatitude());
 
     }
     private String getLongitude(){
         LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
         Location location = lm.getLastKnownLocation(lm.getBestProvider(new Criteria(),true));
+        if(location == null){
+            return "0.0";
+        }
         return String.valueOf(location.getLongitude());
     }
 }
