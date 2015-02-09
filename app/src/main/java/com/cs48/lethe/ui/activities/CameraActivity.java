@@ -174,7 +174,7 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
 
         // Returns to main screen and prints out image location if user presses post button
         if (id == R.id.action_post) {
-            //new ImageClass().execute();//send request with imagedata to server
+            new ImageClass().execute();//send request with imagedata to server
             Toast.makeText(this, mImageUri.toString(), Toast.LENGTH_LONG).show();
             Log.d(TAG, mImageUri.toString());
             setResult(RESULT_OK);
@@ -202,7 +202,7 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
                 connection.setRequestMethod("POST");
                 connection.setRequestProperty("Connection", "Keep-Alive");
                 connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
-                connection.setRequestProperty("Accept", "text/html; charset=utf-8");
+                connection.setRequestProperty("Accept", "application/json");
                 Log.d("TFirst","ad");
                 OutputStream requestBody = connection.getOutputStream();
                 Log.d("Progress","MADEITTODATA");
@@ -248,14 +248,16 @@ public class CameraActivity extends ActionBarActivity implements SeekBar.OnSeekB
 
                 try {
                     InputStream ISIS = connection.getInputStream();
-                }
-                catch(Exception e){
-                    InputStream ISIS = connection.getErrorStream();
                     Log.d("ad","yolo");
+                    Log.d("add",String.valueOf(ISIS.available()));
                     buffer = new byte[ISIS.available()];
                     ISIS.read(buffer,0,bufferSize);
                     Log.d("ad","yoloswag");
                     Log.d("RESPONSE:",new String(buffer));
+                }
+                catch(Exception e){
+                    InputStream ISIS = connection.getErrorStream();
+
                 }
 
 
