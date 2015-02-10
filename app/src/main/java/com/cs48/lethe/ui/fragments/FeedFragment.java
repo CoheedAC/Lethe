@@ -6,10 +6,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.ui.activities.PictureActivity;
@@ -44,6 +48,7 @@ public class FeedFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -61,20 +66,38 @@ public class FeedFragment extends Fragment {
                 Intent showImageIntent = new Intent(getActivity(), PictureActivity.class);
 
                 File imageFile = (File) mGridAdapter.getItem(position);
-                showImageIntent.putExtra("uri", imageFile.getAbsolutePath());
+                showImageIntent.setData(Uri.fromFile(imageFile));
                 showImageIntent.putExtra("position", position);
                 showImageIntent.setAction(PictureActivity.VIEW_ONLY);
 
                 startActivity(showImageIntent);
             }
         });
-
-
         return rootView;
     }
 
     public void update() {
         mGridAdapter.update();
+    }
+
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.getItem(0).setVisible(true);
+        menu.getItem(2).setVisible(true);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_delete_images) {
+            Toast.makeText(getActivity(), "Cleared cache", Toast.LENGTH_SHORT).show();
+            mGridAdapter.clearCache();
+            return true;
+        }
+        if (id == R.id.action_refresh) {
+            mGridAdapter.requestNewImages();
+            Toast.makeText(getActivity(), "Refreshing...", Toast.LENGTH_SHORT).show();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     // TODO: Rename method, update argument and hook method into UI event

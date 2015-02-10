@@ -73,7 +73,8 @@ public class MeFragment extends Fragment {
                 Intent showImageIntent = new Intent(getActivity(), PictureActivity.class);
 
                 File imageFile = (File) mGridAdapter.getItem(position);
-                showImageIntent.putExtra("uri", imageFile.getAbsolutePath());
+                showImageIntent.setData(Uri.fromFile(imageFile));
+//                showImageIntent.putExtra("uri", imageFile.getAbsolutePath());
                 showImageIntent.putExtra("position", position);
                 showImageIntent.setAction(PictureActivity.VIEW_OVERLAY);
 
@@ -85,18 +86,8 @@ public class MeFragment extends Fragment {
     }
 
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        menu.getItem(0).setVisible(true);
+        menu.getItem(2).setVisible(true);
         menu.getItem(1).setVisible(true);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        // updates the grid if the user deletes the image in the full screen view
-        if (requestCode == PictureActivity.FULL_IMAGE_REQUEST && resultCode == PictureActivity.RESULT_OK) {
-            update();
-        }
     }
 
     @Override
@@ -110,6 +101,16 @@ public class MeFragment extends Fragment {
             mGridAdapter.copyImage();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // updates the grid if the user deletes the image in the full screen view
+        if (requestCode == PictureActivity.FULL_IMAGE_REQUEST && resultCode == PictureActivity.RESULT_OK) {
+            update();
+        }
     }
 
     // TODO: Rename method, update argument and hook method into UI event
