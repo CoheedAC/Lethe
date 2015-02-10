@@ -49,6 +49,7 @@ public class PictureActivity extends ActionBarActivity {
         Bundle extras = intent.getExtras();
         if (extras != null) {
             mImageUri = intent.getData();
+            Toast.makeText(this, mImageUri.getPath(), Toast.LENGTH_SHORT).show();
             mImagePosition = extras.getInt("position");
 
             mImageView.setImageURI(mImageUri);

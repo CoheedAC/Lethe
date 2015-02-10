@@ -13,7 +13,7 @@ import android.widget.ImageView;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.utils.FileUtilities;
-import com.cs48.lethe.utils.UploadImage;
+import com.cs48.lethe.utils.PostImage;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -134,7 +134,7 @@ public class CameraActivity extends ActionBarActivity implements GoogleApiClient
 
         // Returns to main screen and prints out image location if user presses post button
         if (id == R.id.action_post) {
-            new UploadImage(this).execute(mImageUri.getPath()); //send request with imagedata to server
+            new PostImage(this).execute(mImageUri.getPath()); //send request with imagedata to server
             Log.d(TAG, mImageUri.toString());
             setResult(RESULT_OK);
             finish();

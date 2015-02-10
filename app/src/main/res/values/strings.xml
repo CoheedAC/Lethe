@@ -8,6 +8,7 @@
     <string name="title_section4">More</string>
     <string name="action_camera">Camera</string>
     <string name="action_copy_images">Copy Images</string>
+    <string name="action_refresh">Refresh</string>
     <string name="action_delete_images">Delete Images</string>
     <string name="title_activity_camera">Post a Picture</string>
     <string name="action_post">Post</string>

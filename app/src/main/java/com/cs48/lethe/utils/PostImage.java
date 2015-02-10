@@ -20,14 +20,14 @@ import java.net.URL;
 /**
  * Created by maxkohne on 2/5/15.
  */
-public class UploadImage extends AsyncTask<String, String, Integer> {
+public class PostImage extends AsyncTask<String, String, Integer> {
 
-    public static final String TAG = UploadImage.class.getSimpleName();
+    public static final String TAG = PostImage.class.getSimpleName();
 
     private final String boundary = "---------------------Boundary";
     private Context mContext;
 
-    public UploadImage(Context context) {
+    public PostImage(Context context) {
         mContext = context;
     }
 
@@ -84,6 +84,8 @@ public class UploadImage extends AsyncTask<String, String, Integer> {
             writer = endBoilerForImage.getBytes();
             requestBody.write(writer, 0, writer.length); //finish image
 
+
+
             imageAsStream.close();
             requestBody.flush();
             requestBody.close();
@@ -91,7 +93,6 @@ public class UploadImage extends AsyncTask<String, String, Integer> {
 
             connection.getInputStream(); // throws FileNotFoundException but still uploads
             connection.disconnect();
-            Log.d(TAG, "Image uploaded successfully");
         } catch (NetworkOnMainThreadException e) {
             Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
         } catch (MalformedURLException e) {
@@ -107,8 +108,16 @@ public class UploadImage extends AsyncTask<String, String, Integer> {
             for(StackTraceElement elem: e.getStackTrace()) {
                 Log.e(TAG, elem.toString());
             }
+        }finally {
+
         }
         return 0;
+    }
+
+    @Override
+    protected void onPostExecute(Integer integer) {
+        super.onPostExecute(integer);
+        Log.d(TAG, "Image uploaded successfully");
     }
 
     private String generateForSimpleText(String name, String value) {

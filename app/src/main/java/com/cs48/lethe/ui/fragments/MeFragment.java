@@ -86,7 +86,7 @@ public class MeFragment extends Fragment {
     }
 
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        menu.getItem(0).setVisible(true);
+        menu.getItem(2).setVisible(true);
         menu.getItem(1).setVisible(true);
     }
 

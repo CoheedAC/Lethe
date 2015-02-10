@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.ui.activities.PictureActivity;
@@ -80,15 +81,21 @@ public class FeedFragment extends Fragment {
     }
 
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        menu.getItem(1).setVisible(true);
+        menu.getItem(0).setVisible(true);
+        menu.getItem(2).setVisible(true);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_delete_images) {
+            Toast.makeText(getActivity(), "Cleared cache", Toast.LENGTH_SHORT).show();
             mGridAdapter.clearCache();
             return true;
+        }
+        if (id == R.id.action_refresh) {
+            mGridAdapter.requestNewImages();
+            Toast.makeText(getActivity(), "Refreshing...", Toast.LENGTH_SHORT).show();
         }
         return super.onOptionsItemSelected(item);
     }

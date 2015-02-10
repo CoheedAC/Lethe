@@ -50,7 +50,7 @@ public class MeGridViewAdapter extends BaseAdapter {
             GridView.LayoutParams imageParams = new GridView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     300);
             imageView.setLayoutParams(imageParams);
-            imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             imageView.setBackgroundColor(mContext.getResources().getColor(R.color.image_load));
         }
 
