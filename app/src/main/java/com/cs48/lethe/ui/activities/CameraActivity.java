@@ -13,7 +13,6 @@ import android.widget.ImageView;
 import com.cs48.lethe.R;
 import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.PostImage;
-import com.google.android.gms.common.api.GoogleApiClient;
 import java.io.File;
 
 import butterknife.ButterKnife;
@@ -25,7 +24,6 @@ public class CameraActivity extends ActionBarActivity {
     public static final int IMAGE_CAPTURE_REQUEST = 100;
     public static final int IMAGE_POST_REQUEST = 200;
 
-    private GoogleApiClient mGoogleApiClient;
     private Uri mImageUri;
 
     @InjectView(R.id.imageView)
@@ -48,7 +46,6 @@ public class CameraActivity extends ActionBarActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        mGoogleApiClient.connect();
     }
 
     /**
