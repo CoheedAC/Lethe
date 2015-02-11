@@ -9,12 +9,9 @@ import android.os.NetworkOnMainThreadException;
 import android.util.Log;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 
 /**
@@ -31,9 +28,11 @@ public class PostImage extends AsyncTask<String, String, Integer> {
         mContext = context;
     }
 
-    protected Integer doInBackground(String... imagePaths) {
-        String imagePath = imagePaths[0];
+    protected Integer doInBackground(String... params) {
+        String imagePath = params[0];
+        Log.d("TFirst", "ad");
         try {
+
             URL address = new URL("https://frozen-sea-8879.herokuapp.com/sendPic");
             HttpURLConnection connection = (HttpURLConnection) (address.openConnection());
 
@@ -43,27 +42,22 @@ public class PostImage extends AsyncTask<String, String, Integer> {
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Connection", "Keep-Alive");
             connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+            connection.setRequestProperty("Accept", "application/json");
+            Log.d("TFirst", "ad");
             OutputStream requestBody = connection.getOutputStream();
-            Log.d(TAG, "Connection success");
+            Log.d("Progress", "MADEITTODATA");
 
-            Location location = getLocation();
-            String latitude = generateForSimpleText("latitude", getLatitude(location));
-            String longitude = generateForSimpleText("longitude", getLongitude(location));
+
+            String latitude = generateForSimpleText("latitude", getLatitude());
+            String longitude = generateForSimpleText("longitude", getLongitude());
             String combined = latitude + longitude;
-            Log.d(TAG, "Location success");
-
             byte[] writer = combined.getBytes();
             requestBody.write(writer, 0, writer.length);
 
-            String filename = FileUtilities.getFileName(imagePath);
-            if (filename == null)
-                filename = "test.jpg";
-            Log.d(TAG, "File name success: " + filename);
 
-            String frontBoilerForImage = generateImageBoilerplateFront(filename);
+            String frontBoilerForImage = generateImageBoilerplateFront("Test.jpg");
             writer = frontBoilerForImage.getBytes();
             requestBody.write(writer, 0, writer.length);
-            Log.d(TAG, "Writer success");
 
             //now encode image
             FileInputStream imageAsStream = new FileInputStream(imagePath);
@@ -78,46 +72,48 @@ public class PostImage extends AsyncTask<String, String, Integer> {
                 bytesRead = imageAsStream.read(buffer, 0, bufferSize);
             } //use buffer, write until image data is exhausted
             //finished writing image
-            Log.d(TAG, "Inputstream success");
 
             String endBoilerForImage = generateImageBoilerPlateEnd();
             writer = endBoilerForImage.getBytes();
             requestBody.write(writer, 0, writer.length); //finish image
 
-
-
             imageAsStream.close();
             requestBody.flush();
             requestBody.close();
-            Log.d(TAG, "Close success");
+            Log.d("Progress", "END");
 
-            connection.getInputStream(); // throws FileNotFoundException but still uploads
-            connection.disconnect();
-        } catch (NetworkOnMainThreadException e) {
-            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
-        } catch (MalformedURLException e) {
-            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
-        } catch (FileNotFoundException e) {
-            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
-        } catch (ProtocolException e) {
-            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
-        } catch (IOException e) {
-            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
-        }catch (NullPointerException e) {
-            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
-            for(StackTraceElement elem: e.getStackTrace()) {
-                Log.e(TAG, elem.toString());
+            Log.d("ConnectionType", connection.getHeaderField("Content-Type"));
+            Log.d("Response Code:", String.valueOf(connection.getResponseCode()));
+
+            try {
+                InputStream ISIS = connection.getInputStream();
+                Log.d("ad", "yolo");
+                Log.d("add", String.valueOf(ISIS.available()));
+                buffer = new byte[ISIS.available()];
+                ISIS.read(buffer, 0, bufferSize);
+                Log.d("ad", "yoloswag");
+                Log.d("RESPONSE:", new String(buffer));
+            } catch (Exception e) {
+                InputStream ISIS = connection.getErrorStream();
+
             }
-        }finally {
 
+
+            //DataInputStream results = (DataInputStream) connection.getInputStream();
+            connection.disconnect();
+            //String str =  results.readLine();
+            //Toast.makeText(this,str, Toast.LENGTH_LONG).show();
+
+        } catch (NetworkOnMainThreadException e) {
+            Log.d("Error", "NetworkMain");
+
+        } catch (Exception e) {
+            Log.d("Error", "GeneralException");
+            Log.d("Error", e.getLocalizedMessage());
+            // test.setText(e.getMessage());
+            //cToast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
         }
         return 0;
-    }
-
-    @Override
-    protected void onPostExecute(Integer integer) {
-        super.onPostExecute(integer);
-        Log.d(TAG, "Image uploaded successfully");
     }
 
     private String generateForSimpleText(String name, String value) {
@@ -132,26 +128,21 @@ public class PostImage extends AsyncTask<String, String, Integer> {
         return ("\r\n--" + boundary + "--");
     }
 
-    private Location getLocation() {
-        LocationManager locationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
-        return locationManager.getLastKnownLocation(locationManager.getBestProvider(new Criteria(),true));
-    }
-
-    // Coords are for Isla Vista
-    private String getLatitude(Location location) {
+    private String getLatitude() {
+        LocationManager lm = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+        Location location = lm.getLastKnownLocation(lm.getBestProvider(new Criteria(), true));
         if (location == null) {
-            String latitude = "34.4133";
-            Log.d(TAG, "latitude: " + latitude);
-            return latitude;
+            return "0.0";
         }
         return String.valueOf(location.getLatitude());
+
     }
 
-    private String getLongitude(Location location) {
+    private String getLongitude() {
+        LocationManager lm = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+        Location location = lm.getLastKnownLocation(lm.getBestProvider(new Criteria(), true));
         if (location == null) {
-            String longitude = "-119.861";
-            Log.d(TAG, "latitude: " + longitude);
-            return longitude;
+            return "0.0";
         }
         return String.valueOf(location.getLongitude());
     }
