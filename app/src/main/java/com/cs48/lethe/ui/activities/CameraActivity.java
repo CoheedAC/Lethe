@@ -117,6 +117,7 @@ public class CameraActivity extends ActionBarActivity {
 
         // Returns to main screen and prints out image location if user presses post button
         if (id == R.id.action_post) {
+            // Tim, add code to PostImage class
             new PostImage(this).execute(mImageUri.getPath()); //send request with imagedata to server
             Log.d(TAG, mImageUri.toString());
             setResult(RESULT_OK);
