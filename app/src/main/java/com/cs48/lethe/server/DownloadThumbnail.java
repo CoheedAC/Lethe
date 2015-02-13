@@ -1,10 +1,11 @@
-package com.cs48.lethe.utils;
+package com.cs48.lethe.server;
 
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import com.cs48.lethe.ui.adapters.FeedGridViewAdapter;
+import com.cs48.lethe.utils.FileUtilities;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -18,15 +19,15 @@ import java.net.URL;
 /**
  * Created by maxkohne on 2/5/15.
  */
-public class DownloadNewImage extends AsyncTask<String, String, Integer> {
+public class DownloadThumbnail extends AsyncTask<String, String, Integer> {
 
-    public static final String TAG = DownloadNewImage.class.getSimpleName();
+    public static final String TAG = DownloadThumbnail.class.getSimpleName();
 
     private Context mContext;
     private FeedGridViewAdapter mFeedGridViewAdapter;
     private String mImageName;
 
-    public DownloadNewImage(Context context, FeedGridViewAdapter feedGridViewAdapter, String id) {
+    public DownloadThumbnail(Context context, FeedGridViewAdapter feedGridViewAdapter, String id) {
         mFeedGridViewAdapter = feedGridViewAdapter;
         mContext = context;
         mImageName = "IMG _" + id + ".jpg";

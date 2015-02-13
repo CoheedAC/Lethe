@@ -9,8 +9,8 @@ import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.cs48.lethe.R;
+import com.cs48.lethe.server.RequestThumbnailFeed;
 import com.cs48.lethe.utils.FileUtilities;
-import com.cs48.lethe.utils.RequestNewImages;
 
 import java.io.File;
 import java.util.List;
@@ -34,7 +34,7 @@ public class FeedGridViewAdapter extends BaseAdapter {
 
     public void requestNewImages() {
         String getRequest = "https://frozen-sea-8879.herokuapp.com/hot/34a4133292,-119a8609718";
-        new RequestNewImages(mContext, this).execute(getRequest);
+        new RequestThumbnailFeed(mContext, this).execute(getRequest);
     }
 
     public int getCount() {

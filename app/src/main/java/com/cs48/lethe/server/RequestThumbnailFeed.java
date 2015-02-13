@@ -1,4 +1,4 @@
-package com.cs48.lethe.utils;
+package com.cs48.lethe.server;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -6,6 +6,8 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.cs48.lethe.ui.adapters.FeedGridViewAdapter;
+import com.cs48.lethe.utils.FileUtilities;
+import com.cs48.lethe.utils.Thumbnail;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -24,14 +26,14 @@ import java.io.InputStreamReader;
 /**
  * Created by maxkohne on 2/5/15.
  */
-public class RequestNewImages extends AsyncTask<String, Void, String> {
+public class RequestThumbnailFeed extends AsyncTask<String, Void, String> {
 
-    public static final String TAG = RequestNewImages.class.getSimpleName();
+    public static final String TAG = RequestThumbnailFeed.class.getSimpleName();
 
     private Context mContext;
     private FeedGridViewAdapter mFeedGridViewAdapter;
 
-    public RequestNewImages(Context context, FeedGridViewAdapter feedGridViewAdapter) {
+    public RequestThumbnailFeed(Context context, FeedGridViewAdapter feedGridViewAdapter) {
         mContext = context;
         mFeedGridViewAdapter = feedGridViewAdapter;
     }
@@ -82,7 +84,7 @@ public class RequestNewImages extends AsyncTask<String, Void, String> {
         try {
             Thumbnail[] thumbnails = getThumbnails(result);
             for (Thumbnail thumbnail: thumbnails) {
-                new DownloadNewImage(mContext, mFeedGridViewAdapter, thumbnail.getId()).execute(thumbnail.getUrl());
+                new DownloadThumbnail(mContext, mFeedGridViewAdapter, thumbnail.getId()).execute(thumbnail.getUrl());
             }
         } catch (JSONException e) {
             Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
