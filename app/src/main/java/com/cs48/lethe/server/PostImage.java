@@ -1,4 +1,4 @@
-package com.cs48.lethe.utils;
+package com.cs48.lethe.server;
 
 import android.content.Context;
 import android.location.Criteria;

@@ -12,7 +12,11 @@ import android.widget.ImageView;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.utils.FileUtilities;
-import com.cs48.lethe.utils.PostImage;
+import com.cs48.lethe.server.PostImage;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
+
 import java.io.File;
 
 import butterknife.ButterKnife;
