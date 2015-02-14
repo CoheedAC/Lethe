@@ -8,6 +8,8 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 
+import com.cs48.lethe.R;
+import com.cs48.lethe.server.RequestThumbnailFeed;
 import com.cs48.lethe.utils.FileUtilities;
 
 import java.io.File;
@@ -18,12 +20,21 @@ import java.util.List;
  */
 public class FeedGridViewAdapter extends BaseAdapter {
 
+    public static final String TAG = FeedGridViewAdapter.class.getSimpleName();
+
     private List<File> mImageList;
     private Context mContext;
 
     public FeedGridViewAdapter(Context context) {
         mContext = context;
-        mImageList = FileUtilities.listFiles(mContext);
+        mImageList = FileUtilities.getCachedImages();
+
+        requestNewImages();
+    }
+
+    public void requestNewImages() {
+        String getRequest = "https://frozen-sea-8879.herokuapp.com/hot/34a4133292,-119a8609718";
+        new RequestThumbnailFeed(mContext, this).execute(getRequest);
     }
 
     public int getCount() {
@@ -46,9 +57,8 @@ public class FeedGridViewAdapter extends BaseAdapter {
             GridView.LayoutParams imageParams = new GridView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     300);
             imageView.setLayoutParams(imageParams);
-            imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-            int padding = 5;
-            imageView.setPadding(padding, padding, padding, padding);
+            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            imageView.setBackgroundColor(mContext.getResources().getColor(R.color.image_load));
         }
 
         Uri imageUri = Uri.fromFile(mImageList.get(position));
@@ -58,8 +68,13 @@ public class FeedGridViewAdapter extends BaseAdapter {
     }
 
     public void update() {
-        mImageList = FileUtilities.listFiles(mContext);
+        mImageList = FileUtilities.getCachedImages();
         notifyDataSetChanged();
+    }
+
+    public void clearCache() {
+        FileUtilities.deleteCachedImages();
+        update();
     }
 
 }

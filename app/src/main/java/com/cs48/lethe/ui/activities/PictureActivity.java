@@ -48,7 +48,8 @@ public class PictureActivity extends ActionBarActivity {
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
         if (extras != null) {
-            mImageUri = Uri.parse(extras.getString("uri"));
+            mImageUri = intent.getData();
+            Toast.makeText(this, mImageUri.getPath(), Toast.LENGTH_SHORT).show();
             mImagePosition = extras.getInt("position");
 
             mImageView.setImageURI(mImageUri);
@@ -79,7 +80,7 @@ public class PictureActivity extends ActionBarActivity {
         mDeleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FileUtilities.deleteImage(PictureActivity.this, mImageUri);
+                FileUtilities.deleteImage(mImageUri);
                 Toast.makeText(PictureActivity.this, "Deleted image #" + (mImagePosition + 1), Toast.LENGTH_SHORT).show();
                 setResult(RESULT_OK);
                 finish();
