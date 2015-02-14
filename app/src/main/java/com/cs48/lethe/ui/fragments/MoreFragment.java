@@ -1,16 +1,25 @@
 package com.cs48.lethe.ui.fragments;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.cs48.lethe.R;
 
 /**
+ *  More Fragment that contains all accessory options
+ *  (Link to facebook, link to instagram, etc. for the application.
+ *
+ *  @Dylan Lynch
+ *  @version WIP
+ *
+ *
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
  * {@link MoreFragment.OnFragmentInteractionListener} interface
@@ -18,8 +27,14 @@ import com.cs48.lethe.R;
  * Use the {@link MoreFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
+
 public class MoreFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
+
+    // Fragment Buttons
+    Button mFacebookButton;
+    Button mInstagramButton;
+    Button mContactButton;
 
     public static MoreFragment newInstance() {
         MoreFragment fragment = new MoreFragment();
@@ -30,19 +45,55 @@ public class MoreFragment extends Fragment {
         // Required empty public constructor
     }
 
+
+    /**
+     * onCreate() is used for normal static setup of the activity
+     *
+     * @param savedInstanceState Saved state data passed into onCreate
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+
     }
 
+
+    View view;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_more, container, false);
+
+        view = inflater.inflate(R.layout.fragment_more, container, false);
+
+        // Initialize fragment buttons
+        mFacebookButton = (Button) view.findViewById(R.id.facebookButton);
+        mInstagramButton = (Button) view.findViewById(R.id.instagramButton);
+        mContactButton = (Button) view.findViewById(R.id.contactButton);
+
+        // Listener for facebook, opens to facebook URL
+        View.OnClickListener facebookHandler = new View.OnClickListener() {
+            public void onClick(View v) {
+                startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://www.facebook.com/I5555")));
+            }
+        };
+        // Listener for Instagram, opens Instagram app
+        View.OnClickListener instagramHandler = new View.OnClickListener() {
+            public void onClick(View v) {
+                // If the user has Instagram installed on their phone
+                startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("instagram://user?username=lynchifer")));
+                // If the user DOES NOT have Instagram installed on their phone (but is clicking this nevertheless)
+
+            }
+        };
+        mFacebookButton.setOnClickListener(facebookHandler);
+
+
+        return view;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
+
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
