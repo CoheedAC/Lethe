@@ -35,6 +35,8 @@ public class MoreFragment extends Fragment {
     Button mFacebookButton;
     Button mInstagramButton;
     Button mContactButton;
+    Button mTOSButton;
+    Button mPPButton;
 
     public static MoreFragment newInstance() {
         MoreFragment fragment = new MoreFragment();
@@ -71,24 +73,58 @@ public class MoreFragment extends Fragment {
         mFacebookButton = (Button) view.findViewById(R.id.facebookButton);
         mInstagramButton = (Button) view.findViewById(R.id.instagramButton);
         mContactButton = (Button) view.findViewById(R.id.contactButton);
+        mTOSButton = (Button) view.findViewById(R.id.tosButton);
+        mPPButton = (Button) view.findViewById(R.id.ppButton);
 
         // Listener for facebook, opens to facebook URL
         View.OnClickListener facebookHandler = new View.OnClickListener() {
+           @Override
             public void onClick(View v) {
                 startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://www.facebook.com/I5555")));
             }
         };
-        // Listener for Instagram, opens Instagram app
+        // Listener for Instagram, opens Instagram URL
         View.OnClickListener instagramHandler = new View.OnClickListener() {
+            @Override
             public void onClick(View v) {
-                // If the user has Instagram installed on their phone
-                startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("instagram://user?username=lynchifer")));
-                // If the user DOES NOT have Instagram installed on their phone (but is clicking this nevertheless)
+                startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://instagram.com/lynchifer/")));
 
             }
         };
-        mFacebookButton.setOnClickListener(facebookHandler);
 
+        // Listener for Contact Us button, prompts user to pick email app, sends email with mailto field already filled in
+        View.OnClickListener contactUsHandler = new View.OnClickListener() {
+           @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("message/rfc822");
+                intent.putExtra(Intent.EXTRA_EMAIL, "dlynch305@gmail.com");
+
+                startActivity(Intent.createChooser(intent, "Send Email"));
+            }
+        };
+
+        // Listener for showing the Terms of Service when clicked
+        View.OnClickListener tosHandler = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO Open Terms of Service Text
+            }
+        };
+
+        // Listener for showing the Privacy Policy when clicked
+        View.OnClickListener ppHandler = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO Open Privacy Policy text
+            }
+        };
+
+
+
+        mFacebookButton.setOnClickListener(facebookHandler);
+        mInstagramButton.setOnClickListener(instagramHandler);
+        mContactButton.setOnClickListener(contactUsHandler);
 
         return view;
     }
