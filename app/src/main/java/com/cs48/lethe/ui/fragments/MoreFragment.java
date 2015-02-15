@@ -78,17 +78,28 @@ public class MoreFragment extends Fragment {
                 startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://www.facebook.com/I5555")));
             }
         };
-        // Listener for Instagram, opens Instagram app
+        // Listener for Instagram, opens Instagram URL
         View.OnClickListener instagramHandler = new View.OnClickListener() {
             public void onClick(View v) {
-                // If the user has Instagram installed on their phone
-                startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("instagram://user?username=lynchifer")));
-                // If the user DOES NOT have Instagram installed on their phone (but is clicking this nevertheless)
+                startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://instagram.com/lynchifer/")));
 
             }
         };
-        mFacebookButton.setOnClickListener(facebookHandler);
 
+        // Listener for Contact Us button, oprompts user to pick email app, sends email with mailto field already filled in
+        View.OnClickListener contactUsHandler = new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("message/rfc822");
+                intent.putExtra(Intent.EXTRA_EMAIL, "dlynch305@gmail.com");
+
+                startActivity(Intent.createChooser(intent, "Send Email"));
+            }
+        };
+
+        mFacebookButton.setOnClickListener(facebookHandler);
+        mInstagramButton.setOnClickListener(instagramHandler);
+        mContactButton.setOnClickListener(contactUsHandler);
 
         return view;
     }
