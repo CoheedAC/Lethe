@@ -1,6 +1,8 @@
 package com.cs48.lethe.utils;
 
+import android.content.ContentResolver;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
@@ -234,5 +236,21 @@ public class FileUtilities {
             return null;
         }
     }
+    public static Bitmap getValidSizedBitmap(ContentResolver cr, Uri mImageUri){
+        return(getXYCompressedBitmap(cr, mImageUri,2048,2048));
+    }
+    public static Bitmap getThumbnailSizedBitmap(ContentResolver cr, Uri mImageUri){
+        return(getXYCompressedBitmap(cr, mImageUri,150,150));
+    }
+    public static Bitmap getXYCompressedBitmap(ContentResolver cr, Uri mImageUri, int x, int y){
+        try {
+            Bitmap bp = android.provider.MediaStore.Images.Media.getBitmap(cr, mImageUri);
+            return (Bitmap.createScaledBitmap(bp,x,y,false)); //low quality
+
+        }catch (Exception e){
+            return null;
+        }
+    }
+
 
 }

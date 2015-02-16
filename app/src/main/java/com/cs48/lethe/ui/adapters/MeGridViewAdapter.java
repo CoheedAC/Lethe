@@ -55,7 +55,8 @@ public class MeGridViewAdapter extends BaseAdapter {
         }
 
         Uri imageUri = Uri.fromFile(mImageList.get(position));
-        imageView.setImageURI(imageUri);
+        //imageView.setImageURI(imageUri);
+        imageView.setImageBitmap(FileUtilities.getThumbnailSizedBitmap(mContext.getContentResolver(), imageUri)  );
         return imageView;
     }
 

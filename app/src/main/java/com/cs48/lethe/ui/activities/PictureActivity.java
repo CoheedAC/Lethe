@@ -52,7 +52,8 @@ public class PictureActivity extends ActionBarActivity {
             Toast.makeText(this, mImageUri.getPath(), Toast.LENGTH_SHORT).show();
             mImagePosition = extras.getInt("position");
 
-            mImageView.setImageURI(mImageUri);
+            //mImageView.setImageURI(mImageUri);
+            mImageView.setImageBitmap(FileUtilities.getValidSizedBitmap(this.getContentResolver(), mImageUri));
             mImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

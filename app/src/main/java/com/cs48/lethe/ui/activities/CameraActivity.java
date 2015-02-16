@@ -1,5 +1,6 @@
 package com.cs48.lethe.ui.activities;
 
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,11 +12,8 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 
 import com.cs48.lethe.R;
-import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.server.PostImage;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
+import com.cs48.lethe.utils.FileUtilities;
 
 import java.io.File;
 
@@ -63,6 +61,7 @@ public class CameraActivity extends ActionBarActivity {
         mImageUri = Uri.fromFile(imageFile); // gets Uri of saved image
         imageCaptureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mImageUri); // set the image file name
 
+
         // start the image capture Intent
         startActivityForResult(imageCaptureIntent, IMAGE_CAPTURE_REQUEST);
     }
@@ -93,10 +92,16 @@ public class CameraActivity extends ActionBarActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
         if (requestCode == IMAGE_CAPTURE_REQUEST) {
             // If user presses okay on camera, then it saves it to storage
             if (resultCode == RESULT_OK) {
-                mImageView.setImageURI(mImageUri);
+                try {
+                    ContentResolver cr = this.getContentResolver();
+                    mImageView.setImageBitmap(FileUtilities.getValidSizedBitmap(cr,mImageUri));
+                }
+                catch(Exception e){
+                }
                 // if user cancels image capture, then return to main screen
             } else if (resultCode == RESULT_CANCELED) {
                 finish();
@@ -130,4 +135,5 @@ public class CameraActivity extends ActionBarActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
 }

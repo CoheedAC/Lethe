@@ -62,7 +62,8 @@ public class FeedGridViewAdapter extends BaseAdapter {
         }
 
         Uri imageUri = Uri.fromFile(mImageList.get(position));
-        imageView.setImageURI(imageUri);
+        imageView.setImageBitmap(FileUtilities.getValidSizedBitmap(mContext.getContentResolver(),imageUri));
+        //imageView.setImageURI(imageUri);
 
         return imageView;
     }
