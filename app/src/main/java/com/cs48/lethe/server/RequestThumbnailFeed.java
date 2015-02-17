@@ -6,7 +6,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.cs48.lethe.ui.adapters.FeedGridViewAdapter;
-import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.Thumbnail;
 
 import org.apache.http.HttpResponse;
@@ -24,7 +23,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 /**
- * Created by maxkohne on 2/5/15.
+ * Asynchronously downloads the JSON of all of the available
+ * images in the current location.
  */
 public class RequestThumbnailFeed extends AsyncTask<String, Void, String> {
 
@@ -38,11 +38,17 @@ public class RequestThumbnailFeed extends AsyncTask<String, Void, String> {
         mFeedGridViewAdapter = feedGridViewAdapter;
     }
 
+    /**
+     * Requests to get the JSON in the background.
+     */
     @Override
     protected String doInBackground(String... urls) {
         return getRequest(urls[0]);
     }
 
+    /**
+     * Stores the JSON text into a string and returns the JSON string.
+     */
     private String getRequest(String url) {
         InputStream inputStream = null;
         String result = "";
@@ -66,6 +72,9 @@ public class RequestThumbnailFeed extends AsyncTask<String, Void, String> {
         return result;
     }
 
+    /**
+     * Interprets the data coming from the server as a String.
+     */
     private String convertInputStreamToString(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         String line;
@@ -77,21 +86,29 @@ public class RequestThumbnailFeed extends AsyncTask<String, Void, String> {
         return result;
     }
 
+    /**
+     * Parses through each JSON object and downloads each image into
+     * the cache folder.
+     */
     @Override
     protected void onPostExecute(String result) {
         Toast.makeText(mContext, "Received Json!", Toast.LENGTH_SHORT).show();
-        FileUtilities.deleteCachedImages();
+//        FileUtilities.deleteCachedImages();
+
         try {
             Thumbnail[] thumbnails = getThumbnails(result);
-            for (Thumbnail thumbnail: thumbnails) {
+            for (Thumbnail thumbnail : thumbnails)
                 new DownloadThumbnail(mContext, mFeedGridViewAdapter, thumbnail.getId()).execute(thumbnail.getUrl());
-            }
         } catch (JSONException e) {
             Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
         }
-
     }
 
+    /**
+     * Parses the JSON string array and turns each entry into its own
+     * Thumbnail object that holds the unique picture ID, the
+     * DropBox URL, and the File of the image.
+     */
     private Thumbnail[] getThumbnails(String jsonData) throws JSONException {
         JSONArray jsonArray = new JSONArray(jsonData);
         Thumbnail[] thumbnails = new Thumbnail[jsonArray.length()];

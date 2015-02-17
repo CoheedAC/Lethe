@@ -8,6 +8,8 @@ import android.os.AsyncTask;
 import android.os.NetworkOnMainThreadException;
 import android.util.Log;
 
+import com.cs48.lethe.utils.FileUtilities;
+
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -15,7 +17,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
- * Created by maxkohne on 2/5/15.
+ * Asynchronously posts the image on the server and returns the
+ * unique picture id.
  */
 public class PostImage extends AsyncTask<String, String, Integer> {
 
@@ -28,11 +31,14 @@ public class PostImage extends AsyncTask<String, String, Integer> {
         mContext = context;
     }
 
+    /**
+     * Posts the image on the server while getting the current
+     * location so the image is posted in the correct region.
+     */
     protected Integer doInBackground(String... params) {
         String imagePath = params[0];
         Log.d("TFirst", "ad");
         try {
-
             URL address = new URL("https://frozen-sea-8879.herokuapp.com/sendPic");
             HttpURLConnection connection = (HttpURLConnection) (address.openConnection());
 
@@ -55,7 +61,8 @@ public class PostImage extends AsyncTask<String, String, Integer> {
             requestBody.write(writer, 0, writer.length);
 
 
-            String frontBoilerForImage = generateImageBoilerplateFront("Test.jpg");
+            String imageName = FileUtilities.getFileName(imagePath);
+            String frontBoilerForImage = generateImageBoilerplateFront(imageName);
             writer = frontBoilerForImage.getBytes();
             requestBody.write(writer, 0, writer.length);
 
@@ -128,6 +135,9 @@ public class PostImage extends AsyncTask<String, String, Integer> {
         return ("\r\n--" + boundary + "--");
     }
 
+    /**
+     * Returns the current location latitude.
+     */
     private String getLatitude() {
         LocationManager lm = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
         Location location = lm.getLastKnownLocation(lm.getBestProvider(new Criteria(), true));
@@ -138,6 +148,9 @@ public class PostImage extends AsyncTask<String, String, Integer> {
 
     }
 
+    /**
+     * Returns the current location longitude.
+     */
     private String getLongitude() {
         LocationManager lm = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
         Location location = lm.getLastKnownLocation(lm.getBestProvider(new Criteria(), true));

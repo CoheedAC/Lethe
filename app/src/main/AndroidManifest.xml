@@ -37,7 +37,7 @@
             android:label="@string/title_activity_camera"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".ui.activities.PictureActivity"
+            android:name=".ui.activities.FullScreenImageActivity"
             android:label="@string/title_activity_picture" >
         </activity>
         <meta-data

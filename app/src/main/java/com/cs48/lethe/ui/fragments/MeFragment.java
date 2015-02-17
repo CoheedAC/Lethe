@@ -15,7 +15,7 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 
 import com.cs48.lethe.R;
-import com.cs48.lethe.ui.activities.PictureActivity;
+import com.cs48.lethe.ui.activities.FullScreenImageActivity;
 import com.cs48.lethe.ui.adapters.MeGridViewAdapter;
 
 import java.io.File;
@@ -49,16 +49,25 @@ public class MeFragment extends Fragment {
         // Required empty public constructor
     }
 
+    /**
+     * Sets up the action bar menu.
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
     }
 
+    /**
+     * Updates the grid.
+     */
     public void update() {
         mGridAdapter.update();
     }
 
+    /**
+     * Sets up the grid and handles the image click event.
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -67,48 +76,71 @@ public class MeFragment extends Fragment {
         mGridView = (GridView) rootView.findViewById(R.id.meGridView);
         mGridAdapter = new MeGridViewAdapter(getActivity());
         mGridView.setAdapter(mGridAdapter);
+
+        /**
+         * Starts the full-screen activity and sends the necessary data to
+         * that activity through a Bundle.
+         */
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent showImageIntent = new Intent(getActivity(), PictureActivity.class);
+                Intent showImageIntent = new Intent(getActivity(), FullScreenImageActivity.class);
 
                 File imageFile = (File) mGridAdapter.getItem(position);
                 showImageIntent.setData(Uri.fromFile(imageFile));
-//                showImageIntent.putExtra("uri", imageFile.getAbsolutePath());
                 showImageIntent.putExtra("position", position);
-                showImageIntent.setAction(PictureActivity.VIEW_OVERLAY);
+                showImageIntent.setAction(FullScreenImageActivity.VIEW_OVERLAY);
 
-                startActivityForResult(showImageIntent, PictureActivity.FULL_IMAGE_REQUEST);
+                startActivityForResult(showImageIntent, FullScreenImageActivity.FULL_IMAGE_REQUEST);
             }
         });
 
         return rootView;
     }
 
+    /**
+     * Hides the refresh and the clear cache buttons.
+     */
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.getItem(2).setVisible(true);
         menu.getItem(1).setVisible(true);
     }
 
+    /**
+     * Handles the action bar button press events.
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+
+        /**
+         * Deletes all the images stored on the device for
+         * testing purposes.
+         */
         if (id == R.id.action_delete_images) {
             mGridAdapter.deleteAllImages();
             return true;
         }
+
+        /**
+         * Copies the first image 50 times to create
+         * a dummy grid for testing purposes.
+         */
         if (id == R.id.action_copy_images) {
             mGridAdapter.copyImage();
         }
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Handles actions when a requested activity is finished.
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         // updates the grid if the user deletes the image in the full screen view
-        if (requestCode == PictureActivity.FULL_IMAGE_REQUEST && resultCode == PictureActivity.RESULT_OK) {
+        if (requestCode == FullScreenImageActivity.FULL_IMAGE_REQUEST && resultCode == FullScreenImageActivity.RESULT_OK) {
             update();
         }
     }

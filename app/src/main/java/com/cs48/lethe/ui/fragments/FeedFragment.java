@@ -16,7 +16,7 @@ import android.widget.GridView;
 import android.widget.Toast;
 
 import com.cs48.lethe.R;
-import com.cs48.lethe.ui.activities.PictureActivity;
+import com.cs48.lethe.ui.activities.FullScreenImageActivity;
 import com.cs48.lethe.ui.adapters.FeedGridViewAdapter;
 
 import java.io.File;
@@ -45,12 +45,18 @@ public class FeedFragment extends Fragment {
         // Required empty public constructor
     }
 
+    /**
+     * Sets up the action bar menu.
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
     }
 
+    /**
+     * Creates the feed grid and handles image taps on grid.
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -60,15 +66,19 @@ public class FeedFragment extends Fragment {
         mGridAdapter = new FeedGridViewAdapter(getActivity());
         mGridView.setAdapter(mGridAdapter);
 
+        /**
+         * Starts the full-screen activity and sends the necessary data to
+         * that activity through a Bundle.
+         */
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent showImageIntent = new Intent(getActivity(), PictureActivity.class);
+                Intent showImageIntent = new Intent(getActivity(), FullScreenImageActivity.class);
 
                 File imageFile = (File) mGridAdapter.getItem(position);
                 showImageIntent.setData(Uri.fromFile(imageFile));
                 showImageIntent.putExtra("position", position);
-                showImageIntent.setAction(PictureActivity.VIEW_ONLY);
+                showImageIntent.setAction(FullScreenImageActivity.VIEW_ONLY);
 
                 startActivity(showImageIntent);
             }
@@ -76,25 +86,42 @@ public class FeedFragment extends Fragment {
         return rootView;
     }
 
+    /**
+     * Updates the grid.
+     */
     public void update() {
         mGridAdapter.update();
     }
 
+    /**
+     * Hides the delete all images and copy image button in the action bar.
+     */
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.getItem(0).setVisible(true);
         menu.getItem(2).setVisible(true);
     }
 
+    /**
+     * Handles action bar menu button clicks.
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+
+        /**
+         * Clears the images in the cache and refreshes the grid.
+         */
         if (id == R.id.action_delete_images) {
             Toast.makeText(getActivity(), "Cleared cache", Toast.LENGTH_SHORT).show();
             mGridAdapter.clearCache();
             return true;
         }
+
+        /**
+         * Requests to get new images on the server.
+         */
         if (id == R.id.action_refresh) {
-            mGridAdapter.requestNewImages();
+            mGridAdapter.requestFeed();
             Toast.makeText(getActivity(), "Refreshing...", Toast.LENGTH_SHORT).show();
         }
         return super.onOptionsItemSelected(item);

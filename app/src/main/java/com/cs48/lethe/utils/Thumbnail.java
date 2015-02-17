@@ -3,7 +3,7 @@ package com.cs48.lethe.utils;
 import java.io.File;
 
 /**
- * Created by maxkohne on 2/5/15.
+ * Class that stores information about a thumbnail.
  */
 public class Thumbnail {
 
@@ -14,8 +14,6 @@ public class Thumbnail {
     public Thumbnail(String id, String url) {
         this.id = id;
         this.url = url;
-
-//        String filename = FileUtilities.getFileName(url);
         thumbnailFile = new File(FileUtilities.getCachedDirectory() + File.separator + "IMG_" + id + ".jpg");
     }
 

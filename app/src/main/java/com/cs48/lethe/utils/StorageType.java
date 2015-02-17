@@ -1,7 +1,7 @@
 package com.cs48.lethe.utils;
 
 /**
- * Created by maxkohne on 1/29/15.
+ * Class that contains strings of the types of storage.
  */
 public class StorageType {
 

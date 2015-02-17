@@ -1,13 +1,12 @@
 package com.cs48.lethe.server;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.ImageView;
+import android.widget.Toast;
 
-import com.cs48.lethe.ui.adapters.FeedGridViewAdapter;
-import com.cs48.lethe.utils.FileUtilities;
-
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,27 +14,26 @@ import java.io.OutputStream;
 import java.net.URL;
 
 /**
- * Asynchronously downloads the thumbnail sized image from the server.
+ * Asynchronously downloads the full sized image from the server
  */
-public class DownloadThumbnail extends AsyncTask<String, String, Integer> {
+public class DownloadFullImage extends AsyncTask<String, String, Integer> {
 
-    public static final String TAG = DownloadThumbnail.class.getSimpleName();
+    public static final String TAG = DownloadFullImage.class.getSimpleName();
 
     private Context mContext;
-    private FeedGridViewAdapter mFeedGridViewAdapter;
-    private String mImageName;
+    private Uri mImageUri;
+    private ImageView mImageView;
 
-    public DownloadThumbnail(Context context, FeedGridViewAdapter feedGridViewAdapter, String id) {
-        mFeedGridViewAdapter = feedGridViewAdapter;
+    public DownloadFullImage(Context context, Uri imageUri, ImageView imageView) {
         mContext = context;
-        mImageName = "IMG _" + id + ".jpg";
+        mImageUri = imageUri;
+        mImageView = imageView;
     }
 
     /**
-     * Downloads the image thumbnail in the background and outputs
-     * the data into a file stored in the cache directory
-     * with the name "IMG_xxx...xxx.jpg" where xxx...xxx is the
-     * unique picture id requested from the server.
+     * Downloads the image in the background and outputs the data
+     * by overwriting the original thumbnail file with the
+     * full sized image.
      */
     protected Integer doInBackground(String... urls) {
         InputStream input = null;
@@ -45,7 +43,7 @@ public class DownloadThumbnail extends AsyncTask<String, String, Integer> {
             input = url.openStream();
             byte[] buffer = new byte[1500];
 
-            output = new FileOutputStream(FileUtilities.getCachedDirectory() + File.separator + mImageName);
+            output = new FileOutputStream(mImageUri.getPath());
 
             int bytesRead;
             while ((bytesRead = input.read(buffer, 0, buffer.length)) >= 0) {
@@ -53,6 +51,7 @@ public class DownloadThumbnail extends AsyncTask<String, String, Integer> {
             }
         } catch (IOException e) {
             Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+            return 1;
         } finally {
             try {
                 if (output != null) {
@@ -69,10 +68,10 @@ public class DownloadThumbnail extends AsyncTask<String, String, Integer> {
     }
 
     /**
-     * Refreshes the feed grid whenever a new thumbnail is successfully
-     * downloaded.
+     * Sets the imageview to the full sized image when done downloading.
      */
     protected void onPostExecute(Integer integer) {
-        mFeedGridViewAdapter.update();
+        Toast.makeText(mContext, "Downloaded full image", Toast.LENGTH_SHORT).show();
+        mImageView.setImageURI(mImageUri);
     }
 }

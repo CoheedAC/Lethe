@@ -22,6 +22,9 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
     private List<String> fragments;
     private Context context;
 
+    /**
+     * Addes all of the fragments into the List.
+     */
     public TabsPagerAdapter(FragmentManager fm, Context context) {
         super(fm);
         this.context = context;
@@ -33,11 +36,17 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
         fragments.add(MoreFragment.class.getName());
     }
 
+    /**
+     * Returns the fragment at a given index.
+     */
     @Override
     public Fragment getItem(int position) {
         return Fragment.instantiate(context, fragments.get(position));
     }
 
+    /**
+     * Returns the number of fragments.
+     */
     @Override
     public int getCount() {
         return fragments.size();
