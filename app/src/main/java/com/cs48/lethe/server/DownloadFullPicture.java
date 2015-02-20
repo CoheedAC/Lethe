@@ -7,6 +7,8 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.cs48.lethe.utils.FullPicture;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,26 +16,27 @@ import java.io.OutputStream;
 import java.net.URL;
 
 /**
- * Asynchronously downloads the full sized image from the server
+ * Asynchronously downloads the full sized image from the server.
  */
-public class DownloadFullImage extends AsyncTask<String, String, Integer> {
+public class DownloadFullPicture extends AsyncTask<String, String, Integer> {
 
-    public static final String TAG = DownloadFullImage.class.getSimpleName();
+    public static final String TAG = DownloadThumbnail.class.getSimpleName();
 
     private Context mContext;
-    private Uri mImageUri;
     private ImageView mImageView;
+    private FullPicture mFullPicture;
 
-    public DownloadFullImage(Context context, Uri imageUri, ImageView imageView) {
+    public DownloadFullPicture(Context context, ImageView imageView, FullPicture fullPicture) {
         mContext = context;
-        mImageUri = imageUri;
         mImageView = imageView;
+        mFullPicture = fullPicture;
     }
 
     /**
-     * Downloads the image in the background and outputs the data
-     * by overwriting the original thumbnail file with the
-     * full sized image.
+     * Downloads the image in the background and outputs
+     * the data into a file stored in the cache directory
+     * with the name "IMG_xxx...xxx.jpg" where xxx...xxx is the
+     * unique picture id requested from the server.
      */
     protected Integer doInBackground(String... urls) {
         InputStream input = null;
@@ -43,7 +46,7 @@ public class DownloadFullImage extends AsyncTask<String, String, Integer> {
             input = url.openStream();
             byte[] buffer = new byte[1500];
 
-            output = new FileOutputStream(mImageUri.getPath());
+            output = new FileOutputStream(mFullPicture.getFullPicture());
 
             int bytesRead;
             while ((bytesRead = input.read(buffer, 0, buffer.length)) >= 0) {
@@ -51,7 +54,6 @@ public class DownloadFullImage extends AsyncTask<String, String, Integer> {
             }
         } catch (IOException e) {
             Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
-            return 1;
         } finally {
             try {
                 if (output != null) {
@@ -68,10 +70,12 @@ public class DownloadFullImage extends AsyncTask<String, String, Integer> {
     }
 
     /**
-     * Sets the imageview to the full sized image when done downloading.
+     * Refreshes the feed grid whenever a new thumbnail is successfully
+     * downloaded.
      */
     protected void onPostExecute(Integer integer) {
         Toast.makeText(mContext, "Downloaded full image", Toast.LENGTH_SHORT).show();
-        mImageView.setImageURI(mImageUri);
+        Uri imageUri = Uri.fromFile(mFullPicture.getFullPicture());
+        mImageView.setImageURI(imageUri);
     }
 }

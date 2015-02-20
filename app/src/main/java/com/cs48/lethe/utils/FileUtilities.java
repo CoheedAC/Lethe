@@ -162,9 +162,26 @@ public class FileUtilities {
     }
 
     /**
+     * Copies a file from the source to the destination.
+     */
+    public static void copyFile(String src, String dst) throws IOException {
+        InputStream in = new FileInputStream(src);
+        OutputStream out = new FileOutputStream(dst);
+
+        // Transfer bytes from in to out
+        byte[] buf = new byte[1024];
+        int len;
+        while ((len = in.read(buf)) > 0) {
+            out.write(buf, 0, len);
+        }
+        in.close();
+        out.close();
+    }
+
+    /**
      * Copies a file numCopies amount of times in the same directory.
      */
-    public static void copyFile(Context context, String path, int numCopies) throws IOException {
+    public static void copyImage(Context context, String path, int numCopies) throws IOException {
         File dir = getFileDirectory(context);
         for (int i = 0; i < numCopies; i++) {
             File dst = new File(dir + "/IMG_" + (i + 1) + ".jpg");
@@ -224,10 +241,17 @@ public class FileUtilities {
     }
 
     /**
+     * Returns a string of a file name based upon the timestamp
+     */
+    public static String createCachedFileName(String uniqueId) {
+        return "IMG_" + uniqueId + ".jpg";
+    }
+
+    /**
      * Returns the file name without the extension and without the full
      * path location.
      */
-    public static String getFileName(String absolutePath) {
+    public static String getSimpleName(String absolutePath) {
         String reverse = new StringBuilder(absolutePath).reverse().toString();
         String result;
         int index = reverse.indexOf("/");
@@ -235,7 +259,7 @@ public class FileUtilities {
             result = absolutePath.substring(absolutePath.length() - index);
             index = result.indexOf("jpg");
             if (index != -1)
-                result = result.substring(0,index + 3);
+                result = result.substring(0, index + 3);
             return result;
         } else {
             return null;
@@ -245,26 +269,26 @@ public class FileUtilities {
     /**
      * Returns the full sized bitmap of the image.
      */
-    public static Bitmap getValidSizedBitmap(ContentResolver cr, Uri mImageUri){
-        return(getXYCompressedBitmap(cr, mImageUri,2048,2048));
+    public static Bitmap getValidSizedBitmap(ContentResolver cr, Uri mImageUri) {
+        return (getXYCompressedBitmap(cr, mImageUri, 2048, 2048));
     }
 
     /**
      * Returns the thumbnail sized bitmap of the image.
      */
-    public static Bitmap getThumbnailSizedBitmap(ContentResolver cr, Uri mImageUri){
-        return(getXYCompressedBitmap(cr, mImageUri,150,150));
+    public static Bitmap getThumbnailSizedBitmap(ContentResolver cr, Uri mImageUri) {
+        return (getXYCompressedBitmap(cr, mImageUri, 150, 150));
     }
 
     /**
      * Returns the custom sized bitmap of the image.
      */
-    public static Bitmap getXYCompressedBitmap(ContentResolver cr, Uri mImageUri, int x, int y){
+    public static Bitmap getXYCompressedBitmap(ContentResolver cr, Uri mImageUri, int x, int y) {
         try {
             Bitmap bp = android.provider.MediaStore.Images.Media.getBitmap(cr, mImageUri);
-            return (Bitmap.createScaledBitmap(bp,x,y,false)); //low quality
+            return (Bitmap.createScaledBitmap(bp, x, y, false)); //low quality
 
-        }catch (Exception e){
+        } catch (Exception e) {
             return null;
         }
     }

@@ -5,9 +5,8 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.cs48.lethe.ui.adapters.FeedGridViewAdapter;
-import com.cs48.lethe.utils.FileUtilities;
+import com.cs48.lethe.utils.Thumbnail;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,12 +22,14 @@ public class DownloadThumbnail extends AsyncTask<String, String, Integer> {
 
     private Context mContext;
     private FeedGridViewAdapter mFeedGridViewAdapter;
-    private String mImageName;
+//    private String mImageName;
+    private Thumbnail mThumbnail;
 
-    public DownloadThumbnail(Context context, FeedGridViewAdapter feedGridViewAdapter, String id) {
+    public DownloadThumbnail(Context context, FeedGridViewAdapter feedGridViewAdapter, Thumbnail thumbnail) {
         mFeedGridViewAdapter = feedGridViewAdapter;
         mContext = context;
-        mImageName = "IMG _" + id + ".jpg";
+//        mImageName = "IMG _" + id + ".jpg";
+        mThumbnail = thumbnail;
     }
 
     /**
@@ -45,7 +46,7 @@ public class DownloadThumbnail extends AsyncTask<String, String, Integer> {
             input = url.openStream();
             byte[] buffer = new byte[1500];
 
-            output = new FileOutputStream(FileUtilities.getCachedDirectory() + File.separator + mImageName);
+            output = new FileOutputStream(mThumbnail.getThumbnailFile());
 
             int bytesRead;
             while ((bytesRead = input.read(buffer, 0, buffer.length)) >= 0) {

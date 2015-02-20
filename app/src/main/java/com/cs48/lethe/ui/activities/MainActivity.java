@@ -141,8 +141,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                 for (Fragment fragment: fragmentList) {
                     if (fragment instanceof MeFragment) {
                         ((MeFragment) fragment).update();
-                    }if (fragment instanceof  FeedFragment) {
-                        ((FeedFragment) fragment).update();
                     }
                 }
             }

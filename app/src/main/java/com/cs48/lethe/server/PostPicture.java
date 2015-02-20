@@ -7,7 +7,9 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.NetworkOnMainThreadException;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.cs48.lethe.R;
 import com.cs48.lethe.utils.FileUtilities;
 
 import java.io.FileInputStream;
@@ -20,14 +22,15 @@ import java.net.URL;
  * Asynchronously posts the image on the server and returns the
  * unique picture id.
  */
-public class PostImage extends AsyncTask<String, String, Integer> {
+public class PostPicture extends AsyncTask<String, String, Integer> {
 
-    public static final String TAG = PostImage.class.getSimpleName();
+    public static final String TAG = PostPicture.class.getSimpleName();
 
     private final String boundary = "---------------------Boundary";
     private Context mContext;
+    private String mImagePath;
 
-    public PostImage(Context context) {
+    public PostPicture(Context context) {
         mContext = context;
     }
 
@@ -35,11 +38,12 @@ public class PostImage extends AsyncTask<String, String, Integer> {
      * Posts the image on the server while getting the current
      * location so the image is posted in the correct region.
      */
-    protected Integer doInBackground(String... params) {
-        String imagePath = params[0];
+    @Override
+    protected Integer doInBackground(String... path) {
+        mImagePath = path[0];
         Log.d("TFirst", "ad");
         try {
-            URL address = new URL("https://frozen-sea-8879.herokuapp.com/sendPic");
+            URL address = new URL(mContext.getString(R.string.server) + mContext.getString(R.string.server_post));
             HttpURLConnection connection = (HttpURLConnection) (address.openConnection());
 
             connection.setDoInput(true);
@@ -61,13 +65,13 @@ public class PostImage extends AsyncTask<String, String, Integer> {
             requestBody.write(writer, 0, writer.length);
 
 
-            String imageName = FileUtilities.getFileName(imagePath);
+            String imageName = FileUtilities.getSimpleName(mImagePath);
             String frontBoilerForImage = generateImageBoilerplateFront(imageName);
             writer = frontBoilerForImage.getBytes();
             requestBody.write(writer, 0, writer.length);
 
             //now encode image
-            FileInputStream imageAsStream = new FileInputStream(imagePath);
+            FileInputStream imageAsStream = new FileInputStream(mImagePath);
             int bytesAvailable = imageAsStream.available();
             int bufferSize = Math.min(bytesAvailable, 1 * 1024 * 1024);
             byte[] buffer = new byte[bufferSize];
@@ -121,6 +125,12 @@ public class PostImage extends AsyncTask<String, String, Integer> {
             //cToast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
         }
         return 0;
+    }
+
+    @Override
+    protected void onPostExecute(Integer integer) {
+        Toast.makeText(mContext, "Pic posted!", Toast.LENGTH_SHORT).show();
+        super.onPostExecute(integer);
     }
 
     private String generateForSimpleText(String name, String value) {
