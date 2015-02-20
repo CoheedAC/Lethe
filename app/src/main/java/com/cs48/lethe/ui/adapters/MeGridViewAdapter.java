@@ -16,7 +16,7 @@ import java.io.File;
 import java.util.List;
 
 /**
- * Created by maxkohne on 1/29/15.
+ * A BaseAdapter that handles the grid for the me tab.
  */
 public class MeGridViewAdapter extends BaseAdapter {
 
@@ -30,22 +30,36 @@ public class MeGridViewAdapter extends BaseAdapter {
         mImageList = FileUtilities.getPostedImages(context);
     }
 
+    /**
+     * Returns the number of items in the grid.
+     */
     public int getCount() {
         return mImageList.size();
     }
 
+    /**
+     * Returns the File in the ImageList of Files at the
+     * given index.
+     */
     public Object getItem(int position) {
         return mImageList.get(position);
     }
 
+    /**
+     * Returns the position.
+     */
     public long getItemId(int position) {
         return position;
     }
 
-    // create a new ImageView for each item referenced by the Adapter
+    /**
+     * Creates a new ImageView for each item referenced by the Adapter
+     */
     public View getView(int position, View convertView, ViewGroup parent) {
         ImageView imageView = (ImageView) convertView;
-        if (convertView == null) {  // if it's not recycled, initialize some attributes
+
+        // if it's not recycled, initialize some attributes
+        if (convertView == null) {
             imageView = new ImageView(mContext);
             GridView.LayoutParams imageParams = new GridView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     300);
@@ -55,21 +69,33 @@ public class MeGridViewAdapter extends BaseAdapter {
         }
 
         Uri imageUri = Uri.fromFile(mImageList.get(position));
-        imageView.setImageURI(imageUri);
+        //imageView.setImageURI(imageUri);
+        imageView.setImageBitmap(FileUtilities.getThumbnailSizedBitmap(mContext.getContentResolver(), imageUri)  );
         return imageView;
     }
 
+    /**
+     * Creates a new ImageList object with the updated images
+     * in the storage directory and then refreshes the grid to reflect
+     * the new image(s).
+     */
     public void update() {
         mImageList = FileUtilities.getPostedImages(mContext);
         notifyDataSetChanged();
     }
 
+    /**
+     * Deletes all of the images taken from this app.
+     */
     public void deleteAllImages() {
         FileUtilities.deletePostedImages(mContext);
         update();
         Toast.makeText(mContext, "Deleted all images", Toast.LENGTH_LONG).show();
     }
 
+    /**
+     * Copies the first image in the grid 50 times to test a full grid.
+     */
     public void copyImage() {
         try {
             FileUtilities.copyFile(mContext, mImageList.get(0).getAbsolutePath(), 50);

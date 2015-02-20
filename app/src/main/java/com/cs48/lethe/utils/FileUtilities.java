@@ -1,6 +1,8 @@
 package com.cs48.lethe.utils;
 
+import android.content.ContentResolver;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
@@ -23,7 +25,8 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Created by maxkohne on 1/27/15.
+ * Utility class that handles tasks related to file storage
+ * and manipulation.
  */
 public class FileUtilities {
 
@@ -220,6 +223,10 @@ public class FileUtilities {
         return "IMG_" + timeStamp + ".jpg";
     }
 
+    /**
+     * Returns the file name without the extension and without the full
+     * path location.
+     */
     public static String getFileName(String absolutePath) {
         String reverse = new StringBuilder(absolutePath).reverse().toString();
         String result;
@@ -233,6 +240,41 @@ public class FileUtilities {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Returns the full sized bitmap of the image.
+     */
+    public static Bitmap getValidSizedBitmap(ContentResolver cr, Uri mImageUri){
+        return(getXYCompressedBitmap(cr, mImageUri,2048,2048));
+    }
+
+    /**
+     * Returns the thumbnail sized bitmap of the image.
+     */
+    public static Bitmap getThumbnailSizedBitmap(ContentResolver cr, Uri mImageUri){
+        return(getXYCompressedBitmap(cr, mImageUri,150,150));
+    }
+
+    /**
+     * Returns the custom sized bitmap of the image.
+     */
+    public static Bitmap getXYCompressedBitmap(ContentResolver cr, Uri mImageUri, int x, int y){
+        try {
+            Bitmap bp = android.provider.MediaStore.Images.Media.getBitmap(cr, mImageUri);
+            return (Bitmap.createScaledBitmap(bp,x,y,false)); //low quality
+
+        }catch (Exception e){
+            return null;
+        }
+    }
+
+    /**
+     * Returns the unique picture ID of an image file.
+     * (i.e. turns "IMG_xxx.jpg" -> "xxx")
+     */
+    public static String getUniqueId(String filename) {
+        return filename.substring(5, filename.length() - 4);
     }
 
 }

@@ -7,7 +7,7 @@ import android.preference.PreferenceManager;
 import com.cs48.lethe.utils.StorageType;
 
 /**
- * Created by maxkohne on 1/29/15.
+ * Controls where the files are stored.
  */
 public class ApplicationSettings {
 
@@ -17,12 +17,16 @@ public class ApplicationSettings {
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
+    /**
+     * Returns the current storage type.
+     */
     public String getStoragePreference() {
-        // StorageType.INTERAL is bugged right now. DO NOT USE IT.
-        // use PRIVATE_EXTERNAL as main storage
         return mSharedPreferences.getString("Storage", StorageType.PRIVATE_EXTERNAL);
     }
 
+    /**
+     * Changes the storage type.
+     */
     public void setSharedPreference (String storageType) {
         mSharedPreferences.edit().putString("Storage",storageType).apply();
     }

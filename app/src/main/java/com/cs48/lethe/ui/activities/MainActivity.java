@@ -20,7 +20,10 @@ import com.cs48.lethe.ui.fragments.PeekFragment;
 
 import java.util.List;
 
-
+/**
+ * The main activity where the app launches. It handles all of the tab fragments
+ * and action bar button presses.
+ */
 public class MainActivity extends ActionBarActivity implements ActionBar.TabListener,
         FeedFragment.OnFragmentInteractionListener, PeekFragment.OnFragmentInteractionListener,
         MeFragment.OnFragmentInteractionListener, MoreFragment.OnFragmentInteractionListener {
@@ -30,6 +33,9 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     private TabsPagerAdapter mTabsPagerAdapter;
     private ViewPager mViewPager;
 
+    /**
+     * Creates the action bar and title.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,6 +45,10 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         setUpActionBar();
     }
 
+    /**
+     * Sets up the custom action bar with the tabs (and the respective
+     * tab listeners/handlers).
+     */
     private void setUpActionBar() {
         // Set up the action bar.
         final ActionBar actionBar = getSupportActionBar();
@@ -87,9 +97,11 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         }
     }
 
+    /**
+     * Inflate the menu; this adds items to the action bar if it is present.
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         menu.getItem(0).setVisible(false);
         menu.getItem(1).setVisible(false);
@@ -97,11 +109,14 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         return true;
     }
 
+    /**
+     * Handles button presses on action bar.
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        // Starts camera activity
+        // Starts camera activity if camera button pressed
         if (id == R.id.action_camera) {
             Intent cameraIntent = new Intent(this, CameraActivity.class);
             startActivityForResult(cameraIntent, CameraActivity.IMAGE_POST_REQUEST);
@@ -110,6 +125,11 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Handles the actions performed when an activity finishes.
+     * For example, it handles updating the grids on the Feed
+     * and Me tabs whenever a user takes a new picture.
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -130,6 +150,9 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         }
     }
 
+    /**
+     * Changes the title on the action bar when a new tab is selected.
+     */
     @Override
     public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
         int position = tab.getPosition();

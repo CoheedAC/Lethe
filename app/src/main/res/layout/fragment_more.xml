@@ -10,59 +10,86 @@
         android:orientation="vertical"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:weightSum="1">
+        android:weightSum="1"
+        android:background="@color/image_load">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text=" Social Media &amp; Contact"
-            android:id="@+id/textView" />
+            android:id="@+id/textView"
+            android:layout_marginTop="5dp"
+            android:textColor="@color/instagram_dark"/>
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="left|center_vertical"
-            android:text="  Like Us on Facebook"
+            android:text="Like Us on Facebook"
             android:id="@+id/facebookButton"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            android:background="@color/instagram_light"
+            android:textColor="@android:color/white"
+            android:layout_margin="5dp"
+            android:paddingLeft="5dp"/>
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="left|center_vertical"
-            android:text="  Follow Us on Instagram"
+            android:text="Follow Us on Instagram"
             android:id="@+id/instagramButton"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            android:background="@color/instagram_light"
+            android:textColor="@android:color/white"
+            android:layout_margin="5dp"
+            android:paddingLeft="5dp"/>
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="left|center_vertical"
-            android:text="  Contact Us"
+            android:text="Contact Us"
             android:id="@+id/contactButton"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            android:background="@color/instagram_light"
+            android:textColor="@android:color/white"
+            android:layout_margin="5dp"
+            android:paddingLeft="5dp"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text=" Legal"
-            android:id="@+id/textView2" />
+            android:id="@+id/textView2"
+            android:textColor="@color/instagram_dark"
+            android:layout_marginTop="20dp"/>
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="left|center_vertical"
             android:text="Terms of Service"
-            android:id="@+id/tosButton" />
+            android:id="@+id/tosButton"
+            android:background="@color/instagram_light"
+            android:textColor="@android:color/white"
+            android:layout_margin="5dp"
+            android:layout_gravity="center_horizontal"
+            android:paddingLeft="5dp"/>
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="left|center_vertical"
             android:text="Privacy Policy"
-            android:id="@+id/ppButton" />
+            android:id="@+id/ppButton"
+            android:background="@color/instagram_light"
+            android:textColor="@android:color/white"
+            android:layout_margin="5dp"
+            android:layout_gravity="center_horizontal"
+            android:paddingLeft="5dp"/>
     </LinearLayout>
 
 </FrameLayout>
