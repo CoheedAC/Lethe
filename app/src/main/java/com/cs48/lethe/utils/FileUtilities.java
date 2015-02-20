@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.cs48.lethe.ApplicationSettings;
 import com.cs48.lethe.R;
@@ -61,6 +62,14 @@ public class FileUtilities {
              */
             return getSharedExternalDirectory(context);
         }
+    }
+
+    /**
+     * Prints out a message for debugging
+     */
+    public static void logResults(Context context, String classTag, String messageResult) {
+        Toast.makeText(context, messageResult, Toast.LENGTH_SHORT).show();
+        Log.d(classTag, messageResult);
     }
 
     /**

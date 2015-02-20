@@ -4,13 +4,12 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.cs48.lethe.R;
+import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.FullPicture;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -43,13 +42,13 @@ public class RequestFullPicture extends AsyncTask<String, String, String> {
      * full sized image.
      */
     protected String doInBackground(String... uniqueId) {
-        return getRequest(uniqueId[0]);
+        return getJSONData(uniqueId[0]);
     }
 
     /**
      * Stores the JSON text into a string and returns the JSON string.
      */
-    private String getRequest(String uniqueId) {
+    private String getJSONData(String uniqueId) {
         InputStream inputStream = null;
         String result = "";
         try {
@@ -64,9 +63,7 @@ public class RequestFullPicture extends AsyncTask<String, String, String> {
             if (inputStream != null)
                 result = convertInputStreamToString(inputStream);
             else
-                result = "Did not work!";
-        } catch (ClientProtocolException e) {
-            Log.d(TAG, e.getClass() + ": " + e.getLocalizedMessage());
+                result = "";
         } catch (IOException e) {
             Log.d(TAG, e.getClass() + ": " + e.getLocalizedMessage());
         }
@@ -91,7 +88,24 @@ public class RequestFullPicture extends AsyncTask<String, String, String> {
      */
     @Override
     protected void onPostExecute(String result) {
-        Toast.makeText(mContext, "Request for full image successful", Toast.LENGTH_SHORT).show();
+        result = result.trim();
+        if (!result.isEmpty()) {
+            FileUtilities.logResults(mContext,TAG,"Request for full image successful");
+
+            FullPicture fullPicture = parseJSON(result);
+            if (fullPicture != null)
+                new DownloadFullPicture(mContext, mImageView, fullPicture).execute(fullPicture.getUrl());
+        } else {
+            FileUtilities.logResults(mContext, TAG, "Request for full image failed");
+        }
+    }
+
+
+    /**
+     * Parses the JSON returned from the server and
+     * returns a FullPicture object
+     */
+    private FullPicture parseJSON(String result) {
         try {
             JSONObject jsonObject = new JSONObject(result);
             String url = jsonObject.getString(mContext.getString(R.string.server_url_full));
@@ -99,12 +113,11 @@ public class RequestFullPicture extends AsyncTask<String, String, String> {
             int views = jsonObject.getInt(mContext.getString(R.string.server_views));
             int likes = jsonObject.getInt(mContext.getString(R.string.server_likes));
 
-            FullPicture fullPicture = new FullPicture(id, url, views,likes);
-            new DownloadFullPicture(mContext, mImageView, fullPicture).execute(url);
-
+            return new FullPicture(id, url, views, likes);
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
         }
+        return null;
     }
 
 }

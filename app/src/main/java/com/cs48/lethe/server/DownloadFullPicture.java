@@ -5,8 +5,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ImageView;
-import android.widget.Toast;
 
+import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.FullPicture;
 
 import java.io.FileOutputStream;
@@ -21,6 +21,8 @@ import java.net.URL;
 public class DownloadFullPicture extends AsyncTask<String, String, Integer> {
 
     public static final String TAG = DownloadThumbnail.class.getSimpleName();
+    public static final int SUCCESS = 0;
+    public static final int FAILED = 1;
 
     private Context mContext;
     private ImageView mImageView;
@@ -54,6 +56,7 @@ public class DownloadFullPicture extends AsyncTask<String, String, Integer> {
             }
         } catch (IOException e) {
             Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+            return FAILED;
         } finally {
             try {
                 if (output != null) {
@@ -66,7 +69,7 @@ public class DownloadFullPicture extends AsyncTask<String, String, Integer> {
                 Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             }
         }
-        return 0;
+        return SUCCESS;
     }
 
     /**
@@ -74,8 +77,12 @@ public class DownloadFullPicture extends AsyncTask<String, String, Integer> {
      * downloaded.
      */
     protected void onPostExecute(Integer integer) {
-        Toast.makeText(mContext, "Downloaded full image", Toast.LENGTH_SHORT).show();
-        Uri imageUri = Uri.fromFile(mFullPicture.getFullPicture());
-        mImageView.setImageURI(imageUri);
+        if (integer == SUCCESS) {
+            FileUtilities.logResults(mContext,TAG, "Download full image succeeded");
+            Uri imageUri = Uri.fromFile(mFullPicture.getFullPicture());
+            mImageView.setImageURI(imageUri);
+        }else {
+            FileUtilities.logResults(mContext,TAG, "Download full image failed");
+        }
     }
 }

@@ -19,6 +19,8 @@ import java.io.IOException;
 public class DislikePicture extends AsyncTask<String, String, Integer> {
 
     public static final String TAG = LikePicture.class.getSimpleName();
+    public static final int SUCCESS = 0;
+    public static final int FAILED = 1;
 
     private Context mContext;
 
@@ -36,16 +38,16 @@ public class DislikePicture extends AsyncTask<String, String, Integer> {
             httpclient.execute(new HttpGet(address));
         } catch (IOException e) {
             e.printStackTrace();
-            return 1;
+            return FAILED;
         }
-        return 0;
+        return SUCCESS;
     }
 
     /**
      * Alerts the user that the picture has been hidden (i.e. disliked).
      */
     protected void onPostExecute(Integer integer) {
-        if (integer == 0)
+        if (integer == SUCCESS)
             Toast.makeText(mContext, "Pic now hidden!", Toast.LENGTH_SHORT).show();
         else
             Toast.makeText(mContext, "Failed to hide pic!", Toast.LENGTH_SHORT).show();

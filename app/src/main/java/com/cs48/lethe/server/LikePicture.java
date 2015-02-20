@@ -19,6 +19,8 @@ import java.io.IOException;
 public class LikePicture extends AsyncTask<String, String, Integer> {
 
     public static final String TAG = LikePicture.class.getSimpleName();
+    public static final int SUCCESS = 0;
+    public static final int FAILED = 1;
 
     private Context mContext;
 
@@ -34,20 +36,18 @@ public class LikePicture extends AsyncTask<String, String, Integer> {
             String address = mContext.getString(R.string.server) + mContext.getString(R.string.server_like) + uniqueId[0];
             HttpClient httpclient = new DefaultHttpClient();
             httpclient.execute(new HttpGet(address));
-
         } catch (IOException e) {
             e.printStackTrace();
-            return 1;
+            return FAILED;
         }
-
-        return 0;
+        return SUCCESS;
     }
 
     /**
      * Alerts the user that the picture has been liked.
      */
     protected void onPostExecute(Integer integer) {
-        if (integer == 0)
+        if (integer == SUCCESS)
             Toast.makeText(mContext, "Liked pic!", Toast.LENGTH_SHORT).show();
         else
             Toast.makeText(mContext, "Failed to like pic!", Toast.LENGTH_SHORT).show();

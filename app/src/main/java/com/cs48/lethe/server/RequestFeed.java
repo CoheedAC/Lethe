@@ -7,10 +7,10 @@ import android.widget.Toast;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.ui.adapters.FeedGridViewAdapter;
+import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.Thumbnail;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -64,10 +64,6 @@ public class RequestFeed extends AsyncTask<String, Void, String> {
             // convert inputstream to string
             if (inputStream != null)
                 result = convertInputStreamToString(inputStream);
-            else
-                result = "Did not work!";
-        } catch (ClientProtocolException e) {
-            Log.d(TAG, e.getClass() + ": " + e.getLocalizedMessage());
         } catch (IOException e) {
             Log.d(TAG, e.getClass() + ": " + e.getLocalizedMessage());
         }
@@ -83,7 +79,6 @@ public class RequestFeed extends AsyncTask<String, Void, String> {
         String result = "";
         while ((line = bufferedReader.readLine()) != null)
             result += line;
-
         inputStream.close();
         return result;
     }
@@ -94,19 +89,21 @@ public class RequestFeed extends AsyncTask<String, Void, String> {
      */
     @Override
     protected void onPostExecute(String result) {
-        Toast.makeText(mContext, "Request for image feed success!", Toast.LENGTH_SHORT).show();
-//        FileUtilities.deleteCachedImages();
+        result = result.trim();
+        if (!result.isEmpty()) {
+            FileUtilities.logResults(mContext, TAG, "Request for image feed succeeded");
 
-        try {
-            Thumbnail[] thumbnails = getThumbnails(result);
-            for (Thumbnail thumbnail : thumbnails) {
-                if (!thumbnail.getThumbnailFile().exists()) {
-                    new DownloadThumbnail(mContext, mFeedGridViewAdapter, thumbnail).execute(thumbnail.getUrl());
-                }
+            try {
+                Thumbnail[] thumbnails = getThumbnails(result);
+                for (Thumbnail thumbnail : thumbnails)
+                    if (!thumbnail.getThumbnailFile().exists())
+                        new DownloadThumbnail(mContext, mFeedGridViewAdapter, thumbnail).execute(thumbnail.getUrl());
+                Toast.makeText(mContext, "Downloaded all images successfully!", Toast.LENGTH_SHORT).show();
+            } catch (JSONException e) {
+                Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             }
-            Toast.makeText(mContext, "Downloaded all images!", Toast.LENGTH_SHORT).show();
-        } catch (JSONException e) {
-            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+        }else {
+            FileUtilities.logResults(mContext, TAG, "Request for image feed failed");
         }
     }
 
@@ -119,12 +116,24 @@ public class RequestFeed extends AsyncTask<String, Void, String> {
         JSONArray jsonArray = new JSONArray(jsonData);
         Thumbnail[] thumbnails = new Thumbnail[jsonArray.length()];
         for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject jsonObject = jsonArray.getJSONObject(i);
-            String id = jsonObject.getString(mContext.getString(R.string.server_id));
-            String url = jsonObject.getString(mContext.getString(R.string.server_url_thumbnail));
-            thumbnails[i] = new Thumbnail(id, url);
-            Log.d(TAG, id + " : " + url);
+            thumbnails[i] = parseJSON(jsonArray.getJSONObject(i));
         }
         return thumbnails;
+    }
+
+    /**
+     * Parses the JSON returned from the server and
+     * returns a Thumbnail object
+     */
+    private Thumbnail parseJSON(JSONObject jsonObject) {
+        try {
+            String id = jsonObject.getString(mContext.getString(R.string.server_id));
+            String url = jsonObject.getString(mContext.getString(R.string.server_url_thumbnail));
+            Log.d(TAG, id + " : " + url);
+            return new Thumbnail(id, url);
+        } catch (JSONException e) {
+            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+        }
+        return null;
     }
 }

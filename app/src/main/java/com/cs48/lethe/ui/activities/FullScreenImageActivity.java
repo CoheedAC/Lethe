@@ -92,6 +92,7 @@ public class FullScreenImageActivity extends ActionBarActivity {
      * Downloads the full-sized image from the server.
      */
     private void requestFullPicture() {
+        Toast.makeText(this, "Requesting full picture!", Toast.LENGTH_SHORT).show();
         new RequestFullPicture(this, mImageView).execute(mUniqueId);
     }
 
