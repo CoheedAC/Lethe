@@ -13,19 +13,19 @@ import android.widget.Button;
 import com.cs48.lethe.R;
 
 /**
- *  More Fragment that contains all accessory options
- *  (Link to facebook, link to instagram, etc. for the application.
+ * More Fragment that contains all accessory options
+ * (Link to facebook, link to instagram, etc. for the application.
  *
- *  @Dylan Lynch
- *  @version WIP
- *
- *
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link MoreFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link MoreFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * @version WIP
+ *          <p/>
+ *          <p/>
+ *          A simple {@link Fragment} subclass.
+ *          Activities that contain this fragment must implement the
+ *          {@link MoreFragment.OnFragmentInteractionListener} interface
+ *          to handle interaction events.
+ *          Use the {@link MoreFragment#newInstance} factory method to
+ *          create an instance of this fragment.
+ * @Dylan Lynch
  */
 
 public class MoreFragment extends Fragment {
@@ -58,11 +58,11 @@ public class MoreFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
 
-
     }
 
 
     View view;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -78,7 +78,7 @@ public class MoreFragment extends Fragment {
 
         // Listener for facebook, opens to facebook URL
         View.OnClickListener facebookHandler = new View.OnClickListener() {
-           @Override
+            @Override
             public void onClick(View v) {
                 startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://www.facebook.com/I5555")));
             }
@@ -94,7 +94,7 @@ public class MoreFragment extends Fragment {
 
         // Listener for Contact Us button, prompts user to pick email app, sends email with mailto field already filled in
         View.OnClickListener contactUsHandler = new View.OnClickListener() {
-           @Override
+            @Override
             public void onClick(View v) {
                 Intent intent = new Intent(Intent.ACTION_SEND);
                 intent.setType("message/rfc822");
@@ -119,7 +119,6 @@ public class MoreFragment extends Fragment {
                 //TODO Open Privacy Policy text
             }
         };
-
 
 
         mFacebookButton.setOnClickListener(facebookHandler);
