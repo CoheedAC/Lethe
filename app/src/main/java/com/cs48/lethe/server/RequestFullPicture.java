@@ -62,8 +62,6 @@ public class RequestFullPicture extends AsyncTask<String, String, String> {
             // convert inputstream to string
             if (inputStream != null)
                 result = convertInputStreamToString(inputStream);
-            else
-                result = "";
         } catch (IOException e) {
             Log.d(TAG, e.getClass() + ": " + e.getLocalizedMessage());
         }
@@ -88,6 +86,7 @@ public class RequestFullPicture extends AsyncTask<String, String, String> {
      */
     @Override
     protected void onPostExecute(String result) {
+        Log.d(TAG, "result = " + result);
         result = result.trim();
         if (!result.isEmpty()) {
             FileUtilities.logResults(mContext,TAG,"Request for full image successful");

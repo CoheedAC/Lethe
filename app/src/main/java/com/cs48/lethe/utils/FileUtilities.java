@@ -307,7 +307,7 @@ public class FileUtilities {
      * (i.e. turns "IMG_xxx.jpg" -> "xxx")
      */
     public static String getUniqueId(String filename) {
-        return filename.substring(5, filename.length() - 4);
+        return filename.substring(4, filename.length() - 4);
     }
 
 }

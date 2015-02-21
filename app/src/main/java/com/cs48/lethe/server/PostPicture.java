@@ -156,8 +156,8 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
         LocationManager lm = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
         Location location = lm.getLastKnownLocation(lm.getBestProvider(new Criteria(), true));
         if (location == null) {
-//            return "-119.8609718";
-            return "0.0";
+            return "-119.8609718";
+//            return "0.0";
         }
         return String.valueOf(location.getLatitude());
 
@@ -170,8 +170,8 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
         LocationManager lm = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
         Location location = lm.getLastKnownLocation(lm.getBestProvider(new Criteria(), true));
         if (location == null) {
-//            return "34.4133292";
-            return "0.0";
+            return "34.4133292";
+//            return "0.0";
         }
         return String.valueOf(location.getLongitude());
     }

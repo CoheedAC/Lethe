@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -11,8 +12,8 @@ import android.widget.Toast;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.server.DislikePicture;
-import com.cs48.lethe.server.RequestFullPicture;
 import com.cs48.lethe.server.LikePicture;
+import com.cs48.lethe.server.RequestFullPicture;
 import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.OnSwipeTouchListener;
 
@@ -34,6 +35,7 @@ public class FullScreenImageActivity extends ActionBarActivity {
     @InjectView(R.id.saveButton)
     ImageButton mCopyButton;
 
+    public static final String TAG = FullScreenImageActivity.class.getSimpleName();
     public static final String VIEW_ONLY = "VIEW_ONLY";
     public static final String VIEW_OVERLAY = "VIEW_OVERLAY";
 
@@ -67,6 +69,7 @@ public class FullScreenImageActivity extends ActionBarActivity {
 
             String fileName = FileUtilities.getSimpleName(mImageUri.getPath());
             mUniqueId = FileUtilities.getUniqueId(fileName);
+            Log.d(TAG, "id = \"" + mUniqueId + "\"");
 
             //mImageView.setImageURI(mImageUri);
             mImageView.setImageBitmap(FileUtilities.getValidSizedBitmap(this.getContentResolver(), mImageUri));
