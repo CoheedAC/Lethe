@@ -44,7 +44,7 @@ public class RequestFeed extends AsyncTask<String, Void, String> {
      */
     @Override
     protected String doInBackground(String... location) {
-        String address = mContext.getResources().getString(R.string.server) + mContext.getString(R.string.server_hot) + location[0] + "," + location[1];
+        String address = mContext.getResources().getString(R.string.server) + mContext.getString(R.string.server_recent) + location[0] + "," + location[1];
         return getRequest(address);
     }
 
@@ -130,8 +130,8 @@ public class RequestFeed extends AsyncTask<String, Void, String> {
      */
     private Thumbnail parseJSON(JSONObject jsonObject) {
         try {
-            String id = jsonObject.getString(mContext.getString(R.string.server_id));
-            String url = jsonObject.getString(mContext.getString(R.string.server_url_thumbnail));
+            String id = jsonObject.getString(mContext.getString(R.string.json_id));
+            String url = jsonObject.getString(mContext.getString(R.string.json_url_thumbnail));
             Log.d(TAG, id + " : " + url);
             return new Thumbnail(id, url);
         } catch (JSONException e) {

@@ -24,6 +24,8 @@ import java.net.URL;
 public class PostPicture extends AsyncTask<String, String, Integer> {
 
     public static final String TAG = PostPicture.class.getSimpleName();
+    public static final int SUCCESS = 0;
+    public static final int FAILED = 1;
 
     private final String boundary = "---------------------Boundary";
     private Context mContext;
@@ -104,7 +106,7 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
             } catch (Exception e) {
                 InputStream ISIS = connection.getErrorStream();
                 Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
-
+                Log.d(TAG, "Failed to get unique ID back from server.");
             }
 
 
@@ -115,15 +117,15 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
 
         } catch (NetworkOnMainThreadException e) {
             Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
-            return 1;
+            return FAILED;
 
         } catch (Exception e) {
             Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
-            return 1;
+            return FAILED;
             // test.setText(e.getMessage());
             //cToast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
         }
-        return 0;
+        return SUCCESS;
     }
 
     @Override
@@ -154,8 +156,8 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
         LocationManager lm = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
         Location location = lm.getLastKnownLocation(lm.getBestProvider(new Criteria(), true));
         if (location == null) {
-            return "-119.8609718";
-//            return "0,0";
+//            return "-119.8609718";
+            return "0.0";
         }
         return String.valueOf(location.getLatitude());
 
@@ -168,8 +170,8 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
         LocationManager lm = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
         Location location = lm.getLastKnownLocation(lm.getBestProvider(new Criteria(), true));
         if (location == null) {
-            return "34.4133292";
-//            return "0,0";
+//            return "34.4133292";
+            return "0.0";
         }
         return String.valueOf(location.getLongitude());
     }
