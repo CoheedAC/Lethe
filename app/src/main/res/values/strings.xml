@@ -29,5 +29,6 @@
     <string name="server_url_full">location</string>
     <string name="server_views">view</string>
     <string name="server_likes">likes</string>
+    <string name="server_new">new/</string>
 
 </resources>

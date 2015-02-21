@@ -102,7 +102,7 @@ public class RequestFeed extends AsyncTask<String, Void, String> {
             } catch (JSONException e) {
                 Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             }
-        }else {
+        } else {
             FileUtilities.logResults(mContext, TAG, "Request for image feed failed");
         }
     }

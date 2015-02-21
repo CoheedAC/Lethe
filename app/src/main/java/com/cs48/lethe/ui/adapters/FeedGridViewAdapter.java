@@ -38,9 +38,9 @@ public class FeedGridViewAdapter extends BaseAdapter {
      * get current location.
      */
     public void requestFeed() {
-        String logitude = "34a4133292";
+        String longitude = "34a4133292";
         String latitude = "-119a8609718";
-        new RequestFeed(mContext, this).execute(logitude, latitude);
+        new RequestFeed(mContext, this).execute(longitude, latitude);
     }
 
     /**

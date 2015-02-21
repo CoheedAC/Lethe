@@ -7,7 +7,6 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.NetworkOnMainThreadException;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.utils.FileUtilities;
@@ -117,10 +116,12 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
 
         } catch (NetworkOnMainThreadException e) {
             Log.d("Error", "NetworkMain");
+            return 1;
 
         } catch (Exception e) {
             Log.d("Error", "GeneralException");
             Log.d("Error", e.getLocalizedMessage());
+            return 1;
             // test.setText(e.getMessage());
             //cToast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
         }
@@ -129,7 +130,10 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
 
     @Override
     protected void onPostExecute(Integer integer) {
-        Toast.makeText(mContext, "Pic posted!", Toast.LENGTH_SHORT).show();
+        if (integer == 0)
+            FileUtilities.logResults(mContext, TAG, "Posted pic successfully!");
+        else
+            FileUtilities.logResults(mContext, TAG, "Failed to post pic!");
         super.onPostExecute(integer);
     }
 
@@ -152,7 +156,8 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
         LocationManager lm = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
         Location location = lm.getLastKnownLocation(lm.getBestProvider(new Criteria(), true));
         if (location == null) {
-            return "0.0";
+            return "-119.8609718";
+//            return "0,0";
         }
         return String.valueOf(location.getLatitude());
 
@@ -165,7 +170,8 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
         LocationManager lm = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
         Location location = lm.getLastKnownLocation(lm.getBestProvider(new Criteria(), true));
         if (location == null) {
-            return "0.0";
+            return "34.4133292";
+//            return "0,0";
         }
         return String.valueOf(location.getLongitude());
     }
