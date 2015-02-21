@@ -1,6 +1,5 @@
 package com.cs48.lethe.ui.activities;
 
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -9,10 +8,13 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.server.PostPicture;
+import com.cs48.lethe.ui.dialogs.NetworkUnavailableDialog;
 import com.cs48.lethe.utils.FileUtilities;
 
 import java.io.File;
@@ -31,7 +33,11 @@ public class CameraActivity extends ActionBarActivity {
     public static final int IMAGE_POST_REQUEST = 200;
 
     private Uri mImageUri;
+    private File mImageFile;
+    private MenuItem mPostButton;
 
+    @InjectView(R.id.progressBar)
+    ProgressBar mProgressBar;
     @InjectView(R.id.imageView)
     ImageView mImageView;
 
@@ -45,6 +51,8 @@ public class CameraActivity extends ActionBarActivity {
         setContentView(R.layout.activity_camera);
 
         ButterKnife.inject(this);
+
+        mProgressBar.setVisibility(View.GONE);
 
         // Displays back button
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -60,8 +68,8 @@ public class CameraActivity extends ActionBarActivity {
         // create Intent to take a picture and return control to the calling application
         Intent imageCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-        File imageFile = FileUtilities.savePostedImage(this); // create a file to save the image
-        mImageUri = Uri.fromFile(imageFile); // gets Uri of saved image
+        mImageFile = FileUtilities.savePostedImage(this); // create a file to save the image
+        mImageUri = Uri.fromFile(mImageFile); // gets Uri of saved image
         imageCaptureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mImageUri); // set the image file name
 
 
@@ -69,12 +77,21 @@ public class CameraActivity extends ActionBarActivity {
         startActivityForResult(imageCaptureIntent, IMAGE_CAPTURE_REQUEST);
     }
 
+    public void showProgressBar() {
+        mProgressBar.setVisibility(View.VISIBLE);
+    }
+
+    public void hideProgressBar() {
+        mProgressBar.setVisibility(View.GONE);
+    }
+
     /**
      * Deletes the image that the user captured and restarts the
      * camera intent.
      */
     private void goBack() {
-        FileUtilities.deleteImage(mImageUri);
+        if (mImageFile != null)
+            mImageFile.delete();
         setResult(RESULT_CANCELED);
         startCamera();
     }
@@ -107,14 +124,16 @@ public class CameraActivity extends ActionBarActivity {
             // If user presses okay on camera, then it saves it to storage
             if (resultCode == RESULT_OK) {
                 try {
-                    ContentResolver cr = this.getContentResolver();
-                    mImageView.setImageBitmap(FileUtilities.getValidSizedBitmap(cr,mImageUri));
+                    mImageView.setImageBitmap(FileUtilities.getValidSizedBitmap(getContentResolver(),mImageUri));
                 }
                 catch(Exception e){
+                    Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                 }
 
                 // if user cancels image capture, then return to main screen
             } else if (resultCode == RESULT_CANCELED) {
+                if (mImageFile != null)
+                    mImageFile.delete();
                 finish();
             }
         }
@@ -127,6 +146,7 @@ public class CameraActivity extends ActionBarActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_camera, menu);
+        mPostButton = menu.findItem(R.id.action_post);
         return true;
     }
 
@@ -139,13 +159,28 @@ public class CameraActivity extends ActionBarActivity {
 
         // Returns to main screen and prints out image location if user presses post button
         if (id == R.id.action_post) {
-            new PostPicture(this).execute(mImageUri.getPath());
-            Log.d(TAG, mImageUri.toString());
-            setResult(RESULT_OK);
-            finish();
-            return true;
+            if (FileUtilities.isNetworkAvailable(this)) {
+                onPostPicture();
+                new PostPicture(this).execute(mImageUri.getPath());
+                return true;
+            }else {
+                new NetworkUnavailableDialog().show(getFragmentManager(), TAG);
+                return false;
+            }
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void onPostPicture() {
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        mPostButton.setVisible(false);
+        setTitle("Posting...");
+    }
+
+    public void onPostPictureFailed() {
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        mPostButton.setVisible(true);
+        setTitle(getString(R.string.title_activity_camera));
     }
 
 }

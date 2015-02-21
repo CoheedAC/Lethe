@@ -1,17 +1,18 @@
 package com.cs48.lethe.server;
 
+import android.app.Activity;
 import android.content.Context;
-import android.location.Criteria;
-import android.location.Location;
-import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.NetworkOnMainThreadException;
 import android.util.Log;
 
 import com.cs48.lethe.R;
+import com.cs48.lethe.ui.activities.CameraActivity;
+import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
 import com.cs48.lethe.utils.FileUtilities;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -28,11 +29,23 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
     public static final int FAILED = 1;
 
     private final String boundary = "---------------------Boundary";
-    private Context mContext;
+    private CameraActivity mCameraActivity;
     private String mImagePath;
+    private String mUniqueId;
 
     public PostPicture(Context context) {
-        mContext = context;
+        mCameraActivity = (CameraActivity) context;
+    }
+
+    @Override
+    protected void onCancelled(Integer integer) {
+        mCameraActivity.hideProgressBar();
+    }
+
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        mCameraActivity.showProgressBar();
     }
 
     /**
@@ -44,7 +57,7 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
         mImagePath = path[0];
         Log.d(TAG, "first");
         try {
-            URL address = new URL(mContext.getString(R.string.server) + mContext.getString(R.string.server_post));
+            URL address = new URL(mCameraActivity.getString(R.string.server) + mCameraActivity.getString(R.string.server_post));
             HttpURLConnection connection = (HttpURLConnection) (address.openConnection());
 
             connection.setDoInput(true);
@@ -58,13 +71,13 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
             OutputStream requestBody = connection.getOutputStream();
             Log.d(TAG, "progress: made it to data");
 
-
-            String latitude = generateForSimpleText("latitude", getLatitude());
-            String longitude = generateForSimpleText("longitude", getLongitude());
+            String[] coordinates = FileUtilities.getLocationCoordinates(mCameraActivity);
+            String latitude = generateForSimpleText("latitude", coordinates[0]);
+            String longitude = generateForSimpleText("longitude", coordinates[1]);
             String combined = latitude + longitude;
+
             byte[] writer = combined.getBytes();
             requestBody.write(writer, 0, writer.length);
-
 
             String imageName = FileUtilities.getSimpleName(mImagePath);
             String frontBoilerForImage = generateImageBoilerplateFront(imageName);
@@ -93,47 +106,40 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
             requestBody.flush();
             requestBody.close();
             Log.d(TAG, "progress: END");
-
             Log.d(TAG, "ConnectionType: " + connection.getHeaderField("Content-Type"));
+
+            // response from server
             Log.d(TAG, "Response Code: " + String.valueOf(connection.getResponseCode()));
+            InputStream ISIS = connection.getInputStream();
+            Log.d(TAG, "Availability: " + String.valueOf(ISIS.available()));
+            buffer = new byte[ISIS.available()];
+            ISIS.read(buffer, 0, bufferSize);
+            mUniqueId = new String(buffer);
+            Log.d(TAG, "RESPONSE: " + mUniqueId);
 
-            try {
-                InputStream ISIS = connection.getInputStream();
-                Log.d(TAG, String.valueOf(ISIS.available()));
-                buffer = new byte[ISIS.available()];
-                ISIS.read(buffer, 0, bufferSize);
-                Log.d(TAG, "RESPONSE: " + new String(buffer));
-            } catch (Exception e) {
-                InputStream ISIS = connection.getErrorStream();
-                Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
-                Log.d(TAG, "Failed to get unique ID back from server.");
-            }
-
-
-            //DataInputStream results = (DataInputStream) connection.getInputStream();
             connection.disconnect();
-            //String str =  results.readLine();
-            //Toast.makeText(this,str, Toast.LENGTH_LONG).show();
-
         } catch (NetworkOnMainThreadException e) {
             Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             return FAILED;
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             return FAILED;
-            // test.setText(e.getMessage());
-            //cToast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
         }
         return SUCCESS;
     }
 
     @Override
     protected void onPostExecute(Integer integer) {
-        if (integer == 0)
-            FileUtilities.logResults(mContext, TAG, "Posted pic successfully!");
-        else
-            FileUtilities.logResults(mContext, TAG, "Failed to post pic!");
+        mCameraActivity.hideProgressBar();
+        if (integer == SUCCESS) {
+            FileUtilities.logResults(mCameraActivity, TAG, "Posted pic successfully!");
+            mCameraActivity.setResult(Activity.RESULT_OK);
+            mCameraActivity.finish();
+        } else {
+            mCameraActivity.onPostPictureFailed();
+            new OperationFailedDialog().show(mCameraActivity.getFragmentManager(), TAG);
+        }
         super.onPostExecute(integer);
     }
 
@@ -149,30 +155,4 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
         return ("\r\n--" + boundary + "--");
     }
 
-    /**
-     * Returns the current location latitude.
-     */
-    private String getLatitude() {
-        LocationManager lm = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
-        Location location = lm.getLastKnownLocation(lm.getBestProvider(new Criteria(), true));
-        if (location == null) {
-            return "-119.8609718";
-//            return "0.0";
-        }
-        return String.valueOf(location.getLatitude());
-
-    }
-
-    /**
-     * Returns the current location longitude.
-     */
-    private String getLongitude() {
-        LocationManager lm = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
-        Location location = lm.getLastKnownLocation(lm.getBestProvider(new Criteria(), true));
-        if (location == null) {
-            return "34.4133292";
-//            return "0.0";
-        }
-        return String.valueOf(location.getLongitude());
-    }
 }

@@ -1,7 +1,6 @@
 package com.cs48.lethe.ui.adapters;
 
 import android.content.Context;
-import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -9,8 +8,8 @@ import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.cs48.lethe.R;
-import com.cs48.lethe.server.RequestFeed;
-import com.cs48.lethe.utils.FileUtilities;
+import com.cs48.lethe.utils.Image;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.util.List;
@@ -22,25 +21,16 @@ public class FeedGridViewAdapter extends BaseAdapter {
 
     public static final String TAG = FeedGridViewAdapter.class.getSimpleName();
 
-    private List<File> mImageList;
     private Context mContext;
+    private List<Image> mImageList;
 
-    public FeedGridViewAdapter(Context context) {
+    public FeedGridViewAdapter(Context context, List<Image> imageList) {
         mContext = context;
-        mImageList = FileUtilities.getCachedImages();
-
-//        requestFeed();
+        mImageList = imageList;
     }
 
-    /**
-     * Requests to get new images from the server.
-     * NOTE: hard coded for images in Isla Vista only. Does not
-     * get current location.
-     */
-    public void requestFeed() {
-        String longitude = "34a4133292";
-        String latitude = "-119a8609718";
-        new RequestFeed(mContext, this).execute(longitude, latitude);
+    public void setImageList(List<Image> list) {
+        mImageList = list;
     }
 
     /**
@@ -70,7 +60,6 @@ public class FeedGridViewAdapter extends BaseAdapter {
      */
     public View getView(int position, View convertView, ViewGroup parent) {
         ImageView imageView = (ImageView) convertView;
-
         // if it's not recycled, initialize some attributes
         if (convertView == null) {
             imageView = new ImageView(mContext);
@@ -81,9 +70,12 @@ public class FeedGridViewAdapter extends BaseAdapter {
             imageView.setBackgroundColor(mContext.getResources().getColor(R.color.image_load));
         }
 
-        Uri imageUri = Uri.fromFile(mImageList.get(position));
-        imageView.setImageBitmap(FileUtilities.getThumbnailSizedBitmap(mContext.getContentResolver(), imageUri));
-//        imageView.setImageURI(imageUri);
+        Image image = (Image) getItem(position);
+        Picasso.with(mContext).load(image.getUrl())
+                .into(imageView);
+
+//        Uri imageUri = Uri.fromFile(mImageList.get(position));
+//        imageView.setImageBitmap(FileUtilities.getThumbnailSizedBitmap(mContext.getContentResolver(), imageUri));
 
         return imageView;
     }
@@ -94,7 +86,10 @@ public class FeedGridViewAdapter extends BaseAdapter {
      * the new image(s).
      */
     public void update() {
-        mImageList = FileUtilities.getCachedImages();
+//        mImageList = FileUtilities.getCachedImagez(mContext);
+//        mImages = new Image[mImageList.size()];
+//        for (int i = 0; i < mImages.length; i++)
+//            mImages[i] = new Image(mImageList.get(i));
         notifyDataSetChanged();
     }
 
@@ -103,7 +98,10 @@ public class FeedGridViewAdapter extends BaseAdapter {
      * are stored in the cache folder.
      */
     public void clearCache() {
-        FileUtilities.deleteCachedImages();
+        File cachedDirectory = new File(mContext.getCacheDir() + File.separator + "picasso-cache");
+        for (File cachedFile : cachedDirectory.listFiles())
+            Picasso.with(mContext).invalidate(cachedFile);
+
         update();
     }
 

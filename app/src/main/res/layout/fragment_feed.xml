@@ -11,6 +11,7 @@
         android:layout_gravity="left|top"
         android:numColumns="3"
         android:verticalSpacing="3dp"
-        android:horizontalSpacing="3dp"/>
+        android:horizontalSpacing="3dp"
+        android:stretchMode="columnWidth"/>
 
 </FrameLayout>

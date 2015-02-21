@@ -1,23 +1,25 @@
 package com.cs48.lethe.ui.activities;
 
 import android.content.Intent;
-import android.net.Uri;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.server.DislikePicture;
 import com.cs48.lethe.server.LikePicture;
 import com.cs48.lethe.server.RequestFullPicture;
-import com.cs48.lethe.utils.FileUtilities;
+import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
+import com.cs48.lethe.utils.Image;
 import com.cs48.lethe.utils.OnSwipeTouchListener;
-
-import java.io.IOException;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -26,7 +28,7 @@ import butterknife.InjectView;
  * The activity that handles showing the full-sized image
  * whenever the user tabs on an image in the grid.
  */
-public class FullScreenImageActivity extends ActionBarActivity {
+public class FullPictureActivity extends ActionBarActivity {
 
     @InjectView(R.id.fullImageView)
     ImageView mImageView;
@@ -34,16 +36,16 @@ public class FullScreenImageActivity extends ActionBarActivity {
     ImageButton mDeleteButton;
     @InjectView(R.id.saveButton)
     ImageButton mCopyButton;
+    @InjectView(R.id.progressBar)
+    ProgressBar mProgressBar;
 
-    public static final String TAG = FullScreenImageActivity.class.getSimpleName();
+    public static final String TAG = FullPictureActivity.class.getSimpleName();
     public static final String VIEW_ONLY = "VIEW_ONLY";
     public static final String VIEW_OVERLAY = "VIEW_OVERLAY";
 
     public static final int FULL_IMAGE_REQUEST = 99;
 
-    private Uri mImageUri;
-    private int mImagePosition;
-    private String mUniqueId;
+    private Image mImage;
 
     /**
      * Hides the action bar and gets all of the necessary data from
@@ -60,43 +62,53 @@ public class FullScreenImageActivity extends ActionBarActivity {
         // Hide action bar
         getSupportActionBar().hide();
 
+        mProgressBar.setVisibility(View.GONE);
+
         // Get intent and extras
         Intent intent = getIntent();
-        Bundle extras = intent.getExtras();
-        if (extras != null) {
-            mImageUri = intent.getData();
-            mImagePosition = extras.getInt("position");
+        mImage = (Image) intent.getSerializableExtra("image");
 
-            String fileName = FileUtilities.getSimpleName(mImageUri.getPath());
-            mUniqueId = FileUtilities.getUniqueId(fileName);
-            Log.d(TAG, "id = \"" + mUniqueId + "\"");
+        Picasso.with(this).load(mImage.getUrl()).into(mImageView);
 
-            //mImageView.setImageURI(mImageUri);
-            mImageView.setImageBitmap(FileUtilities.getValidSizedBitmap(this.getContentResolver(), mImageUri));
-
-
-            if (intent.getAction().equals(VIEW_OVERLAY)) {
-                showPictureOverlay();
-                mImageView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        finish();
-                    }
-                });
-            } else {
-                hidePictureOverlay();
-                requestFullPicture();
-                setUpGestureListener();
-            }
+        if (intent.getAction().equals(VIEW_OVERLAY)) {
+            showPictureOverlay();
+            mImageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finish();
+                }
+            });
+        } else {
+            hidePictureOverlay();
+            new RequestFullPicture(this, mProgressBar, mImage).execute(mImage.getId());
+            setUpGestureListener();
         }
     }
 
-    /**
-     * Downloads the full-sized image from the server.
-     */
-    private void requestFullPicture() {
-        Toast.makeText(this, "Requesting full picture!", Toast.LENGTH_SHORT).show();
-        new RequestFullPicture(this, mImageView).execute(mUniqueId);
+
+    public void setImageView(Image image) {
+        mImage = image;
+
+        Target target = new Target() {
+            @Override
+            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                mProgressBar.setVisibility(View.GONE);
+                mImageView.setImageBitmap(bitmap);
+            }
+
+            @Override
+            public void onBitmapFailed(Drawable errorDrawable) {
+                mProgressBar.setVisibility(View.GONE);
+                new OperationFailedDialog().show(getFragmentManager(), TAG);
+            }
+
+            @Override
+            public void onPrepareLoad(Drawable placeHolderDrawable) {
+            }
+        };
+        Picasso.with(this)
+                .load(mImage.getUrl())
+                .into(target);
     }
 
     /**
@@ -110,7 +122,7 @@ public class FullScreenImageActivity extends ActionBarActivity {
              */
             @Override
             public void onSwipeLeft() {
-                new LikePicture(FullScreenImageActivity.this).execute(mUniqueId);
+                new LikePicture(FullPictureActivity.this).execute(mImage.getId());
                 finish();
             }
 
@@ -119,7 +131,7 @@ public class FullScreenImageActivity extends ActionBarActivity {
              */
             @Override
             public void onSwipeRight() {
-                new DislikePicture(FullScreenImageActivity.this).execute(mUniqueId);
+                new DislikePicture(FullPictureActivity.this).execute(mImage.getId());
                 finish();
             }
 
@@ -156,8 +168,8 @@ public class FullScreenImageActivity extends ActionBarActivity {
         mDeleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FileUtilities.deleteImage(mImageUri);
-                Toast.makeText(FullScreenImageActivity.this, "Deleted image #" + (mImagePosition + 1), Toast.LENGTH_SHORT).show();
+//                FileUtilities.deleteImage(mImageUri);
+                Toast.makeText(FullPictureActivity.this, "Deleted image #" + (mImage.getPosition() + 1), Toast.LENGTH_SHORT).show();
                 setResult(RESULT_OK);
                 finish();
             }
@@ -170,12 +182,12 @@ public class FullScreenImageActivity extends ActionBarActivity {
         mCopyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    FileUtilities.saveImageForSharing(FullScreenImageActivity.this, mImageUri.getPath());
-                    Toast.makeText(FullScreenImageActivity.this, "Saved to shared storage.", Toast.LENGTH_SHORT).show();
-                } catch (IOException e) {
-                    Toast.makeText(FullScreenImageActivity.this, "Cannot copy to shared storage.", Toast.LENGTH_SHORT).show();
-                }
+//                try {
+//                    FileUtilities.saveImageForSharing(ImageActivity.this, mImageUri.getPath());
+                Toast.makeText(FullPictureActivity.this, "Saved to shared storage.", Toast.LENGTH_SHORT).show();
+//                } catch (IOException e) {
+//                    Toast.makeText(ImageActivity.this, "Cannot copy to shared storage.", Toast.LENGTH_SHORT).show();
+//                }
             }
         });
     }

@@ -47,7 +47,6 @@ public class MoreFragment extends Fragment {
         // Required empty public constructor
     }
 
-
     /**
      * onCreate() is used for normal static setup of the activity
      *

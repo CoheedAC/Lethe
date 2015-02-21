@@ -3,10 +3,11 @@ package com.cs48.lethe.server;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.cs48.lethe.R;
+import com.cs48.lethe.utils.FileUtilities;
 
+import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -36,7 +37,10 @@ public class LikePicture extends AsyncTask<String, String, Integer> {
         try {
             String address = mContext.getString(R.string.server) + mContext.getString(R.string.server_like) + uniqueId[0];
             HttpClient httpclient = new DefaultHttpClient();
-            httpclient.execute(new HttpGet(address));
+            HttpResponse httpResponse = httpclient.execute(new HttpGet(address));
+            int statusCode = httpResponse.getStatusLine().getStatusCode();
+            if (statusCode == 500)
+                return FAILED;
         } catch (IOException e) {
             Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             return FAILED;
@@ -49,8 +53,8 @@ public class LikePicture extends AsyncTask<String, String, Integer> {
      */
     protected void onPostExecute(Integer integer) {
         if (integer == SUCCESS)
-            Toast.makeText(mContext, "Liked pic!", Toast.LENGTH_SHORT).show();
+            FileUtilities.logResults(mContext, TAG, "Liked pic!");
         else
-            Toast.makeText(mContext, "Failed to like pic!", Toast.LENGTH_SHORT).show();
+            FileUtilities.logResults(mContext, TAG, "Failed to like pic");
     }
 }

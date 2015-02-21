@@ -16,10 +16,15 @@ import android.widget.GridView;
 import android.widget.Toast;
 
 import com.cs48.lethe.R;
-import com.cs48.lethe.ui.activities.FullScreenImageActivity;
+import com.cs48.lethe.server.RequestFeed;
+import com.cs48.lethe.ui.activities.FullPictureActivity;
 import com.cs48.lethe.ui.adapters.FeedGridViewAdapter;
+import com.cs48.lethe.ui.dialogs.NetworkUnavailableDialog;
+import com.cs48.lethe.utils.FileUtilities;
+import com.cs48.lethe.utils.Image;
 
-import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -31,8 +36,11 @@ import java.io.File;
  */
 public class FeedFragment extends Fragment {
 
+    public static final String TAG = FeedFragment.class.getSimpleName();
+
     private FeedGridViewAdapter mGridAdapter;
     private GridView mGridView;
+    private List<Image> mImageList;
 
     private OnFragmentInteractionListener mListener;
 
@@ -52,6 +60,8 @@ public class FeedFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
+        mImageList = new ArrayList<>();
     }
 
     /**
@@ -63,7 +73,8 @@ public class FeedFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_feed, container, false);
         mGridView = (GridView) rootView.findViewById(R.id.feedGridView);
-        mGridAdapter = new FeedGridViewAdapter(getActivity());
+
+        mGridAdapter = new FeedGridViewAdapter(getActivity(), mImageList);
         mGridView.setAdapter(mGridAdapter);
 
         /**
@@ -73,17 +84,30 @@ public class FeedFragment extends Fragment {
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent showImageIntent = new Intent(getActivity(), FullScreenImageActivity.class);
+                Intent showImageIntent = new Intent(getActivity(), FullPictureActivity.class);
 
-                File imageFile = (File) mGridAdapter.getItem(position);
-                showImageIntent.setData(Uri.fromFile(imageFile));
-                showImageIntent.putExtra("position", position);
-                showImageIntent.setAction(FullScreenImageActivity.VIEW_ONLY);
+                Image image = (Image) mGridAdapter.getItem(position);
+                image.setPosition(position);
+                showImageIntent.putExtra("image", image);
+                showImageIntent.setAction(FullPictureActivity.VIEW_ONLY);
 
                 startActivity(showImageIntent);
             }
         });
+        requestFeed();
+
         return rootView;
+    }
+
+    public void requestFeed() {
+        if (FileUtilities.isNetworkAvailable(getActivity())) {
+            String[] coordinates = FileUtilities.getLocationCoordinates(getActivity());
+            String latitude = coordinates[0].replace(".", "a");
+            String longitude = coordinates[1].replace(".", "a");
+            new RequestFeed(getActivity(), mGridAdapter).execute(longitude, latitude);
+        } else {
+            new NetworkUnavailableDialog().show(getActivity().getFragmentManager(), TAG);
+        }
     }
 
     /**
@@ -97,8 +121,8 @@ public class FeedFragment extends Fragment {
      * Hides the delete all images and copy image button in the action bar.
      */
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        menu.getItem(0).setVisible(true);
-        menu.getItem(2).setVisible(true);
+        menu.findItem(R.id.action_delete_images).setVisible(true);
+        menu.findItem(R.id.action_refresh).setVisible(true);
     }
 
     /**
@@ -121,7 +145,7 @@ public class FeedFragment extends Fragment {
          * Requests to get new images on the server.
          */
         if (id == R.id.action_refresh) {
-            mGridAdapter.requestFeed();
+            requestFeed();
             Toast.makeText(getActivity(), "Refreshing...", Toast.LENGTH_SHORT).show();
         }
         return super.onOptionsItemSelected(item);

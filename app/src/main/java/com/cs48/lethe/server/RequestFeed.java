@@ -3,12 +3,11 @@ package com.cs48.lethe.server;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.ui.adapters.FeedGridViewAdapter;
 import com.cs48.lethe.utils.FileUtilities;
-import com.cs48.lethe.utils.Thumbnail;
+import com.cs48.lethe.utils.Image;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -22,6 +21,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Asynchronously downloads the JSON of all of the available
@@ -92,16 +93,10 @@ public class RequestFeed extends AsyncTask<String, Void, String> {
         result = result.trim();
         if (!result.isEmpty()) {
             FileUtilities.logResults(mContext, TAG, "Request for image feed succeeded");
-
             try {
-                Thumbnail[] thumbnails = getThumbnails(result);
-                for (Thumbnail thumbnail : thumbnails) {
-                    if (!thumbnail.getFile().exists())
-                        new DownloadThumbnail(mContext, mFeedGridViewAdapter, thumbnail).execute(thumbnail.getUrl());
-                    else
-                        Log.d(TAG, thumbnail.getFile().getName() + " already exists");
-                }
-                Toast.makeText(mContext, "Downloaded all images successfully!", Toast.LENGTH_SHORT).show();
+                mFeedGridViewAdapter.setImageList(getPictures(result));
+                mFeedGridViewAdapter.notifyDataSetChanged();
+
             } catch (JSONException e) {
                 Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             }
@@ -115,25 +110,23 @@ public class RequestFeed extends AsyncTask<String, Void, String> {
      * Thumbnail object that holds the unique picture ID, the
      * DropBox URL, and the File of the image.
      */
-    private Thumbnail[] getThumbnails(String jsonData) throws JSONException {
+    private List<Image> getPictures(String jsonData) throws JSONException {
         JSONArray jsonArray = new JSONArray(jsonData);
-        Thumbnail[] thumbnails = new Thumbnail[jsonArray.length()];
-        for (int i = 0; i < jsonArray.length(); i++) {
-            thumbnails[i] = parseJSON(jsonArray.getJSONObject(i));
-        }
-        return thumbnails;
+        List<Image> imageList = new ArrayList<>();
+        for (int i = 0; i < jsonArray.length(); i++)
+            imageList.add(parseJSON(jsonArray.getJSONObject(i), i));
+        return imageList;
     }
 
     /**
      * Parses the JSON returned from the server and
      * returns a Thumbnail object
      */
-    private Thumbnail parseJSON(JSONObject jsonObject) {
+    private Image parseJSON(JSONObject jsonObject, int index) {
         try {
             String id = jsonObject.getString(mContext.getString(R.string.json_id));
             String url = jsonObject.getString(mContext.getString(R.string.json_url_thumbnail));
-            Log.d(TAG, id + " : " + url);
-            return new Thumbnail(id, url);
+            return new Image(id, url, index);
         } catch (JSONException e) {
             Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
         }
