@@ -95,9 +95,12 @@ public class RequestFeed extends AsyncTask<String, Void, String> {
 
             try {
                 Thumbnail[] thumbnails = getThumbnails(result);
-                for (Thumbnail thumbnail : thumbnails)
-                    if (!thumbnail.getThumbnailFile().exists())
+                for (Thumbnail thumbnail : thumbnails) {
+                    if (!thumbnail.getFile().exists())
                         new DownloadThumbnail(mContext, mFeedGridViewAdapter, thumbnail).execute(thumbnail.getUrl());
+                    else
+                        Log.d(TAG, thumbnail.getFile().getName() + " already exists");
+                }
                 Toast.makeText(mContext, "Downloaded all images successfully!", Toast.LENGTH_SHORT).show();
             } catch (JSONException e) {
                 Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());

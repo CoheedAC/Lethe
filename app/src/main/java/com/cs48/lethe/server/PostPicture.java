@@ -40,7 +40,7 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
     @Override
     protected Integer doInBackground(String... path) {
         mImagePath = path[0];
-        Log.d("TFirst", "ad");
+        Log.d(TAG, "first");
         try {
             URL address = new URL(mContext.getString(R.string.server) + mContext.getString(R.string.server_post));
             HttpURLConnection connection = (HttpURLConnection) (address.openConnection());
@@ -52,9 +52,9 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
             connection.setRequestProperty("Connection", "Keep-Alive");
             connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
             connection.setRequestProperty("Accept", "application/json");
-            Log.d("TFirst", "ad");
+            Log.d(TAG, "first");
             OutputStream requestBody = connection.getOutputStream();
-            Log.d("Progress", "MADEITTODATA");
+            Log.d(TAG, "progress: made it to data");
 
 
             String latitude = generateForSimpleText("latitude", getLatitude());
@@ -90,21 +90,20 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
             imageAsStream.close();
             requestBody.flush();
             requestBody.close();
-            Log.d("Progress", "END");
+            Log.d(TAG, "progress: END");
 
-            Log.d("ConnectionType", connection.getHeaderField("Content-Type"));
-            Log.d("Response Code:", String.valueOf(connection.getResponseCode()));
+            Log.d(TAG, "ConnectionType: " + connection.getHeaderField("Content-Type"));
+            Log.d(TAG, "Response Code: " + String.valueOf(connection.getResponseCode()));
 
             try {
                 InputStream ISIS = connection.getInputStream();
-                Log.d("ad", "yolo");
-                Log.d("add", String.valueOf(ISIS.available()));
+                Log.d(TAG, String.valueOf(ISIS.available()));
                 buffer = new byte[ISIS.available()];
                 ISIS.read(buffer, 0, bufferSize);
-                Log.d("ad", "yoloswag");
-                Log.d("RESPONSE:", new String(buffer));
+                Log.d(TAG, "RESPONSE: " + new String(buffer));
             } catch (Exception e) {
                 InputStream ISIS = connection.getErrorStream();
+                Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
 
             }
 
@@ -115,12 +114,11 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
             //Toast.makeText(this,str, Toast.LENGTH_LONG).show();
 
         } catch (NetworkOnMainThreadException e) {
-            Log.d("Error", "NetworkMain");
+            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             return 1;
 
         } catch (Exception e) {
-            Log.d("Error", "GeneralException");
-            Log.d("Error", e.getLocalizedMessage());
+            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             return 1;
             // test.setText(e.getMessage());
             //cToast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();

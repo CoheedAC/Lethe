@@ -3,12 +3,12 @@ package com.cs48.lethe.utils;
 import java.io.File;
 
 /**
- * Created by maxkohne on 2/20/15.
+ * Class that stores information about a full sized picture.
  */
 public class FullPicture {
 
     private String url;
-    private File fullPicture;
+    private File file;
     private String id;
     private int views;
     private int likes;
@@ -19,15 +19,15 @@ public class FullPicture {
         this.views =views;
         this.likes = likes;
 
-        fullPicture = new File(FileUtilities.getCachedDirectory() + File.separator + "IMG_" + id + ".jpg");
+        file = new File(FileUtilities.getCachedDirectory() + File.separator + "IMG_" + id + ".jpg");
     }
 
     public String getUrl() {
         return url;
     }
 
-    public File getFullPicture() {
-        return fullPicture;
+    public File getFile() {
+        return file;
     }
 
     public String getId() {

@@ -8,21 +8,21 @@ import java.io.File;
 public class Thumbnail {
 
     private String url;
-    private File thumbnailFile;
+    private File file;
     private String id;
 
     public Thumbnail(String id, String url) {
         this.id = id;
         this.url = url;
-        thumbnailFile = new File(FileUtilities.getCachedDirectory() + File.separator + "IMG_" + id + ".jpg");
+        file = new File(FileUtilities.getCachedDirectory() + File.separator + "IMG_" + id + ".jpg");
     }
 
     public String getUrl() {
         return url;
     }
 
-    public File getThumbnailFile() {
-        return thumbnailFile;
+    public File getFile() {
+        return file;
     }
 
     public String getId() {

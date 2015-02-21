@@ -48,7 +48,7 @@ public class DownloadFullPicture extends AsyncTask<String, String, Integer> {
             input = url.openStream();
             byte[] buffer = new byte[1500];
 
-            output = new FileOutputStream(mFullPicture.getFullPicture());
+            output = new FileOutputStream(mFullPicture.getFile());
 
             int bytesRead;
             while ((bytesRead = input.read(buffer, 0, buffer.length)) >= 0) {
@@ -78,8 +78,8 @@ public class DownloadFullPicture extends AsyncTask<String, String, Integer> {
      */
     protected void onPostExecute(Integer integer) {
         if (integer == SUCCESS) {
-            FileUtilities.logResults(mContext,TAG, "Download full image succeeded");
-            Uri imageUri = Uri.fromFile(mFullPicture.getFullPicture());
+            FileUtilities.logResults(mContext, TAG, "Download full image succeeded");
+            Uri imageUri = Uri.fromFile(mFullPicture.getFile());
             mImageView.setImageURI(imageUri);
         }else {
             FileUtilities.logResults(mContext,TAG, "Download full image failed");

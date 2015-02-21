@@ -47,7 +47,7 @@ public class DownloadThumbnail extends AsyncTask<String, String, Integer> {
             input = url.openStream();
             byte[] buffer = new byte[1500];
 
-            output = new FileOutputStream(mThumbnail.getThumbnailFile());
+            output = new FileOutputStream(mThumbnail.getFile());
 
             int bytesRead;
             while ((bytesRead = input.read(buffer, 0, buffer.length)) >= 0) {

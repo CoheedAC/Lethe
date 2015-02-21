@@ -2,6 +2,7 @@ package com.cs48.lethe.server;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.cs48.lethe.R;
@@ -37,7 +38,7 @@ public class LikePicture extends AsyncTask<String, String, Integer> {
             HttpClient httpclient = new DefaultHttpClient();
             httpclient.execute(new HttpGet(address));
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             return FAILED;
         }
         return SUCCESS;
