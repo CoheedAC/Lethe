@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.os.NetworkOnMainThreadException;
 import android.util.Log;
 
+import com.cs48.lethe.R;
 import com.cs48.lethe.utils.FileUtilities;
 
 import java.io.FileInputStream;
@@ -20,14 +21,17 @@ import java.net.URL;
  * Asynchronously posts the image on the server and returns the
  * unique picture id.
  */
-public class PostImage extends AsyncTask<String, String, Integer> {
+public class PostPicture extends AsyncTask<String, String, Integer> {
 
-    public static final String TAG = PostImage.class.getSimpleName();
+    public static final String TAG = PostPicture.class.getSimpleName();
+    public static final int SUCCESS = 0;
+    public static final int FAILED = 1;
 
     private final String boundary = "---------------------Boundary";
     private Context mContext;
+    private String mImagePath;
 
-    public PostImage(Context context) {
+    public PostPicture(Context context) {
         mContext = context;
     }
 
@@ -35,11 +39,12 @@ public class PostImage extends AsyncTask<String, String, Integer> {
      * Posts the image on the server while getting the current
      * location so the image is posted in the correct region.
      */
-    protected Integer doInBackground(String... params) {
-        String imagePath = params[0];
-        Log.d("TFirst", "ad");
+    @Override
+    protected Integer doInBackground(String... path) {
+        mImagePath = path[0];
+        Log.d(TAG, "first");
         try {
-            URL address = new URL("https://frozen-sea-8879.herokuapp.com/sendPic");
+            URL address = new URL(mContext.getString(R.string.server) + mContext.getString(R.string.server_post));
             HttpURLConnection connection = (HttpURLConnection) (address.openConnection());
 
             connection.setDoInput(true);
@@ -49,9 +54,9 @@ public class PostImage extends AsyncTask<String, String, Integer> {
             connection.setRequestProperty("Connection", "Keep-Alive");
             connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
             connection.setRequestProperty("Accept", "application/json");
-            Log.d("TFirst", "ad");
+            Log.d(TAG, "first");
             OutputStream requestBody = connection.getOutputStream();
-            Log.d("Progress", "MADEITTODATA");
+            Log.d(TAG, "progress: made it to data");
 
 
             String latitude = generateForSimpleText("latitude", getLatitude());
@@ -61,13 +66,13 @@ public class PostImage extends AsyncTask<String, String, Integer> {
             requestBody.write(writer, 0, writer.length);
 
 
-            String imageName = FileUtilities.getFileName(imagePath);
+            String imageName = FileUtilities.getSimpleName(mImagePath);
             String frontBoilerForImage = generateImageBoilerplateFront(imageName);
             writer = frontBoilerForImage.getBytes();
             requestBody.write(writer, 0, writer.length);
 
             //now encode image
-            FileInputStream imageAsStream = new FileInputStream(imagePath);
+            FileInputStream imageAsStream = new FileInputStream(mImagePath);
             int bytesAvailable = imageAsStream.available();
             int bufferSize = Math.min(bytesAvailable, 1 * 1024 * 1024);
             byte[] buffer = new byte[bufferSize];
@@ -87,22 +92,21 @@ public class PostImage extends AsyncTask<String, String, Integer> {
             imageAsStream.close();
             requestBody.flush();
             requestBody.close();
-            Log.d("Progress", "END");
+            Log.d(TAG, "progress: END");
 
-            Log.d("ConnectionType", connection.getHeaderField("Content-Type"));
-            Log.d("Response Code:", String.valueOf(connection.getResponseCode()));
+            Log.d(TAG, "ConnectionType: " + connection.getHeaderField("Content-Type"));
+            Log.d(TAG, "Response Code: " + String.valueOf(connection.getResponseCode()));
 
             try {
                 InputStream ISIS = connection.getInputStream();
-                Log.d("ad", "yolo");
-                Log.d("add", String.valueOf(ISIS.available()));
+                Log.d(TAG, String.valueOf(ISIS.available()));
                 buffer = new byte[ISIS.available()];
                 ISIS.read(buffer, 0, bufferSize);
-                Log.d("ad", "yoloswag");
-                Log.d("RESPONSE:", new String(buffer));
+                Log.d(TAG, "RESPONSE: " + new String(buffer));
             } catch (Exception e) {
                 InputStream ISIS = connection.getErrorStream();
-
+                Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                Log.d(TAG, "Failed to get unique ID back from server.");
             }
 
 
@@ -112,15 +116,25 @@ public class PostImage extends AsyncTask<String, String, Integer> {
             //Toast.makeText(this,str, Toast.LENGTH_LONG).show();
 
         } catch (NetworkOnMainThreadException e) {
-            Log.d("Error", "NetworkMain");
+            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+            return FAILED;
 
         } catch (Exception e) {
-            Log.d("Error", "GeneralException");
-            Log.d("Error", e.getLocalizedMessage());
+            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+            return FAILED;
             // test.setText(e.getMessage());
             //cToast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
         }
-        return 0;
+        return SUCCESS;
+    }
+
+    @Override
+    protected void onPostExecute(Integer integer) {
+        if (integer == 0)
+            FileUtilities.logResults(mContext, TAG, "Posted pic successfully!");
+        else
+            FileUtilities.logResults(mContext, TAG, "Failed to post pic!");
+        super.onPostExecute(integer);
     }
 
     private String generateForSimpleText(String name, String value) {
@@ -142,7 +156,8 @@ public class PostImage extends AsyncTask<String, String, Integer> {
         LocationManager lm = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
         Location location = lm.getLastKnownLocation(lm.getBestProvider(new Criteria(), true));
         if (location == null) {
-            return "0.0";
+            return "-119.8609718";
+//            return "0.0";
         }
         return String.valueOf(location.getLatitude());
 
@@ -155,7 +170,8 @@ public class PostImage extends AsyncTask<String, String, Integer> {
         LocationManager lm = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
         Location location = lm.getLastKnownLocation(lm.getBestProvider(new Criteria(), true));
         if (location == null) {
-            return "0.0";
+            return "34.4133292";
+//            return "0.0";
         }
         return String.valueOf(location.getLongitude());
     }

@@ -4,14 +4,16 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.cs48.lethe.R;
-import com.cs48.lethe.server.DownloadFullImage;
-import com.cs48.lethe.server.LikeImage;
+import com.cs48.lethe.server.DislikePicture;
+import com.cs48.lethe.server.LikePicture;
+import com.cs48.lethe.server.RequestFullPicture;
 import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.OnSwipeTouchListener;
 
@@ -32,9 +34,8 @@ public class FullScreenImageActivity extends ActionBarActivity {
     ImageButton mDeleteButton;
     @InjectView(R.id.saveButton)
     ImageButton mCopyButton;
-    @InjectView(R.id.likeButton)
-    ImageButton mLikeButton;
 
+    public static final String TAG = FullScreenImageActivity.class.getSimpleName();
     public static final String VIEW_ONLY = "VIEW_ONLY";
     public static final String VIEW_OVERLAY = "VIEW_OVERLAY";
 
@@ -52,7 +53,7 @@ public class FullScreenImageActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_picture);
+        setContentView(R.layout.activity_full_picture);
 
         ButterKnife.inject(this);
 
@@ -66,23 +67,25 @@ public class FullScreenImageActivity extends ActionBarActivity {
             mImageUri = intent.getData();
             mImagePosition = extras.getInt("position");
 
+            String fileName = FileUtilities.getSimpleName(mImageUri.getPath());
+            mUniqueId = FileUtilities.getUniqueId(fileName);
+            Log.d(TAG, "id = \"" + mUniqueId + "\"");
+
             //mImageView.setImageURI(mImageUri);
             mImageView.setImageBitmap(FileUtilities.getValidSizedBitmap(this.getContentResolver(), mImageUri));
-            mImageView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    finish();
-                }
-            });
 
-            mUniqueId = FileUtilities.getFileName(mImageUri.getPath());
-            mUniqueId = FileUtilities.getUniqueId(mUniqueId);
 
             if (intent.getAction().equals(VIEW_OVERLAY)) {
                 showPictureOverlay();
+                mImageView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        finish();
+                    }
+                });
             } else {
                 hidePictureOverlay();
-                downloadFullImage();
+                requestFullPicture();
                 setUpGestureListener();
             }
         }
@@ -91,9 +94,9 @@ public class FullScreenImageActivity extends ActionBarActivity {
     /**
      * Downloads the full-sized image from the server.
      */
-    private void downloadFullImage() {
-        String fullImageRequest = "https://frozen-sea-8879.herokuapp.com/" + mUniqueId;
-        new DownloadFullImage(this, mImageUri, mImageView).execute(fullImageRequest);
+    private void requestFullPicture() {
+        Toast.makeText(this, "Requesting full picture!", Toast.LENGTH_SHORT).show();
+        new RequestFullPicture(this, mImageView).execute(mUniqueId);
     }
 
     /**
@@ -107,18 +110,16 @@ public class FullScreenImageActivity extends ActionBarActivity {
              */
             @Override
             public void onSwipeLeft() {
-                String likeImageRequest = "https://frozen-sea-8879.herokuapp.com/like/" + mUniqueId;
-                new LikeImage(FullScreenImageActivity.this).execute(likeImageRequest);
+                new LikePicture(FullScreenImageActivity.this).execute(mUniqueId);
                 finish();
             }
 
             /**
-             * UNIMPLEMENTED
              * Swiping right hides the photo from the feed.
              */
             @Override
             public void onSwipeRight() {
-                Toast.makeText(FullScreenImageActivity.this, "Photo hidden", Toast.LENGTH_SHORT).show();
+                new DislikePicture(FullScreenImageActivity.this).execute(mUniqueId);
                 finish();
             }
 
@@ -139,15 +140,6 @@ public class FullScreenImageActivity extends ActionBarActivity {
     private void hidePictureOverlay() {
         mDeleteButton.setVisibility(View.GONE);
         mCopyButton.setVisibility(View.GONE);
-        mLikeButton.setVisibility(View.VISIBLE);
-
-        mLikeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String likeImageRequest = "https://frozen-sea-8879.herokuapp.com/like/" + mUniqueId;
-                new LikeImage(FullScreenImageActivity.this).execute(likeImageRequest);
-            }
-        });
     }
 
     /**
@@ -157,8 +149,6 @@ public class FullScreenImageActivity extends ActionBarActivity {
     private void showPictureOverlay() {
         mDeleteButton.setVisibility(View.VISIBLE);
         mCopyButton.setVisibility(View.VISIBLE);
-        mLikeButton.setVisibility(View.GONE);
-
 
         /**
          * Deletes the image stored on the device and goes back to the grid.

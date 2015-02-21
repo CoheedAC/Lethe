@@ -5,11 +5,12 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.cs48.lethe.R;
 import com.cs48.lethe.ui.adapters.FeedGridViewAdapter;
+import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.Thumbnail;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -26,14 +27,14 @@ import java.io.InputStreamReader;
  * Asynchronously downloads the JSON of all of the available
  * images in the current location.
  */
-public class RequestThumbnailFeed extends AsyncTask<String, Void, String> {
+public class RequestFeed extends AsyncTask<String, Void, String> {
 
-    public static final String TAG = RequestThumbnailFeed.class.getSimpleName();
+    public static final String TAG = RequestFeed.class.getSimpleName();
 
     private Context mContext;
     private FeedGridViewAdapter mFeedGridViewAdapter;
 
-    public RequestThumbnailFeed(Context context, FeedGridViewAdapter feedGridViewAdapter) {
+    public RequestFeed(Context context, FeedGridViewAdapter feedGridViewAdapter) {
         mContext = context;
         mFeedGridViewAdapter = feedGridViewAdapter;
     }
@@ -42,8 +43,9 @@ public class RequestThumbnailFeed extends AsyncTask<String, Void, String> {
      * Requests to get the JSON in the background.
      */
     @Override
-    protected String doInBackground(String... urls) {
-        return getRequest(urls[0]);
+    protected String doInBackground(String... location) {
+        String address = mContext.getResources().getString(R.string.server) + mContext.getString(R.string.server_recent) + location[0] + "," + location[1];
+        return getRequest(address);
     }
 
     /**
@@ -62,10 +64,6 @@ public class RequestThumbnailFeed extends AsyncTask<String, Void, String> {
             // convert inputstream to string
             if (inputStream != null)
                 result = convertInputStreamToString(inputStream);
-            else
-                result = "Did not work!";
-        } catch (ClientProtocolException e) {
-            Log.d(TAG, e.getClass() + ": " + e.getLocalizedMessage());
         } catch (IOException e) {
             Log.d(TAG, e.getClass() + ": " + e.getLocalizedMessage());
         }
@@ -81,7 +79,6 @@ public class RequestThumbnailFeed extends AsyncTask<String, Void, String> {
         String result = "";
         while ((line = bufferedReader.readLine()) != null)
             result += line;
-
         inputStream.close();
         return result;
     }
@@ -92,15 +89,24 @@ public class RequestThumbnailFeed extends AsyncTask<String, Void, String> {
      */
     @Override
     protected void onPostExecute(String result) {
-        Toast.makeText(mContext, "Received Json!", Toast.LENGTH_SHORT).show();
-//        FileUtilities.deleteCachedImages();
+        result = result.trim();
+        if (!result.isEmpty()) {
+            FileUtilities.logResults(mContext, TAG, "Request for image feed succeeded");
 
-        try {
-            Thumbnail[] thumbnails = getThumbnails(result);
-            for (Thumbnail thumbnail : thumbnails)
-                new DownloadThumbnail(mContext, mFeedGridViewAdapter, thumbnail.getId()).execute(thumbnail.getUrl());
-        } catch (JSONException e) {
-            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+            try {
+                Thumbnail[] thumbnails = getThumbnails(result);
+                for (Thumbnail thumbnail : thumbnails) {
+                    if (!thumbnail.getFile().exists())
+                        new DownloadThumbnail(mContext, mFeedGridViewAdapter, thumbnail).execute(thumbnail.getUrl());
+                    else
+                        Log.d(TAG, thumbnail.getFile().getName() + " already exists");
+                }
+                Toast.makeText(mContext, "Downloaded all images successfully!", Toast.LENGTH_SHORT).show();
+            } catch (JSONException e) {
+                Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+            }
+        } else {
+            FileUtilities.logResults(mContext, TAG, "Request for image feed failed");
         }
     }
 
@@ -113,12 +119,24 @@ public class RequestThumbnailFeed extends AsyncTask<String, Void, String> {
         JSONArray jsonArray = new JSONArray(jsonData);
         Thumbnail[] thumbnails = new Thumbnail[jsonArray.length()];
         for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject jsonObject = jsonArray.getJSONObject(i);
-            String id = jsonObject.getString("name");
-            String url = jsonObject.getString("thumb");
-            thumbnails[i] = new Thumbnail(id, url);
-            Log.d(TAG, id + " : " + url);
+            thumbnails[i] = parseJSON(jsonArray.getJSONObject(i));
         }
         return thumbnails;
+    }
+
+    /**
+     * Parses the JSON returned from the server and
+     * returns a Thumbnail object
+     */
+    private Thumbnail parseJSON(JSONObject jsonObject) {
+        try {
+            String id = jsonObject.getString(mContext.getString(R.string.json_id));
+            String url = jsonObject.getString(mContext.getString(R.string.json_url_thumbnail));
+            Log.d(TAG, id + " : " + url);
+            return new Thumbnail(id, url);
+        } catch (JSONException e) {
+            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+        }
+        return null;
     }
 }

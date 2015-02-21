@@ -2,17 +2,32 @@
 <resources>
 
     <string name="app_name">Project Lethe</string>
+
     <string name="title_section1">Home</string>
     <string name="title_section2">Peek</string>
     <string name="title_section3">Me</string>
     <string name="title_section4">More</string>
+
     <string name="action_camera">Camera</string>
     <string name="action_copy_images">Copy Images</string>
     <string name="action_refresh">Refresh</string>
     <string name="action_delete_images">Delete Images</string>
-    <string name="title_activity_camera">Post a Picture</string>
     <string name="action_post">Post</string>
+
+    <string name="title_activity_camera">Post a Picture</string>
     <string name="title_activity_picture">PictureActivity</string>
-    <string name="action_settings">Settings</string>
+
+    <string name="server">https://frozen-sea-8879.herokuapp.com/</string>
+    <string name="server_dislike">dislike/</string>
+    <string name="server_hot">hot/</string>
+    <string name="server_recent">recent/</string>
+    <string name="server_post">sendPic</string>
+    <string name="server_like">like/</string>
+
+    <string name="json_id">name</string>
+    <string name="json_url_thumbnail">thumb</string>
+    <string name="json_url_full">location</string>
+    <string name="json_views">view</string>
+    <string name="json_likes">likes</string>
 
 </resources>

@@ -6,8 +6,8 @@ import android.util.Log;
 
 import com.cs48.lethe.ui.adapters.FeedGridViewAdapter;
 import com.cs48.lethe.utils.FileUtilities;
+import com.cs48.lethe.utils.Thumbnail;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,15 +20,17 @@ import java.net.URL;
 public class DownloadThumbnail extends AsyncTask<String, String, Integer> {
 
     public static final String TAG = DownloadThumbnail.class.getSimpleName();
+    public static final int SUCCESS = 0;
+    public static final int FAILED = 1;
 
     private Context mContext;
     private FeedGridViewAdapter mFeedGridViewAdapter;
-    private String mImageName;
+    private Thumbnail mThumbnail;
 
-    public DownloadThumbnail(Context context, FeedGridViewAdapter feedGridViewAdapter, String id) {
+    public DownloadThumbnail(Context context, FeedGridViewAdapter feedGridViewAdapter, Thumbnail thumbnail) {
         mFeedGridViewAdapter = feedGridViewAdapter;
         mContext = context;
-        mImageName = "IMG _" + id + ".jpg";
+        mThumbnail = thumbnail;
     }
 
     /**
@@ -45,7 +47,7 @@ public class DownloadThumbnail extends AsyncTask<String, String, Integer> {
             input = url.openStream();
             byte[] buffer = new byte[1500];
 
-            output = new FileOutputStream(FileUtilities.getCachedDirectory() + File.separator + mImageName);
+            output = new FileOutputStream(mThumbnail.getFile());
 
             int bytesRead;
             while ((bytesRead = input.read(buffer, 0, buffer.length)) >= 0) {
@@ -53,6 +55,7 @@ public class DownloadThumbnail extends AsyncTask<String, String, Integer> {
             }
         } catch (IOException e) {
             Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+            return FAILED;
         } finally {
             try {
                 if (output != null) {
@@ -65,7 +68,7 @@ public class DownloadThumbnail extends AsyncTask<String, String, Integer> {
                 Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             }
         }
-        return 0;
+        return SUCCESS;
     }
 
     /**
@@ -73,6 +76,11 @@ public class DownloadThumbnail extends AsyncTask<String, String, Integer> {
      * downloaded.
      */
     protected void onPostExecute(Integer integer) {
-        mFeedGridViewAdapter.update();
+        if (integer == SUCCESS) {
+            mFeedGridViewAdapter.update();
+        }else {
+            FileUtilities.logResults(mContext,TAG,"Failed to download thumbnail");
+        }
+
     }
 }

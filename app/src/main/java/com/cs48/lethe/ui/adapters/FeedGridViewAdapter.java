@@ -9,7 +9,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.cs48.lethe.R;
-import com.cs48.lethe.server.RequestThumbnailFeed;
+import com.cs48.lethe.server.RequestFeed;
 import com.cs48.lethe.utils.FileUtilities;
 
 import java.io.File;
@@ -29,7 +29,7 @@ public class FeedGridViewAdapter extends BaseAdapter {
         mContext = context;
         mImageList = FileUtilities.getCachedImages();
 
-        requestFeed();
+//        requestFeed();
     }
 
     /**
@@ -38,8 +38,9 @@ public class FeedGridViewAdapter extends BaseAdapter {
      * get current location.
      */
     public void requestFeed() {
-        String getRequest = "https://frozen-sea-8879.herokuapp.com/hot/34a4133292,-119a8609718";
-        new RequestThumbnailFeed(mContext, this).execute(getRequest);
+        String longitude = "34a4133292";
+        String latitude = "-119a8609718";
+        new RequestFeed(mContext, this).execute(longitude, latitude);
     }
 
     /**

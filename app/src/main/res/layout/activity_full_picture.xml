@@ -49,17 +49,7 @@
             android:background="#00ffffff"
             android:layout_gravity="center"
             android:paddingLeft="25dp"
-            android:paddingRight="25dp"/>
-
-        <ImageButton
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/likeButton"
-            android:layout_gravity="center"
-            android:background="#00ffffff"
-            android:src="@drawable/ic_like"
-            android:cropToPadding="false"
-            android:layout_marginLeft="25dp"/>
+            />
 
     </LinearLayout>
 

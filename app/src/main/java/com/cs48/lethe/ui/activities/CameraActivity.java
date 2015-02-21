@@ -12,7 +12,7 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 
 import com.cs48.lethe.R;
-import com.cs48.lethe.server.PostImage;
+import com.cs48.lethe.server.PostPicture;
 import com.cs48.lethe.utils.FileUtilities;
 
 import java.io.File;
@@ -139,7 +139,7 @@ public class CameraActivity extends ActionBarActivity {
 
         // Returns to main screen and prints out image location if user presses post button
         if (id == R.id.action_post) {
-            new PostImage(this).execute(mImageUri.getPath());
+            new PostPicture(this).execute(mImageUri.getPath());
             Log.d(TAG, mImageUri.toString());
             setResult(RESULT_OK);
             finish();

@@ -98,7 +98,7 @@ public class MeGridViewAdapter extends BaseAdapter {
      */
     public void copyImage() {
         try {
-            FileUtilities.copyFile(mContext, mImageList.get(0).getAbsolutePath(), 50);
+            FileUtilities.copyImage(mContext, mImageList.get(0).getAbsolutePath(), 50);
             update();
             Toast.makeText(mContext, "Copied first image", Toast.LENGTH_LONG).show();
         } catch (Exception e) {
