@@ -79,8 +79,9 @@ public class DownloadFullPicture extends AsyncTask<String, String, Integer> {
     protected void onPostExecute(Integer integer) {
         if (integer == SUCCESS) {
             FileUtilities.logResults(mContext, TAG, "Download full image succeeded");
+
             Uri imageUri = Uri.fromFile(mFullPicture.getFile());
-            mImageView.setImageURI(imageUri);
+            mImageView.setImageBitmap(FileUtilities.getValidSizedBitmap(mContext.getContentResolver(), imageUri));
         }else {
             FileUtilities.logResults(mContext,TAG, "Download full image failed");
         }
