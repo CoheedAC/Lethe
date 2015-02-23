@@ -20,6 +20,8 @@ import com.cs48.lethe.ui.activities.FullPictureActivity;
 import com.cs48.lethe.ui.adapters.FeedGridViewAdapter;
 import com.cs48.lethe.utils.Image;
 
+import java.io.Serializable;
+
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
@@ -156,20 +158,14 @@ public class FeedFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         if (savedInstanceState != null) {
-            //testInt = savedInstanceState.getInt("testInt");
-            //Log.d(TAG, "saved testing = " + testInt);
             mGridAdapter = (FeedGridViewAdapter) savedInstanceState.getSerializable("theFeed");
         }
-
-       // testInt++;
-        //Log.d(TAG, "testing = " + testInt);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        //outState.putInt("testInt", testInt);
-        outState.putSerializable("theFeed", mGridAdapter);
+        outState.putSerializable("theFeed", (Serializable) mGridAdapter);
     }
 
 

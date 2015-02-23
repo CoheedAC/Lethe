@@ -34,7 +34,6 @@ public class  FeedGridViewAdapter extends BaseAdapter implements Serializable {
         mImageList = new ArrayList<>();
     }
 
-
     public void setImageList(List<Image> list) {
         mImageList = list;
     }
