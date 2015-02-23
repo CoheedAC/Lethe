@@ -94,8 +94,8 @@ public class FileUtilities {
         Location location = lm.getLastKnownLocation(lm.getBestProvider(new Criteria(), true));
 
         if (location != null) {
-            coordinates[0] = String.valueOf(location.getLongitude());
-            coordinates[1] = String.valueOf(location.getLatitude());
+            coordinates[0] = String.valueOf(location.getLatitude());
+            coordinates[1] = String.valueOf(location.getLongitude());
         } else {
             // default to isla vista coordinates
             coordinates[0] = "34.4133"; // latitude

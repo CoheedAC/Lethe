@@ -12,6 +12,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -40,8 +41,11 @@ public class LikePicture extends AsyncTask<String, String, Integer> {
             HttpResponse httpResponse = httpclient.execute(new HttpGet(address));
             int statusCode = httpResponse.getStatusLine().getStatusCode();
             if (statusCode == 500)
-                return FAILED;
+                throw new Exception("Internal server error");
         } catch (IOException e) {
+            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+            return FAILED;
+        } catch (Exception e) {
             Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             return FAILED;
         }
@@ -55,6 +59,6 @@ public class LikePicture extends AsyncTask<String, String, Integer> {
         if (integer == SUCCESS)
             FileUtilities.logResults(mContext, TAG, "Liked pic!");
         else
-            FileUtilities.logResults(mContext, TAG, "Failed to like pic");
+            FileUtilities.logResults(mContext, TAG, "Failed to like pic!");
     }
 }

@@ -11,9 +11,15 @@ import com.cs48.lethe.ui.activities.CameraActivity;
 import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
 import com.cs48.lethe.utils.FileUtilities;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -32,6 +38,7 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
     private CameraActivity mCameraActivity;
     private String mImagePath;
     private String mUniqueId;
+    private String mDatePosted;
 
     public PostPicture(Context context) {
         mCameraActivity = (CameraActivity) context;
@@ -109,24 +116,36 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
             Log.d(TAG, "ConnectionType: " + connection.getHeaderField("Content-Type"));
 
             // response from server
-            Log.d(TAG, "Response Code: " + String.valueOf(connection.getResponseCode()));
-            InputStream ISIS = connection.getInputStream();
-            Log.d(TAG, "Availability: " + String.valueOf(ISIS.available()));
-            buffer = new byte[ISIS.available()];
-            ISIS.read(buffer, 0, bufferSize);
-            mUniqueId = new String(buffer);
-            Log.d(TAG, "RESPONSE: " + mUniqueId);
+            InputStream inputStreamResponse = connection.getInputStream();
+            String response = convertInputStreamToString(inputStreamResponse).trim();
+            if (response.isEmpty())
+                throw new FileNotFoundException("Response from server is empty");
+            JSONObject jsonObject = new JSONObject(response);
+            mUniqueId = jsonObject.getString("id");
+            mDatePosted = jsonObject.getString("created");
 
             connection.disconnect();
         } catch (NetworkOnMainThreadException e) {
             Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             return FAILED;
-
         } catch (IOException e) {
+            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+            return FAILED;
+        } catch (JSONException e) {
             Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             return FAILED;
         }
         return SUCCESS;
+    }
+
+    private String convertInputStreamToString(InputStream inputStream) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        String line;
+        String result = "";
+        while ((line = bufferedReader.readLine()) != null)
+            result += line;
+        inputStream.close();
+        return result;
     }
 
     @Override
@@ -134,6 +153,22 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
         mCameraActivity.hideProgressBar();
         if (integer == SUCCESS) {
             FileUtilities.logResults(mCameraActivity, TAG, "Posted pic successfully!");
+
+            Log.d(TAG, "Response:");
+            Log.d(TAG, "id: " + mUniqueId);
+            Log.d(TAG, "created: " + mDatePosted);
+
+            /*
+            FeedDbHelper feedDbHelper = new FeedDbHelper(mCameraActivity);
+            SQLiteDatabase db = feedDbHelper.getWritableDatabase();
+            ContentValues values = new ContentValues();
+            values.put(MeEntry.COLUMN_NAME_PHOTO_ID, mUniqueId);
+            values.put(MeEntry.COLUMN_NAME_POST_DATE, mDatePosted);
+            values.put(MeEntry.COLUMN_NAME_VIEWS, 0);
+            values.put(MeEntry.COLUMN_NAME_LIKES, 0);
+            long newRowId = db.insert(MeEntry.TABLE_NAME, "null", values);
+            */
+
             mCameraActivity.setResult(Activity.RESULT_OK);
             mCameraActivity.finish();
         } else {

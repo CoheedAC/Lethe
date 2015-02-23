@@ -24,10 +24,10 @@
     <string name="server_post">sendPic</string>
     <string name="server_like">like/</string>
 
-    <string name="json_id">name</string>
+    <string name="json_id">id</string>
     <string name="json_url_thumbnail">thumb</string>
-    <string name="json_url_full">location</string>
-    <string name="json_views">view</string>
+    <string name="json_url_full">full</string>
+    <string name="json_views">views</string>
     <string name="json_likes">likes</string>
 
 <!-- TODO: Remove or change this placeholder text -->
