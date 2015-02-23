@@ -17,7 +17,6 @@ import com.cs48.lethe.ui.fragments.FeedFragment;
 import com.cs48.lethe.ui.fragments.MeFragment;
 import com.cs48.lethe.ui.fragments.MoreFragment;
 import com.cs48.lethe.ui.fragments.PeekFragment;
-import com.cs48.lethe.utils.Image;
 
 import java.util.List;
 
@@ -33,7 +32,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
     private TabsPagerAdapter mTabsPagerAdapter;
     private ViewPager mViewPager;
-    private Image[] mImages;
 
     /**
      * Creates the action bar and title.
@@ -67,6 +65,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mTabsPagerAdapter);
+        mViewPager.setOffscreenPageLimit(3);
 
         // When swiping between different sections, select the corresponding
         // tab. We can also use ActionBar.Tab#select() to do this if we have
@@ -144,13 +143,23 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                         ((MeFragment) fragment).update();
                     }
                     if (fragment instanceof FeedFragment) {
-                        ((FeedFragment) fragment).requestFeed();
+                        ((FeedFragment) fragment).update();
                     }
 
                 }
             }
 
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+//Save the fragment's instance
+//        getSupportFragmentManager().putFragment(outState, "mContent", mContent);
+
+
     }
 
     /**

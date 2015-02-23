@@ -17,8 +17,7 @@ import android.widget.GridView;
 import com.cs48.lethe.R;
 import com.cs48.lethe.ui.activities.FullPictureActivity;
 import com.cs48.lethe.ui.adapters.MeGridViewAdapter;
-
-import java.io.File;
+import com.cs48.lethe.utils.Image;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -56,6 +55,7 @@ public class MeFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
     }
 
     /**
@@ -86,9 +86,8 @@ public class MeFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent showImageIntent = new Intent(getActivity(), FullPictureActivity.class);
 
-                File imageFile = (File) mGridAdapter.getItem(position);
-                showImageIntent.setData(Uri.fromFile(imageFile));
-                showImageIntent.putExtra("position", position);
+                Image image = (Image) mGridAdapter.getItem(position);
+                showImageIntent.putExtra("image", image);
                 showImageIntent.setAction(FullPictureActivity.VIEW_OVERLAY);
 
                 startActivityForResult(showImageIntent, FullPictureActivity.FULL_IMAGE_REQUEST);

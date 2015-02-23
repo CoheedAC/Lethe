@@ -16,15 +16,9 @@ import android.widget.GridView;
 import android.widget.Toast;
 
 import com.cs48.lethe.R;
-import com.cs48.lethe.server.RequestFeed;
 import com.cs48.lethe.ui.activities.FullPictureActivity;
 import com.cs48.lethe.ui.adapters.FeedGridViewAdapter;
-import com.cs48.lethe.ui.dialogs.NetworkUnavailableDialog;
-import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.Image;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -40,7 +34,6 @@ public class FeedFragment extends Fragment {
 
     private FeedGridViewAdapter mGridAdapter;
     private GridView mGridView;
-    private List<Image> mImageList;
 
     private OnFragmentInteractionListener mListener;
 
@@ -60,8 +53,6 @@ public class FeedFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-
-        mImageList = new ArrayList<>();
     }
 
     /**
@@ -74,7 +65,7 @@ public class FeedFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_feed, container, false);
         mGridView = (GridView) rootView.findViewById(R.id.feedGridView);
 
-        mGridAdapter = new FeedGridViewAdapter(getActivity(), mImageList);
+        mGridAdapter = new FeedGridViewAdapter(getActivity());
         mGridView.setAdapter(mGridAdapter);
 
         /**
@@ -87,34 +78,18 @@ public class FeedFragment extends Fragment {
                 Intent showImageIntent = new Intent(getActivity(), FullPictureActivity.class);
 
                 Image image = (Image) mGridAdapter.getItem(position);
-                image.setPosition(position);
                 showImageIntent.putExtra("image", image);
                 showImageIntent.setAction(FullPictureActivity.VIEW_ONLY);
 
                 startActivity(showImageIntent);
             }
         });
-        requestFeed();
 
         return rootView;
     }
 
-    public void requestFeed() {
-        if (FileUtilities.isNetworkAvailable(getActivity())) {
-            String[] coordinates = FileUtilities.getLocationCoordinates(getActivity());
-            String latitude = coordinates[0].replace(".", "a");
-            String longitude = coordinates[1].replace(".", "a");
-            new RequestFeed(getActivity(), mGridAdapter).execute(longitude, latitude);
-        } else {
-            new NetworkUnavailableDialog().show(getActivity().getFragmentManager(), TAG);
-        }
-    }
-
-    /**
-     * Updates the grid.
-     */
     public void update() {
-        mGridAdapter.update();
+        mGridAdapter.requestFeed();
     }
 
     /**
@@ -145,11 +120,21 @@ public class FeedFragment extends Fragment {
          * Requests to get new images on the server.
          */
         if (id == R.id.action_refresh) {
-            requestFeed();
+            mGridAdapter.requestFeed();
             Toast.makeText(getActivity(), "Refreshing...", Toast.LENGTH_SHORT).show();
         }
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+
+
+    }
+
+
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {

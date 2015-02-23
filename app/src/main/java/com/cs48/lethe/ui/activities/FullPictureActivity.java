@@ -14,7 +14,6 @@ import android.widget.Toast;
 import com.cs48.lethe.R;
 import com.cs48.lethe.server.DislikePicture;
 import com.cs48.lethe.server.LikePicture;
-import com.cs48.lethe.server.RequestFullPicture;
 import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
 import com.cs48.lethe.utils.Image;
 import com.cs48.lethe.utils.OnSwipeTouchListener;
@@ -68,9 +67,9 @@ public class FullPictureActivity extends ActionBarActivity {
         Intent intent = getIntent();
         mImage = (Image) intent.getSerializableExtra("image");
 
-        Picasso.with(this).load(mImage.getUrl()).into(mImageView);
 
         if (intent.getAction().equals(VIEW_OVERLAY)) {
+            Picasso.with(this).load(mImage.getFile()).into(mImageView);
             showPictureOverlay();
             mImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -79,36 +78,39 @@ public class FullPictureActivity extends ActionBarActivity {
                 }
             });
         } else {
+            Picasso.with(this).load(mImage.getFullUrl()).into(mImageView);
             hidePictureOverlay();
-            new RequestFullPicture(this, mProgressBar, mImage).execute(mImage.getId());
             setUpGestureListener();
         }
     }
 
-
     public void setImageView(Image image) {
         mImage = image;
 
-        Target target = new Target() {
-            @Override
-            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                mProgressBar.setVisibility(View.GONE);
-                mImageView.setImageBitmap(bitmap);
-            }
+        if (!mImage.isHidden()) {
+            Target target = new Target() {
+                @Override
+                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                    mProgressBar.setVisibility(View.GONE);
+                    mImageView.setImageBitmap(bitmap);
+                }
 
-            @Override
-            public void onBitmapFailed(Drawable errorDrawable) {
-                mProgressBar.setVisibility(View.GONE);
-                new OperationFailedDialog().show(getFragmentManager(), TAG);
-            }
+                @Override
+                public void onBitmapFailed(Drawable errorDrawable) {
+                    mProgressBar.setVisibility(View.GONE);
+                    new OperationFailedDialog().show(getFragmentManager(), TAG);
+                }
 
-            @Override
-            public void onPrepareLoad(Drawable placeHolderDrawable) {
-            }
-        };
-        Picasso.with(this)
-                .load(mImage.getUrl())
-                .into(target);
+                @Override
+                public void onPrepareLoad(Drawable placeHolderDrawable) {
+                }
+            };
+
+
+            Picasso.with(this)
+                    .load(mImage.getFullUrl())
+                    .into(target);
+        }
     }
 
     /**
@@ -169,7 +171,7 @@ public class FullPictureActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
 //                FileUtilities.deleteImage(mImageUri);
-                Toast.makeText(FullPictureActivity.this, "Deleted image #" + (mImage.getPosition() + 1), Toast.LENGTH_SHORT).show();
+                Toast.makeText(FullPictureActivity.this, "Deleted image", Toast.LENGTH_SHORT).show();
                 setResult(RESULT_OK);
                 finish();
             }

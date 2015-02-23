@@ -113,12 +113,12 @@ public class RequestFullPicture extends AsyncTask<String, String, String> {
     private Image parseJSON(String result) {
         try {
             JSONObject jsonObject = new JSONObject(result);
-            String url = jsonObject.getString(mContext.getString(R.string.json_url_full));
-//            String id = jsonObject.getString(mContext.getString(R.string.json_id));
+            String fullUrl = jsonObject.getString(mContext.getString(R.string.json_url_full));
+            String id = jsonObject.getString(mContext.getString(R.string.json_id));
             int views = jsonObject.getInt(mContext.getString(R.string.json_views));
             int likes = jsonObject.getInt(mContext.getString(R.string.json_likes));
 //            mImage.setId(id);
-            mImage.setUrl(url);
+            mImage.setFullUrl(fullUrl);
             mImage.setViews(views);
             mImage.setLikes(likes);
             return mImage;

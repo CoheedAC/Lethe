@@ -45,7 +45,9 @@ public class RequestFeed extends AsyncTask<String, Void, String> {
      */
     @Override
     protected String doInBackground(String... location) {
-        String address = mContext.getResources().getString(R.string.server) + mContext.getString(R.string.server_recent) + location[0] + "," + location[1];
+        String latitude = location[0].replace(".","a");
+        String longitude = location[1].replace(".","a");
+        String address = mContext.getResources().getString(R.string.server) + mContext.getString(R.string.server_recent) + longitude + "," + latitude;
         return getRequest(address);
     }
 
@@ -114,7 +116,7 @@ public class RequestFeed extends AsyncTask<String, Void, String> {
         JSONArray jsonArray = new JSONArray(jsonData);
         List<Image> imageList = new ArrayList<>();
         for (int i = 0; i < jsonArray.length(); i++)
-            imageList.add(parseJSON(jsonArray.getJSONObject(i), i));
+            imageList.add(parseJSON(jsonArray.getJSONObject(i)));
         return imageList;
     }
 
@@ -122,11 +124,15 @@ public class RequestFeed extends AsyncTask<String, Void, String> {
      * Parses the JSON returned from the server and
      * returns a Thumbnail object
      */
-    private Image parseJSON(JSONObject jsonObject, int index) {
+    private Image parseJSON(JSONObject jsonObject) {
         try {
             String id = jsonObject.getString(mContext.getString(R.string.json_id));
-            String url = jsonObject.getString(mContext.getString(R.string.json_url_thumbnail));
-            return new Image(id, url, index);
+            String thumbnailUrl = jsonObject.getString(mContext.getString(R.string.json_url_thumbnail));
+            String fullUrl = jsonObject.getString(mContext.getString(R.string.json_url_full));
+            int views = jsonObject.getInt(mContext.getString(R.string.json_views));
+            int likes = jsonObject.getInt(mContext.getString(R.string.json_likes));
+
+            return new Image(id, thumbnailUrl, fullUrl, views, likes);
         } catch (JSONException e) {
             Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
         }

@@ -40,8 +40,11 @@ public class DislikePicture extends AsyncTask<String, String, Integer> {
             HttpResponse httpResponse = httpclient.execute(new HttpGet(address));
             int statusCode = httpResponse.getStatusLine().getStatusCode();
             if (statusCode == 500)
-                return FAILED;
+                throw new Exception("Internal server error");
         } catch (IOException e) {
+            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+            return FAILED;
+        } catch (Exception e) {
             Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             return FAILED;
         }

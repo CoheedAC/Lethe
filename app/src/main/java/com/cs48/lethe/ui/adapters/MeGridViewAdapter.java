@@ -1,7 +1,6 @@
 package com.cs48.lethe.ui.adapters;
 
 import android.content.Context;
-import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -10,13 +9,11 @@ import android.widget.ImageView;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.utils.FileUtilities;
+import com.cs48.lethe.utils.Image;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -26,12 +23,16 @@ public class MeGridViewAdapter extends BaseAdapter {
 
     public static final String TAG = MeGridViewAdapter.class.getSimpleName();
 
-    private List<File> mImageList;
+    private List<Image> mImageList;
     private Context mContext;
 
     public MeGridViewAdapter(Context context) {
         mContext = context;
-        mImageList = FileUtilities.getPostedImages(context);
+        List<File> postedImageFiles = FileUtilities.getPostedImages(mContext);
+        mImageList = new ArrayList<>();
+        for (File imageFile : postedImageFiles) {
+            mImageList.add(new Image(imageFile.getAbsolutePath()));
+        }
     }
 
     /**
@@ -73,10 +74,9 @@ public class MeGridViewAdapter extends BaseAdapter {
         }
 
 
-
-        Uri imageUri = Uri.fromFile(mImageList.get(position));
+        Image image = (Image) getItem(position);
         Picasso.with(mContext)
-                .load(imageUri)
+                .load(image.getFile())
                 .into(imageView);
 
 //        imageView.setImageBitmap(FileUtilities.getThumbnailSizedBitmap(mContext.getContentResolver(), imageUri)  );
@@ -89,7 +89,11 @@ public class MeGridViewAdapter extends BaseAdapter {
      * the new image(s).
      */
     public void update() {
-        mImageList = FileUtilities.getPostedImages(mContext);
+        List<File> postedImageFiles = FileUtilities.getPostedImages(mContext);
+        mImageList.removeAll(mImageList);
+        for (File imageFile : postedImageFiles) {
+            mImageList.add(new Image(imageFile.getAbsolutePath()));
+        }
         notifyDataSetChanged();
     }
 
@@ -99,11 +103,13 @@ public class MeGridViewAdapter extends BaseAdapter {
     public void deletePostedImages() {
         String subdirectory = FileUtilities.getSubdirectoryName(mContext);
         File sharedExternalDirectory = FileUtilities.getSharedExternalDirectory(mContext);
-        for (File sharedFile : sharedExternalDirectory.listFiles())
+        for (File sharedFile : sharedExternalDirectory.listFiles()) {
             sharedFile.delete();
+        }
         File externalFilesDir = mContext.getExternalFilesDir(subdirectory);
-        for (File savedFile : externalFilesDir.listFiles())
+        for (File savedFile : externalFilesDir.listFiles()) {
             savedFile.delete();
+        }
 
         update();
         FileUtilities.logResults(mContext, TAG, "Deleted all images");
@@ -113,32 +119,33 @@ public class MeGridViewAdapter extends BaseAdapter {
      * Copies the first image in the grid 50 times to test a full grid.
      */
     public void copyFirstImage() {
-        try {
-            File dir = FileUtilities.getFileDirectory(mContext);
-            String src = mImageList.get(0).getAbsolutePath();
-            String imageCopyName = FileUtilities.getUniqueId(FileUtilities.getSimpleName(src));
-            for (int i = 0; i < 50; i++) {
-
-                File dst = new File(dir + "/IMG_" + imageCopyName + "_" + i + ".jpg");
-
-                InputStream in = new FileInputStream(src);
-                OutputStream out = new FileOutputStream(dst);
-
-                // Transfer bytes from in to out
-                byte[] buf = new byte[1024];
-                int len;
-                while ((len = in.read(buf)) > 0) {
-                    out.write(buf, 0, len);
-                }
-                in.close();
-                out.close();
-            }
-
-            update();
-            FileUtilities.logResults(mContext, TAG, "Copied first image");
-        } catch (Exception e) {
-            FileUtilities.logResults(mContext, TAG, "No image to copy");
-        }
+//        try {
+//            File dir = FileUtilities.getFileDirectory(mContext);
+//            String src = String imageCopyName = FileUtilities.getUniqueId(FileUtilities.getSimpleName(src));
+//            for (int i = 0; i < 50; i++) {
+//
+//                File dst = new File(dir + "/IMG_" + imageCopyName + "_" + i + ".jpg");
+//
+//                InputStream in = new FileInputStream(src);
+//                OutputStream out = new FileOutputStream(dst);
+//
+//                // Transfer bytes from in to out
+//                byte[] buf = new byte[1024];
+//                int len;
+//                while ((len = in.read(buf)) > 0) {
+//                    out.write(buf, 0, len);
+//                }
+//
+//                mImageList.add(dst);
+//                notifyDataSetChanged();
+//                in.close();
+//                out.close();
+//            }
+//
+//            FileUtilities.logResults(mContext, TAG, "Copied first image");
+//        } catch (Exception e) {
+//            FileUtilities.logResults(mContext, TAG, "No image to copy");
+//        }
     }
 
 }
