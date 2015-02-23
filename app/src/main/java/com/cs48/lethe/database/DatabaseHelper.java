@@ -1,11 +1,18 @@
 package com.cs48.lethe.database;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.cs48.lethe.database.DatabaseContract.FeedEntry;
 import com.cs48.lethe.database.DatabaseContract.MeEntry;
+import com.cs48.lethe.utils.Image;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by maxkohne on 2/22/15.
@@ -35,7 +42,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     FeedEntry.COLUMN_NAME_THUMBNAIL_URL + TEXT_TYPE + COMMA_SEP +
                     FeedEntry.COLUMN_NAME_FULL_URL + TEXT_TYPE + COMMA_SEP +
                     FeedEntry.COLUMN_NAME_VIEWS + INT_TYPE + COMMA_SEP +
-                    FeedEntry.COLUMN_NAME_LIKES + INT_TYPE +
+                    FeedEntry.COLUMN_NAME_LIKES + INT_TYPE + COMMA_SEP +
+                    FeedEntry.COLUMN_NAME_VISIBILITY + " INTEGER DEFAULT " + FeedEntry.VISIBLE +
                     ")";
 
     // Me table create statement
@@ -69,6 +77,85 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         // create new tables
         onCreate(db);
+    }
+
+    public boolean imageExist(String uniqueId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String selectQuery = "SELECT * FROM " + FeedEntry.TABLE_NAME + " WHERE "
+            + FeedEntry.COLUMN_NAME_PHOTO_ID + " = " + uniqueId;
+
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        if (c.getCount() == 0)
+            return false;
+        return true;
+    }
+
+    public void updateImage(String uniqueId, int likes, int views) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(FeedEntry.COLUMN_NAME_VIEWS, views);
+        values.put(FeedEntry.COLUMN_NAME_LIKES, likes);
+
+        db.update(FeedEntry.TABLE_NAME, values, FeedEntry.COLUMN_NAME_PHOTO_ID + " = ?", new String[] {uniqueId});
+    }
+
+    public void createFeedTable(List<Image> imageList) {
+        Log.d(LOG, "createFeedTable called");
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        for (Image image : imageList) {
+            ContentValues values = new ContentValues();
+            values.put(FeedEntry.COLUMN_NAME_PHOTO_ID, image.getUniqueId());
+            values.put(FeedEntry.COLUMN_NAME_THUMBNAIL_URL, image.getThumbnailUrl());
+            values.put(FeedEntry.COLUMN_NAME_FULL_URL, image.getFullUrl());
+            values.put(FeedEntry.COLUMN_NAME_VIEWS, image.getViews());
+            values.put(FeedEntry.COLUMN_NAME_LIKES, image.getLikes());
+
+            boolean exist = imageExist(image.getUniqueId());
+            if (!exist) {
+                Log.d(LOG, image.getUniqueId() + " does not exist");
+                db.insert(FeedEntry.TABLE_NAME, null, values);
+            }else {
+                Log.d(LOG, image.getUniqueId() + "  exists");
+                updateImage(image.getUniqueId(), image.getLikes(), image.getViews());
+            }
+        }
+    }
+
+    public void hideImage(String uniqueId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(FeedEntry.COLUMN_NAME_VISIBILITY, FeedEntry.HIDDEN);
+
+        db.update(FeedEntry.TABLE_NAME, values, FeedEntry.COLUMN_NAME_PHOTO_ID + " = ?", new String[] {uniqueId});
+    }
+
+    public List<Image> fetchImageList() {
+        List<Image> imageList = new ArrayList<>();
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String selectQuery = "SELECT * FROM " + FeedEntry.TABLE_NAME + " WHERE " + FeedEntry.COLUMN_NAME_VISIBILITY
+                + " = " + FeedEntry.VISIBLE;
+
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        if (c.moveToFirst()) {
+            do {
+                String uniqueId = c.getString(c.getColumnIndex(FeedEntry.COLUMN_NAME_PHOTO_ID));
+                String thumbnailUrl = c.getString(c.getColumnIndex(FeedEntry.COLUMN_NAME_THUMBNAIL_URL));
+                String fullUrl = c.getString(c.getColumnIndex(FeedEntry.COLUMN_NAME_FULL_URL));
+                int views = c.getInt(c.getColumnIndex(FeedEntry.COLUMN_NAME_VIEWS));
+                int likes = c.getInt(c.getColumnIndex(FeedEntry.COLUMN_NAME_LIKES));
+
+                imageList.add(new Image(uniqueId, thumbnailUrl, fullUrl, views, likes));
+            } while (c.moveToNext());
+        }
+
+        return imageList;
     }
 
 }

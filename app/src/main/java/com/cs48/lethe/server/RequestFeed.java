@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.cs48.lethe.R;
+import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.ui.adapters.FeedGridViewAdapter;
 import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.Image;
@@ -45,8 +46,8 @@ public class RequestFeed extends AsyncTask<String, Void, String> {
      */
     @Override
     protected String doInBackground(String... location) {
-        String latitude = location[0].replace(".","a");
-        String longitude = location[1].replace(".","a");
+        String latitude = location[0].replace(".", "a");
+        String longitude = location[1].replace(".", "a");
         String address = mContext.getResources().getString(R.string.server) + mContext.getString(R.string.server_recent) + longitude + "," + latitude;
         return getRequest(address);
     }
@@ -96,9 +97,11 @@ public class RequestFeed extends AsyncTask<String, Void, String> {
         if (!result.isEmpty()) {
             FileUtilities.logResults(mContext, TAG, "Request for image feed succeeded");
             try {
-                mFeedGridViewAdapter.setImageList(getPictures(result));
-                mFeedGridViewAdapter.notifyDataSetChanged();
+                List<Image> imageList = getPictures(result);
 
+                DatabaseHelper databaseHelper = new DatabaseHelper(mContext);
+                databaseHelper.createFeedTable(imageList);
+                mFeedGridViewAdapter.fetchImageList();
             } catch (JSONException e) {
                 Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             }
@@ -131,8 +134,10 @@ public class RequestFeed extends AsyncTask<String, Void, String> {
             String fullUrl = jsonObject.getString(mContext.getString(R.string.json_url_full));
             int views = jsonObject.getInt(mContext.getString(R.string.json_views));
             int likes = jsonObject.getInt(mContext.getString(R.string.json_likes));
+//            String datePosted = jsonObject.getString(mContext.getString(R.string.json_date_posted));
 
             return new Image(id, thumbnailUrl, fullUrl, views, likes);
+//            return new Image(id, thumbnailUrl, fullUrl, views, likes, datePosted);
         } catch (JSONException e) {
             Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
         }

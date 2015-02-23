@@ -9,13 +9,13 @@ import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.cs48.lethe.R;
+import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.server.RequestFeed;
 import com.cs48.lethe.ui.dialogs.NetworkUnavailableDialog;
 import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.Image;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,11 +30,14 @@ public class FeedGridViewAdapter extends BaseAdapter {
 
     public FeedGridViewAdapter(Context context) {
         mContext = context;
-        mImageList = new ArrayList<>();
+        fetchImageList();
+        requestFeed();
     }
 
-    public void setImageList(List<Image> list) {
-        mImageList = list;
+    public void fetchImageList() {
+        DatabaseHelper databaseHelper = new DatabaseHelper(mContext);
+        mImageList = databaseHelper.fetchImageList();
+        notifyDataSetChanged();
     }
 
     /**
