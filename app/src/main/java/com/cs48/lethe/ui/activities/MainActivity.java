@@ -32,7 +32,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
     private TabsPagerAdapter mTabsPagerAdapter;
     private ViewPager mViewPager;
-
+    private FeedFragment mContent;
     /**
      * Creates the action bar and title.
      */
@@ -65,7 +65,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mTabsPagerAdapter);
-        mViewPager.setOffscreenPageLimit(3);
+        //mViewPager.setOffscreenPageLimit(3);
 
         // When swiping between different sections, select the corresponding
         // tab. We can also use ActionBar.Tab#select() to do this if we have
@@ -156,10 +156,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-//Save the fragment's instance
-//        getSupportFragmentManager().putFragment(outState, "mContent", mContent);
-
-
+  //save the fragment's instance
+    //   getSupportFragmentManager().putFragment(outState, "mContent", mContent);
     }
 
     /**

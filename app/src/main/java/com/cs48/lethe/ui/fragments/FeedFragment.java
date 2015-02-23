@@ -55,6 +55,7 @@ public class FeedFragment extends Fragment {
         setHasOptionsMenu(true);
     }
 
+
     /**
      * Creates the feed grid and handles image taps on grid.
      */
@@ -126,16 +127,6 @@ public class FeedFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-
-
-    }
-
-
-
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
@@ -153,6 +144,34 @@ public class FeedFragment extends Fragment {
                     + " must implement OnFragmentInteractionListener");
         }
     }
+
+
+    /**
+     * Runs when the fragment is selected, checking to see if it has a previous state saved, and
+     * putting the user back to their current scroll location in the fragment
+     * @param savedInstanceState
+     */
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            //testInt = savedInstanceState.getInt("testInt");
+            //Log.d(TAG, "saved testing = " + testInt);
+            mGridAdapter = (FeedGridViewAdapter) savedInstanceState.getSerializable("theFeed");
+        }
+
+       // testInt++;
+        //Log.d(TAG, "testing = " + testInt);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        //outState.putInt("testInt", testInt);
+        outState.putSerializable("theFeed", mGridAdapter);
+    }
+
 
     @Override
     public void onDetach() {

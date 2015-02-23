@@ -15,13 +15,14 @@ import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.Image;
 import com.squareup.picasso.Picasso;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * A BaseAdapter that handles the grid for the feed tab.
  */
-public class FeedGridViewAdapter extends BaseAdapter {
+public class  FeedGridViewAdapter extends BaseAdapter implements Serializable {
 
     public static final String TAG = FeedGridViewAdapter.class.getSimpleName();
 
@@ -32,6 +33,7 @@ public class FeedGridViewAdapter extends BaseAdapter {
         mContext = context;
         mImageList = new ArrayList<>();
     }
+
 
     public void setImageList(List<Image> list) {
         mImageList = list;
