@@ -3,6 +3,11 @@ package com.cs48.lethe.utils;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
@@ -16,8 +21,6 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -73,6 +76,35 @@ public class FileUtilities {
     }
 
     /**
+     * Returns whether there is internet connectivity or not.
+     */
+    public static boolean isNetworkAvailable(Context context) {
+        ConnectivityManager manager = (ConnectivityManager)
+                context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = manager.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnected();
+    }
+
+    /**
+     * Returns the current latitude[0] and longitude[1]
+     */
+    public static String[] getLocationCoordinates(Context context) {
+        String[] coordinates = new String[2];
+        LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        Location location = lm.getLastKnownLocation(lm.getBestProvider(new Criteria(), true));
+
+        if (location != null) {
+            coordinates[0] = String.valueOf(location.getLongitude());
+            coordinates[1] = String.valueOf(location.getLatitude());
+        } else {
+            // default to isla vista coordinates
+            coordinates[0] = "34.4133"; // latitude
+            coordinates[1] = "-119.861"; // longitude
+        }
+        return coordinates;
+    }
+
+    /**
      * Returns true if external storage is mounted. False otherwise.
      */
     public static boolean isExternalStorageAvailable() {
@@ -91,7 +123,7 @@ public class FileUtilities {
      * Returns app subdirectory in the external public storage. If directory doesn't exist, then it's created.
      */
     public static File getSharedExternalDirectory(Context context) {
-        File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/" + getSubdirectoryName(context));
+        File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + File.separator + getSubdirectoryName(context));
         if (!dir.exists()) {
             if (!dir.mkdirs()) {
                 Log.d(TAG, "Failed to make directory.");
@@ -101,16 +133,15 @@ public class FileUtilities {
     }
 
     /**
-     * Returns app subdirectory in the external public storage. If directory doesn't exist, then it's created.
+     * Returns the cache directory.
      */
-    public static File getCachedDirectory() {
-        File dir = new File(Environment.getExternalStorageDirectory(), "cache");
-        if (!dir.exists()) {
-            if (!dir.mkdirs()) {
-                Log.d(TAG, "Failed to make directory.");
-            }
-        }
-        return dir;
+    public static File getCachedDirectory(Context context) {
+        ApplicationSettings settings = new ApplicationSettings(context);
+        String storageType = settings.getStoragePreference();
+        if (storageType.equals(StorageType.INTERNAL) || !isExternalStorageAvailable()) {
+            return context.getCacheDir();
+        } else
+            return context.getExternalCacheDir();
     }
 
     /**
@@ -130,8 +161,8 @@ public class FileUtilities {
     /**
      * Returns an array of jpg files that are saved in the storage directory
      */
-    public static List<File> getCachedImages() {
-        File cachedDirectory = getCachedDirectory();
+    public static List<File> getCachedImages(Context context) {
+        File cachedDirectory = getCachedDirectory(context);
         Log.d(TAG, cachedDirectory.getAbsolutePath());
         File[] filteredFiles = cachedDirectory.listFiles(new FileFilter() {
             @Override
@@ -142,71 +173,12 @@ public class FileUtilities {
         return new ArrayList<>(Arrays.asList(filteredFiles));
     }
 
-    public static void deleteCachedImages() {
-        File cachedDirectory = getCachedDirectory();
-        for (File cachedFile : cachedDirectory.listFiles())
-            cachedFile.delete();
-    }
-
-    /**
-     * Deletes all images in all directories related to the app.
-     * (i.e. private and public external storage).
-     */
-    public static void deletePostedImages(Context context) {
-        String subdirectory = getSubdirectoryName(context);
-        File sharedExternalDirectory = getSharedExternalDirectory(context);
-        for (File sharedFile : sharedExternalDirectory.listFiles())
-            sharedFile.delete();
-        File externalFilesDir = context.getExternalFilesDir(subdirectory);
-        for (File savedFile : externalFilesDir.listFiles())
-            savedFile.delete();
-    }
-
     /**
      * Deletes the image from a given Uri path
      */
     public static boolean deleteImage(Uri deleteUri) {
         File imageFile = new File(deleteUri.getPath());
         return imageFile.delete();
-    }
-
-    /**
-     * Copies a file from the source to the destination.
-     */
-    public static void copyFile(String src, String dst) throws IOException {
-        InputStream in = new FileInputStream(src);
-        OutputStream out = new FileOutputStream(dst);
-
-        // Transfer bytes from in to out
-        byte[] buf = new byte[1024];
-        int len;
-        while ((len = in.read(buf)) > 0) {
-            out.write(buf, 0, len);
-        }
-        in.close();
-        out.close();
-    }
-
-    /**
-     * Copies a file numCopies amount of times in the same directory.
-     */
-    public static void copyImage(Context context, String path, int numCopies) throws IOException {
-        File dir = getFileDirectory(context);
-        for (int i = 0; i < numCopies; i++) {
-            File dst = new File(dir + "/IMG_" + (i + 1) + ".jpg");
-
-            InputStream in = new FileInputStream(path);
-            OutputStream out = new FileOutputStream(dst);
-
-            // Transfer bytes from in to out
-            byte[] buf = new byte[1024];
-            int len;
-            while ((len = in.read(buf)) > 0) {
-                out.write(buf, 0, len);
-            }
-            in.close();
-            out.close();
-        }
     }
 
     /**
@@ -234,26 +206,11 @@ public class FileUtilities {
     }
 
     /**
-     * Create a File for saving an image or video
-     */
-    public static File saveCachedImage(Context context) {
-        File fileDirectory = getCachedDirectory();
-        return new File(fileDirectory.getPath() + File.separator + getImageFileName());
-    }
-
-    /**
      * Returns a string of a file name based upon the timestamp
      */
     private static String getImageFileName() {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         return "IMG_" + timeStamp + ".jpg";
-    }
-
-    /**
-     * Returns a string of a file name based upon the timestamp
-     */
-    public static String createCachedFileName(String uniqueId) {
-        return "IMG_" + uniqueId + ".jpg";
     }
 
     /**

@@ -15,7 +15,7 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 
 import com.cs48.lethe.R;
-import com.cs48.lethe.ui.activities.FullScreenImageActivity;
+import com.cs48.lethe.ui.activities.FullPictureActivity;
 import com.cs48.lethe.ui.adapters.MeGridViewAdapter;
 
 import java.io.File;
@@ -84,14 +84,14 @@ public class MeFragment extends Fragment {
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent showImageIntent = new Intent(getActivity(), FullScreenImageActivity.class);
+                Intent showImageIntent = new Intent(getActivity(), FullPictureActivity.class);
 
                 File imageFile = (File) mGridAdapter.getItem(position);
                 showImageIntent.setData(Uri.fromFile(imageFile));
                 showImageIntent.putExtra("position", position);
-                showImageIntent.setAction(FullScreenImageActivity.VIEW_OVERLAY);
+                showImageIntent.setAction(FullPictureActivity.VIEW_OVERLAY);
 
-                startActivityForResult(showImageIntent, FullScreenImageActivity.FULL_IMAGE_REQUEST);
+                startActivityForResult(showImageIntent, FullPictureActivity.FULL_IMAGE_REQUEST);
             }
         });
 
@@ -102,8 +102,8 @@ public class MeFragment extends Fragment {
      * Hides the refresh and the clear cache buttons.
      */
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        menu.getItem(2).setVisible(true);
-        menu.getItem(1).setVisible(true);
+        menu.findItem(R.id.action_delete_images).setVisible(true);
+        menu.findItem(R.id.action_copy_images).setVisible(true);
     }
 
     /**
@@ -118,7 +118,7 @@ public class MeFragment extends Fragment {
          * testing purposes.
          */
         if (id == R.id.action_delete_images) {
-            mGridAdapter.deleteAllImages();
+            mGridAdapter.deletePostedImages();
             return true;
         }
 
@@ -127,7 +127,7 @@ public class MeFragment extends Fragment {
          * a dummy grid for testing purposes.
          */
         if (id == R.id.action_copy_images) {
-            mGridAdapter.copyImage();
+            mGridAdapter.copyFirstImage();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -140,7 +140,7 @@ public class MeFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
 
         // updates the grid if the user deletes the image in the full screen view
-        if (requestCode == FullScreenImageActivity.FULL_IMAGE_REQUEST && resultCode == FullScreenImageActivity.RESULT_OK) {
+        if (requestCode == FullPictureActivity.FULL_IMAGE_REQUEST && resultCode == FullPictureActivity.RESULT_OK) {
             update();
         }
     }

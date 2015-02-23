@@ -7,12 +7,16 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.utils.FileUtilities;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 /**
@@ -68,9 +72,14 @@ public class MeGridViewAdapter extends BaseAdapter {
             imageView.setBackgroundColor(mContext.getResources().getColor(R.color.image_load));
         }
 
+
+
         Uri imageUri = Uri.fromFile(mImageList.get(position));
-        //imageView.setImageURI(imageUri);
-        imageView.setImageBitmap(FileUtilities.getThumbnailSizedBitmap(mContext.getContentResolver(), imageUri)  );
+        Picasso.with(mContext)
+                .load(imageUri)
+                .into(imageView);
+
+//        imageView.setImageBitmap(FileUtilities.getThumbnailSizedBitmap(mContext.getContentResolver(), imageUri)  );
         return imageView;
     }
 
@@ -87,22 +96,48 @@ public class MeGridViewAdapter extends BaseAdapter {
     /**
      * Deletes all of the images taken from this app.
      */
-    public void deleteAllImages() {
-        FileUtilities.deletePostedImages(mContext);
+    public void deletePostedImages() {
+        String subdirectory = FileUtilities.getSubdirectoryName(mContext);
+        File sharedExternalDirectory = FileUtilities.getSharedExternalDirectory(mContext);
+        for (File sharedFile : sharedExternalDirectory.listFiles())
+            sharedFile.delete();
+        File externalFilesDir = mContext.getExternalFilesDir(subdirectory);
+        for (File savedFile : externalFilesDir.listFiles())
+            savedFile.delete();
+
         update();
-        Toast.makeText(mContext, "Deleted all images", Toast.LENGTH_LONG).show();
+        FileUtilities.logResults(mContext, TAG, "Deleted all images");
     }
 
     /**
      * Copies the first image in the grid 50 times to test a full grid.
      */
-    public void copyImage() {
+    public void copyFirstImage() {
         try {
-            FileUtilities.copyImage(mContext, mImageList.get(0).getAbsolutePath(), 50);
+            File dir = FileUtilities.getFileDirectory(mContext);
+            String src = mImageList.get(0).getAbsolutePath();
+            String imageCopyName = FileUtilities.getUniqueId(FileUtilities.getSimpleName(src));
+            for (int i = 0; i < 50; i++) {
+
+                File dst = new File(dir + "/IMG_" + imageCopyName + "_" + i + ".jpg");
+
+                InputStream in = new FileInputStream(src);
+                OutputStream out = new FileOutputStream(dst);
+
+                // Transfer bytes from in to out
+                byte[] buf = new byte[1024];
+                int len;
+                while ((len = in.read(buf)) > 0) {
+                    out.write(buf, 0, len);
+                }
+                in.close();
+                out.close();
+            }
+
             update();
-            Toast.makeText(mContext, "Copied first image", Toast.LENGTH_LONG).show();
+            FileUtilities.logResults(mContext, TAG, "Copied first image");
         } catch (Exception e) {
-            Toast.makeText(mContext, "No image to copy", Toast.LENGTH_LONG).show();
+            FileUtilities.logResults(mContext, TAG, "No image to copy");
         }
     }
 

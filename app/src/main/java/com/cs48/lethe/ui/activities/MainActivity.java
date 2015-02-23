@@ -17,6 +17,7 @@ import com.cs48.lethe.ui.fragments.FeedFragment;
 import com.cs48.lethe.ui.fragments.MeFragment;
 import com.cs48.lethe.ui.fragments.MoreFragment;
 import com.cs48.lethe.ui.fragments.PeekFragment;
+import com.cs48.lethe.utils.Image;
 
 import java.util.List;
 
@@ -32,6 +33,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
     private TabsPagerAdapter mTabsPagerAdapter;
     private ViewPager mViewPager;
+    private Image[] mImages;
 
     /**
      * Creates the action bar and title.
@@ -91,7 +93,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             // this tab is selected.
             actionBar.addTab(
                     actionBar.newTab()
-//                            .setText(mTabsPagerAdapter.getPageTitle(i))
                             .setIcon(ICONS[i])
                             .setTabListener(this));
         }
@@ -103,9 +104,9 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        menu.getItem(0).setVisible(false);
-        menu.getItem(1).setVisible(false);
-        menu.getItem(2).setVisible(false);
+        menu.findItem(R.id.action_copy_images).setVisible(false);
+        menu.findItem(R.id.action_delete_images).setVisible(false);
+        menu.findItem(R.id.action_refresh).setVisible(false);
         return true;
     }
 
@@ -142,6 +143,10 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                     if (fragment instanceof MeFragment) {
                         ((MeFragment) fragment).update();
                     }
+                    if (fragment instanceof FeedFragment) {
+                        ((FeedFragment) fragment).requestFeed();
+                    }
+
                 }
             }
 
