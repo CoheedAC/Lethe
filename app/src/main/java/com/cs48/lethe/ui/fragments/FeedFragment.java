@@ -10,6 +10,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
@@ -79,9 +80,25 @@ public class FeedFragment extends Fragment {
                 Image image = (Image) mGridAdapter.getItem(position);
                 showImageIntent.putExtra("uniqueId", image.getUniqueId());
                 showImageIntent.putExtra("position", position);
-                showImageIntent.setAction(FullPictureActivity.FEED_OVERLAY);
+                showImageIntent.setAction(FullPictureActivity.CACHED_IMAGE_INTERFACE);
 
                 startActivityForResult(showImageIntent, FullPictureActivity.FULL_PICTURE_REQUEST);
+            }
+        });
+
+        /**
+         * UNIMPLEMENTED
+         * Scroll state for pull-to-refresh implementation
+         */
+        mGridView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+
             }
         });
 

@@ -13,20 +13,20 @@ public final class DatabaseContract {
     }
 
     /* Inner class that defines the table contents */
-    private static abstract class Table {
-        public static final String COLUMN_NAME_PHOTO_ID = "photoid";
-        public static final String COLUMN_NAME_DATE_POSTED = "dateposted";
+    public static abstract class Table {
+        public static final String COLUMN_NAME_PHOTO_ID = "photo_id";
+        public static final String COLUMN_NAME_DATE_POSTED = "date_posted";
         public static final String COLUMN_NAME_VIEWS = "views";
         public static final String COLUMN_NAME_LIKES = "likes";
     }
 
     /* Inner class that defines the table contents */
-    public static abstract class FeedTable extends Table implements BaseColumns {
-        public static final String TABLE_NAME = "feedtable";
+    public static abstract class CachedImagesTable extends Table implements BaseColumns {
+        public static final String TABLE_NAME = "cached_images_table";
 
-        public static final String COLUMN_NAME_THUMBNAIL_URL = "thumbnailurl";
-        public static final String COLUMN_NAME_FULL_URL = "fullurl";
-        public static final String COLUMN_NAME_IS_LIKED = "isliked";
+        public static final String COLUMN_NAME_THUMBNAIL_URL = "thumbnail_url";
+        public static final String COLUMN_NAME_FULL_URL = "full_url";
+        public static final String COLUMN_NAME_IS_LIKED = "is_liked";
         public static final String COLUMN_NAME_VISIBILITY = "visibility";
 
         public static final int VISIBLE = 1;
@@ -37,9 +37,9 @@ public final class DatabaseContract {
     }
 
     /* Inner class that defines the table contents */
-    public static abstract class MeTable extends Table implements BaseColumns {
-        public static final String TABLE_NAME = "metable";
+    public static abstract class PostedImagesTable extends Table implements BaseColumns {
+        public static final String TABLE_NAME = "posted_images_table";
 
-        public static final String COLUMN_NAME_FILEPATH = "filepath";
+        public static final String COLUMN_NAME_FILE = "file";
     }
 }

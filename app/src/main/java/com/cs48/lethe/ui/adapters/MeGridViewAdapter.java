@@ -9,7 +9,6 @@ import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.cs48.lethe.R;
-import com.cs48.lethe.database.DatabaseContract.MeTable;
 import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.ui.activities.MainActivity;
 import com.cs48.lethe.ui.dialogs.DeleteImageWarningDialog;
@@ -34,11 +33,11 @@ public class MeGridViewAdapter extends BaseAdapter {
     public MeGridViewAdapter(Context context) {
         mContext = context;
         mDatabaseHelper = DatabaseHelper.getInstance(mContext);
-        mImageList = mDatabaseHelper.getImages(MeTable.TABLE_NAME);
+        mImageList = mDatabaseHelper.getPostedImages();
     }
 
     public void fetchImagesFromDatabase() {
-        mImageList = mDatabaseHelper.getImages(MeTable.TABLE_NAME);
+        mImageList = mDatabaseHelper.getPostedImages();
         notifyDataSetChanged();
     }
 

@@ -7,8 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import com.cs48.lethe.database.DatabaseContract.FeedTable;
-import com.cs48.lethe.database.DatabaseContract.MeTable;
+import com.cs48.lethe.database.DatabaseContract.CachedImagesTable;
+import com.cs48.lethe.database.DatabaseContract.PostedImagesTable;
 import com.cs48.lethe.utils.Image;
 
 import java.io.File;
@@ -20,7 +20,8 @@ import java.util.List;
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    private static DatabaseHelper sInstance;;
+    private static DatabaseHelper sInstance;
+    ;
 
     // Logcat tag
     private static final String LOG = "DatabaseHelper";
@@ -39,27 +40,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Table Create Statements
     // Feed table create statement
     private static final String CREATE_TABLE_FEED =
-            "CREATE TABLE " + FeedTable.TABLE_NAME + " (" +
-                    FeedTable._ID + " INTEGER PRIMARY KEY," +
-                    FeedTable.COLUMN_NAME_PHOTO_ID + TEXT_TYPE + COMMA_SEP +
-                    FeedTable.COLUMN_NAME_DATE_POSTED + TEXT_TYPE + COMMA_SEP +
-                    FeedTable.COLUMN_NAME_THUMBNAIL_URL + TEXT_TYPE + COMMA_SEP +
-                    FeedTable.COLUMN_NAME_FULL_URL + TEXT_TYPE + COMMA_SEP +
-                    FeedTable.COLUMN_NAME_VIEWS + INT_TYPE + COMMA_SEP +
-                    FeedTable.COLUMN_NAME_LIKES + INT_TYPE + COMMA_SEP +
-                    FeedTable.COLUMN_NAME_VISIBILITY + " INTEGER DEFAULT " + FeedTable.VISIBLE + COMMA_SEP +
-                    FeedTable.COLUMN_NAME_IS_LIKED + " INTEGER DEFAULT " + FeedTable.FALSE +
+            "CREATE TABLE " + CachedImagesTable.TABLE_NAME + " (" +
+                    CachedImagesTable._ID + " INTEGER PRIMARY KEY," +
+                    CachedImagesTable.COLUMN_NAME_PHOTO_ID + TEXT_TYPE + COMMA_SEP +
+                    CachedImagesTable.COLUMN_NAME_DATE_POSTED + TEXT_TYPE + COMMA_SEP +
+                    CachedImagesTable.COLUMN_NAME_THUMBNAIL_URL + TEXT_TYPE + COMMA_SEP +
+                    CachedImagesTable.COLUMN_NAME_FULL_URL + TEXT_TYPE + COMMA_SEP +
+                    CachedImagesTable.COLUMN_NAME_VIEWS + INT_TYPE + COMMA_SEP +
+                    CachedImagesTable.COLUMN_NAME_LIKES + INT_TYPE + COMMA_SEP +
+                    CachedImagesTable.COLUMN_NAME_VISIBILITY + " INTEGER DEFAULT " + CachedImagesTable.VISIBLE + COMMA_SEP +
+                    CachedImagesTable.COLUMN_NAME_IS_LIKED + " INTEGER DEFAULT " + CachedImagesTable.FALSE +
                     ")";
 
     // Me table create statement
     private static final String CREATE_TABLE_ME =
-            "CREATE TABLE " + MeTable.TABLE_NAME + " (" +
-                    MeTable._ID + " INTEGER PRIMARY KEY," +
-                    MeTable.COLUMN_NAME_PHOTO_ID + TEXT_TYPE + COMMA_SEP +
-                    MeTable.COLUMN_NAME_DATE_POSTED + TEXT_TYPE + COMMA_SEP +
-                    MeTable.COLUMN_NAME_FILEPATH + TEXT_TYPE + COMMA_SEP +
-                    MeTable.COLUMN_NAME_VIEWS + INT_TYPE + COMMA_SEP +
-                    MeTable.COLUMN_NAME_LIKES + INT_TYPE +
+            "CREATE TABLE " + PostedImagesTable.TABLE_NAME + " (" +
+                    PostedImagesTable._ID + " INTEGER PRIMARY KEY," +
+                    PostedImagesTable.COLUMN_NAME_PHOTO_ID + TEXT_TYPE + COMMA_SEP +
+                    PostedImagesTable.COLUMN_NAME_DATE_POSTED + TEXT_TYPE + COMMA_SEP +
+                    PostedImagesTable.COLUMN_NAME_FILE + TEXT_TYPE + COMMA_SEP +
+                    PostedImagesTable.COLUMN_NAME_VIEWS + INT_TYPE + COMMA_SEP +
+                    PostedImagesTable.COLUMN_NAME_LIKES + INT_TYPE +
                     ")";
 
     private static final String DELETE_TABLE = "DROP TABLE IF EXISTS ";
@@ -85,22 +86,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_ME);
     }
 
-
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // on upgrade drop older tables
-        db.execSQL(DELETE_TABLE + FeedTable.TABLE_NAME);
-        db.execSQL(DELETE_TABLE + MeTable.TABLE_NAME);
+        db.execSQL(DELETE_TABLE + CachedImagesTable.TABLE_NAME);
+        db.execSQL(DELETE_TABLE + PostedImagesTable.TABLE_NAME);
 
         // create new tables
         onCreate(db);
     }
 
-    public boolean imageExistInFeed(Image image) {
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        onUpgrade(db, oldVersion, newVersion);
+    }
+
+    public boolean imageExistInCache(Image image) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        String selectQuery = "SELECT * FROM " + FeedTable.TABLE_NAME + " WHERE "
-                + FeedTable.COLUMN_NAME_PHOTO_ID + " = " + image.getUniqueId();
+        String selectQuery = "SELECT * FROM " + CachedImagesTable.TABLE_NAME + " WHERE "
+                + CachedImagesTable.COLUMN_NAME_PHOTO_ID + " = " + image.getUniqueId();
 
         Cursor c = db.rawQuery(selectQuery, null);
         int count = c.getCount();
@@ -109,35 +114,35 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return (count != 0);
     }
 
-    public void updateFeedFromImages(List<Image> imageList) {
+    public void updateCache(List<Image> imageList) {
         SQLiteDatabase db = getWritableDatabase();
 
         for (Image image : imageList) {
-            if (!imageExistInFeed(image)) {
+            if (!imageExistInCache(image)) {
                 ContentValues values = new ContentValues();
-                values.put(FeedTable.COLUMN_NAME_PHOTO_ID, image.getUniqueId());
-                values.put(FeedTable.COLUMN_NAME_DATE_POSTED, image.getDatePosted());
-                values.put(FeedTable.COLUMN_NAME_THUMBNAIL_URL, image.getThumbnailUrl());
-                values.put(FeedTable.COLUMN_NAME_FULL_URL, image.getFullUrl());
-                values.put(FeedTable.COLUMN_NAME_VIEWS, image.getViews());
-                values.put(FeedTable.COLUMN_NAME_LIKES, image.getLikes());
+                values.put(CachedImagesTable.COLUMN_NAME_PHOTO_ID, image.getUniqueId());
+                values.put(CachedImagesTable.COLUMN_NAME_DATE_POSTED, image.getDatePosted());
+                values.put(CachedImagesTable.COLUMN_NAME_THUMBNAIL_URL, image.getThumbnailUrl());
+                values.put(CachedImagesTable.COLUMN_NAME_FULL_URL, image.getFullUrl());
+                values.put(CachedImagesTable.COLUMN_NAME_VIEWS, image.getViews());
+                values.put(CachedImagesTable.COLUMN_NAME_LIKES, image.getLikes());
 
-                db.insert(FeedTable.TABLE_NAME, null, values);
-            }else
+                db.insert(CachedImagesTable.TABLE_NAME, null, values);
+            } else
                 updateDatabaseStatisticsFromImage(image);
         }
         db.close();
     }
 
-    public void clearFeed() {
+    public void clearCachedImages() {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(FeedTable.TABLE_NAME,null,null);
+        db.delete(CachedImagesTable.TABLE_NAME, null, null);
         db.close();
     }
 
     public void clearPostedImages() {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(MeTable.TABLE_NAME,null,null);
+        db.delete(PostedImagesTable.TABLE_NAME, null, null);
         db.close();
     }
 
@@ -145,84 +150,85 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues feedValues = new ContentValues();
-        feedValues.put(FeedTable.COLUMN_NAME_VIEWS, updatedImage.getViews());
-        feedValues.put(FeedTable.COLUMN_NAME_LIKES, updatedImage.getLikes());
+        feedValues.put(CachedImagesTable.COLUMN_NAME_VIEWS, updatedImage.getViews());
+        feedValues.put(CachedImagesTable.COLUMN_NAME_LIKES, updatedImage.getLikes());
 
         ContentValues postedValues = new ContentValues();
-        postedValues.put(MeTable.COLUMN_NAME_VIEWS, updatedImage.getViews());
-        postedValues.put(MeTable.COLUMN_NAME_LIKES, updatedImage.getLikes());
+        postedValues.put(PostedImagesTable.COLUMN_NAME_VIEWS, updatedImage.getViews());
+        postedValues.put(PostedImagesTable.COLUMN_NAME_LIKES, updatedImage.getLikes());
 
-        db.update(FeedTable.TABLE_NAME, feedValues, FeedTable.COLUMN_NAME_PHOTO_ID + " = ?", new String[]{updatedImage.getUniqueId()});
-        db.update(MeTable.TABLE_NAME, feedValues, MeTable.COLUMN_NAME_PHOTO_ID + " = ?", new String[]{updatedImage.getUniqueId()});
+        db.update(CachedImagesTable.TABLE_NAME, feedValues, CachedImagesTable.COLUMN_NAME_PHOTO_ID + " = ?", new String[]{updatedImage.getUniqueId()});
+        db.update(PostedImagesTable.TABLE_NAME, feedValues, PostedImagesTable.COLUMN_NAME_PHOTO_ID + " = ?", new String[]{updatedImage.getUniqueId()});
     }
 
     public void updateImageStatisticsFromDatabase(Image imageToUpdate) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        String selectQuery = "SELECT * FROM " + FeedTable.TABLE_NAME + " WHERE " + FeedTable.COLUMN_NAME_PHOTO_ID
+        String selectQuery = "SELECT * FROM " + CachedImagesTable.TABLE_NAME + " WHERE " + CachedImagesTable.COLUMN_NAME_PHOTO_ID
                 + " = " + imageToUpdate.getUniqueId();
 
         Cursor c = db.rawQuery(selectQuery, null);
         c.moveToFirst();
 
-        imageToUpdate.setViews(c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_VIEWS)));
-        imageToUpdate.setLikes(c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_LIKES)));
+        imageToUpdate.setViews(c.getInt(c.getColumnIndex(CachedImagesTable.COLUMN_NAME_VIEWS)));
+        imageToUpdate.setLikes(c.getInt(c.getColumnIndex(CachedImagesTable.COLUMN_NAME_LIKES)));
 
         db.close();
     }
 
-    public Image getImage(String uniqueId, String tableName) {
+    public Image getCachedImage(String uniqueId) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        if (tableName.equals(FeedTable.TABLE_NAME)) {
+        String selectQuery = "SELECT * FROM " + CachedImagesTable.TABLE_NAME + " WHERE " + CachedImagesTable.COLUMN_NAME_PHOTO_ID
+                + " = " + uniqueId;
 
-            String selectQuery = "SELECT * FROM " + FeedTable.TABLE_NAME + " WHERE " + FeedTable.COLUMN_NAME_PHOTO_ID
-                    + " = " + uniqueId;
+        Cursor c = db.rawQuery(selectQuery, null);
+        c.moveToFirst();
 
-            Cursor c = db.rawQuery(selectQuery, null);
-            c.moveToFirst();
+        db.close();
+        return new Image(c.getString(c.getColumnIndex(CachedImagesTable.COLUMN_NAME_PHOTO_ID)),
+                c.getString(c.getColumnIndex(CachedImagesTable.COLUMN_NAME_DATE_POSTED)),
+                c.getString(c.getColumnIndex(CachedImagesTable.COLUMN_NAME_THUMBNAIL_URL)),
+                c.getString(c.getColumnIndex(CachedImagesTable.COLUMN_NAME_FULL_URL)),
+                c.getInt(c.getColumnIndex(CachedImagesTable.COLUMN_NAME_VIEWS)),
+                c.getInt(c.getColumnIndex(CachedImagesTable.COLUMN_NAME_LIKES)));
+    }
 
-            db.close();
-            return new Image(c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_PHOTO_ID)),
-                    c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_DATE_POSTED)),
-                    c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_THUMBNAIL_URL)),
-                    c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_FULL_URL)),
-                    c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_VIEWS)),
-                    c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_LIKES)));
-        }else {
-            String selectQuery = "SELECT * FROM " + MeTable.TABLE_NAME + " WHERE " + MeTable.COLUMN_NAME_PHOTO_ID
-                    + " = " + uniqueId;
+    public Image getPostedImage(String uniqueId) {
+        SQLiteDatabase db = this.getWritableDatabase();
 
-            Cursor c = db.rawQuery(selectQuery, null);
-            c.moveToFirst();
-            db.close();
+        String selectQuery = "SELECT * FROM " + PostedImagesTable.TABLE_NAME + " WHERE " + PostedImagesTable.COLUMN_NAME_PHOTO_ID
+                + " = " + uniqueId;
 
-            return new Image(c.getString(c.getColumnIndex(MeTable.COLUMN_NAME_PHOTO_ID)),
-                    c.getString(c.getColumnIndex(MeTable.COLUMN_NAME_DATE_POSTED)),
-                    new File(c.getString(c.getColumnIndex(MeTable.COLUMN_NAME_FILEPATH))),
-                    c.getInt(c.getColumnIndex(MeTable.COLUMN_NAME_VIEWS)),
-                    c.getInt(c.getColumnIndex(MeTable.COLUMN_NAME_LIKES)));
-        }
+        Cursor c = db.rawQuery(selectQuery, null);
+        c.moveToFirst();
+        db.close();
+
+        return new Image(c.getString(c.getColumnIndex(PostedImagesTable.COLUMN_NAME_PHOTO_ID)),
+                c.getString(c.getColumnIndex(PostedImagesTable.COLUMN_NAME_DATE_POSTED)),
+                new File(c.getString(c.getColumnIndex(PostedImagesTable.COLUMN_NAME_FILE))),
+                c.getInt(c.getColumnIndex(PostedImagesTable.COLUMN_NAME_VIEWS)),
+                c.getInt(c.getColumnIndex(PostedImagesTable.COLUMN_NAME_LIKES)));
     }
 
     public void insertPostedImage(Image postedImage) {
         SQLiteDatabase db = getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(MeTable.COLUMN_NAME_PHOTO_ID, postedImage.getUniqueId());
-        values.put(MeTable.COLUMN_NAME_FILEPATH, postedImage.getFile().getAbsolutePath());
-        values.put(MeTable.COLUMN_NAME_DATE_POSTED, postedImage.getDatePosted());
+        values.put(PostedImagesTable.COLUMN_NAME_PHOTO_ID, postedImage.getUniqueId());
+        values.put(PostedImagesTable.COLUMN_NAME_FILE, postedImage.getFile().getAbsolutePath());
+        values.put(PostedImagesTable.COLUMN_NAME_DATE_POSTED, postedImage.getDatePosted());
 
-        db.insert(MeTable.TABLE_NAME, null, values);
+        db.insert(PostedImagesTable.TABLE_NAME, null, values);
         db.close();
     }
 
     public void deletePostedImage(Image imageToDelete) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        String whereClause = MeTable.COLUMN_NAME_PHOTO_ID + " = " + imageToDelete.getUniqueId();
-        String[] whereArgs = new String[] { imageToDelete.getUniqueId() };
-        db.delete(MeTable.TABLE_NAME, whereClause, null);
+        String whereClause = PostedImagesTable.COLUMN_NAME_PHOTO_ID + " = " + imageToDelete.getUniqueId();
+        String[] whereArgs = new String[]{imageToDelete.getUniqueId()};
+        db.delete(PostedImagesTable.TABLE_NAME, whereClause, null);
 
         db.close();
     }
@@ -232,23 +238,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         image.view();
 
         ContentValues feedValues = new ContentValues();
-        feedValues.put(FeedTable.COLUMN_NAME_VIEWS, image.getViews());
+        feedValues.put(CachedImagesTable.COLUMN_NAME_VIEWS, image.getViews());
 
         ContentValues postedValues = new ContentValues();
-        postedValues.put(MeTable.COLUMN_NAME_VIEWS, image.getViews());
+        postedValues.put(PostedImagesTable.COLUMN_NAME_VIEWS, image.getViews());
 
-        db.update(FeedTable.TABLE_NAME, feedValues, FeedTable.COLUMN_NAME_PHOTO_ID + " = ?", new String[]{image.getUniqueId()});
-        db.update(MeTable.TABLE_NAME, postedValues, MeTable.COLUMN_NAME_PHOTO_ID + " = ?", new String[]{image.getUniqueId()});
+        db.update(CachedImagesTable.TABLE_NAME, feedValues, CachedImagesTable.COLUMN_NAME_PHOTO_ID + " = ?", new String[]{image.getUniqueId()});
+        db.update(PostedImagesTable.TABLE_NAME, postedValues, PostedImagesTable.COLUMN_NAME_PHOTO_ID + " = ?", new String[]{image.getUniqueId()});
         db.close();
     }
 
-    public void hideImage(Image imageToHide) {
+    public void hideImage(Image image) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(FeedTable.COLUMN_NAME_VISIBILITY, FeedTable.HIDDEN);
+        values.put(CachedImagesTable.COLUMN_NAME_VISIBILITY, CachedImagesTable.HIDDEN);
 
-        db.update(FeedTable.TABLE_NAME, values, FeedTable.COLUMN_NAME_PHOTO_ID + " = ?", new String[]{imageToHide.getUniqueId()});
+        db.update(CachedImagesTable.TABLE_NAME, values, CachedImagesTable.COLUMN_NAME_PHOTO_ID + " = ?", new String[]{image.getUniqueId()});
         db.close();
     }
 
@@ -257,70 +263,74 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         image.like();
 
         ContentValues values = new ContentValues();
-        values.put(FeedTable.COLUMN_NAME_LIKES, image.getLikes());
-        values.put(FeedTable.COLUMN_NAME_IS_LIKED, FeedTable.TRUE);
+        values.put(CachedImagesTable.COLUMN_NAME_LIKES, image.getLikes());
+        values.put(CachedImagesTable.COLUMN_NAME_IS_LIKED, CachedImagesTable.TRUE);
 
-        db.update(FeedTable.TABLE_NAME, values, FeedTable.COLUMN_NAME_PHOTO_ID + " = ?", new String[]{image.getUniqueId()});
+        db.update(CachedImagesTable.TABLE_NAME, values, CachedImagesTable.COLUMN_NAME_PHOTO_ID + " = ?", new String[]{image.getUniqueId()});
         db.close();
     }
 
     public boolean isImageLiked(Image image) {
         SQLiteDatabase db = getWritableDatabase();
 
-        String selectQuery = "SELECT * FROM " + FeedTable.TABLE_NAME + " WHERE "
-                + FeedTable.COLUMN_NAME_PHOTO_ID + " = " + image.getUniqueId();
+        String selectQuery = "SELECT * FROM " + CachedImagesTable.TABLE_NAME + " WHERE "
+                + CachedImagesTable.COLUMN_NAME_PHOTO_ID + " = " + image.getUniqueId();
 
         Cursor c = db.rawQuery(selectQuery, null);
         c.moveToFirst();
-        boolean isLiked = (c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_IS_LIKED)) == FeedTable.TRUE);
+        boolean isLiked = (c.getInt(c.getColumnIndex(CachedImagesTable.COLUMN_NAME_IS_LIKED)) == CachedImagesTable.TRUE);
         c.close();
         db.close();
         return isLiked;
     }
 
-    public List<Image> getImages(String tableName) {
+    public List<Image> getCachedImages() {
         List<Image> imageList = new ArrayList<>();
         SQLiteDatabase db = this.getWritableDatabase();
 
-        if (tableName.equals(FeedTable.TABLE_NAME)) {
+        String selectQuery = "SELECT * FROM " + CachedImagesTable.TABLE_NAME + " WHERE " + CachedImagesTable.COLUMN_NAME_VISIBILITY
+                + " = " + CachedImagesTable.VISIBLE + " ORDER BY " + CachedImagesTable.COLUMN_NAME_DATE_POSTED + " ASC";
 
-            String selectQuery = "SELECT * FROM " + FeedTable.TABLE_NAME + " WHERE " + FeedTable.COLUMN_NAME_VISIBILITY
-                    + " = " + FeedTable.VISIBLE;
+        Cursor c = db.rawQuery(selectQuery, null);
 
-            Cursor c = db.rawQuery(selectQuery, null);
+        if (c.moveToFirst()) {
+            do {
 
-            if (c.moveToFirst()) {
-                do {
-
-                    Image image = new Image(c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_PHOTO_ID)),
-                            c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_DATE_POSTED)),
-                            c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_THUMBNAIL_URL)),
-                            c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_FULL_URL)),
-                            c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_VIEWS)),
-                            c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_LIKES)));
-                    imageList.add(image);
-                    updateDatabaseStatisticsFromImage(image );
-                } while (c.moveToNext());
-            }
-            c.close();
-        }else {
-            String selectQuery = "SELECT * FROM " + MeTable.TABLE_NAME;
-
-            Cursor c = db.rawQuery(selectQuery, null);
-
-            if (c.moveToFirst()) {
-                do {
-                    Log.d(LOG, c.getString(c.getColumnIndex(MeTable.COLUMN_NAME_FILEPATH)));
-                    imageList.add(
-                            new Image(c.getString(c.getColumnIndex(MeTable.COLUMN_NAME_PHOTO_ID)),
-                                    c.getString(c.getColumnIndex(MeTable.COLUMN_NAME_DATE_POSTED)),
-                                    new File(c.getString(c.getColumnIndex(MeTable.COLUMN_NAME_FILEPATH))),
-                                    c.getInt(c.getColumnIndex(MeTable.COLUMN_NAME_VIEWS)),
-                                    c.getInt(c.getColumnIndex(MeTable.COLUMN_NAME_LIKES))));
-                } while (c.moveToNext());
-            }
-            c.close();
+                Image image = new Image(c.getString(c.getColumnIndex(CachedImagesTable.COLUMN_NAME_PHOTO_ID)),
+                        c.getString(c.getColumnIndex(CachedImagesTable.COLUMN_NAME_DATE_POSTED)),
+                        c.getString(c.getColumnIndex(CachedImagesTable.COLUMN_NAME_THUMBNAIL_URL)),
+                        c.getString(c.getColumnIndex(CachedImagesTable.COLUMN_NAME_FULL_URL)),
+                        c.getInt(c.getColumnIndex(CachedImagesTable.COLUMN_NAME_VIEWS)),
+                        c.getInt(c.getColumnIndex(CachedImagesTable.COLUMN_NAME_LIKES)));
+                imageList.add(image);
+                updateDatabaseStatisticsFromImage(image);
+            } while (c.moveToNext());
         }
+        c.close();
+        db.close();
+        return imageList;
+    }
+
+    public List<Image> getPostedImages() {
+        List<Image> imageList = new ArrayList<>();
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String selectQuery = "SELECT * FROM " + PostedImagesTable.TABLE_NAME + " ORDER BY " + PostedImagesTable.COLUMN_NAME_DATE_POSTED + " ASC";
+
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        if (c.moveToFirst()) {
+            do {
+                Log.d(LOG, c.getString(c.getColumnIndex(PostedImagesTable.COLUMN_NAME_FILE)));
+                imageList.add(
+                        new Image(c.getString(c.getColumnIndex(PostedImagesTable.COLUMN_NAME_PHOTO_ID)),
+                                c.getString(c.getColumnIndex(PostedImagesTable.COLUMN_NAME_DATE_POSTED)),
+                                new File(c.getString(c.getColumnIndex(PostedImagesTable.COLUMN_NAME_FILE))),
+                                c.getInt(c.getColumnIndex(PostedImagesTable.COLUMN_NAME_VIEWS)),
+                                c.getInt(c.getColumnIndex(PostedImagesTable.COLUMN_NAME_LIKES))));
+            } while (c.moveToNext());
+        }
+        c.close();
         db.close();
         return imageList;
     }

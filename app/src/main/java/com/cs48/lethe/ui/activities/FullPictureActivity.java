@@ -13,7 +13,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cs48.lethe.R;
-import com.cs48.lethe.database.DatabaseContract.*;
 import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.ui.dialogs.AlreadyLikedImageDialog;
 import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
@@ -54,8 +53,8 @@ public class FullPictureActivity extends ActionBarActivity {
     TextView mViewsTextView;
 
     public static final String TAG = FullPictureActivity.class.getSimpleName();
-    public static final String FEED_OVERLAY = "FEED_OVERLAY";
-    public static final String ME_OVERLAY = "ME_OVERLAY";
+    public static final String CACHED_IMAGE_INTERFACE = "CACHED_IMAGE_INTERFACE";
+    public static final String POSTED_IMAGE_INTERFACE= "POSTED_IMAGE_INTERFACE";
     public static final int HIDDEN = -100;
     public static final int DELETE_IMAGE = -101;
     public static final int FULL_PICTURE_REQUEST = 100;
@@ -85,9 +84,9 @@ public class FullPictureActivity extends ActionBarActivity {
         setResult(RESULT_OK, getIntent());
         String uniqueId = getIntent().getStringExtra("uniqueId");
 
-        if (getIntent().getAction().equals(ME_OVERLAY)) {
+        if (getIntent().getAction().equals(POSTED_IMAGE_INTERFACE)) {
 
-            mImage = mDatabaseHelper.getImage(uniqueId, MeTable.TABLE_NAME);  // get image from me table
+            mImage = mDatabaseHelper.getPostedImage(uniqueId);  // get image from me table
 
             FileUtilities.logResults(this, TAG, mImage.getFile().getAbsolutePath());
 
@@ -103,7 +102,7 @@ public class FullPictureActivity extends ActionBarActivity {
 
         } else {
 
-            mImage = mDatabaseHelper.getImage(uniqueId, FeedTable.TABLE_NAME);    // get image from feed table
+            mImage = mDatabaseHelper.getCachedImage(uniqueId);    // get image from feed table
             mDatabaseHelper.viewImage(mImage);    // update views in table
             final Target target = new Target() {
                 @Override

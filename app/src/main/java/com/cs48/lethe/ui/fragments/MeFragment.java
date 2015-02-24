@@ -82,7 +82,7 @@ public class MeFragment extends Fragment {
                 Image image = (Image) mGridAdapter.getItem(position);
                 showImageIntent.putExtra("uniqueId", image.getUniqueId());
                 showImageIntent.putExtra("position", position);
-                showImageIntent.setAction(FullPictureActivity.ME_OVERLAY);
+                showImageIntent.setAction(FullPictureActivity.POSTED_IMAGE_INTERFACE);
 
                 startActivityForResult(showImageIntent, FullPictureActivity.FULL_PICTURE_REQUEST);
             }

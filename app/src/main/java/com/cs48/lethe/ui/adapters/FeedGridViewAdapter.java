@@ -10,9 +10,10 @@ import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.cs48.lethe.R;
-import com.cs48.lethe.database.DatabaseContract.FeedTable;
 import com.cs48.lethe.database.DatabaseHelper;
+import com.cs48.lethe.ui.activities.MainActivity;
 import com.cs48.lethe.ui.dialogs.NetworkUnavailableDialog;
+import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
 import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.Image;
 import com.loopj.android.http.AsyncHttpClient;
@@ -42,7 +43,7 @@ public class FeedGridViewAdapter extends BaseAdapter {
     public FeedGridViewAdapter(Context context) {
         mContext = context;
         mDatabaseHelper = DatabaseHelper.getInstance(mContext);
-        mImageList = mDatabaseHelper.getImages(FeedTable.TABLE_NAME);
+        mImageList = mDatabaseHelper.getCachedImages();
         fetchFeedFromServer();
     }
 
@@ -133,10 +134,10 @@ public class FeedGridViewAdapter extends BaseAdapter {
 
                         // updates the database with the new image list
                         // (while keeping the integrity of mImageList)
-                        mDatabaseHelper.updateFeedFromImages(serverImageList);
+                        mDatabaseHelper.updateCache(serverImageList);
 
                         // gets an updated list of images from the database
-                        mImageList = mDatabaseHelper.getImages(FeedTable.TABLE_NAME);
+                        mImageList = mDatabaseHelper.getCachedImages();
 
                         // updates the grid to reflect the new data in the image list
                         notifyDataSetChanged();
@@ -147,6 +148,7 @@ public class FeedGridViewAdapter extends BaseAdapter {
 
                 @Override
                 public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                    new OperationFailedDialog().show(((MainActivity) mContext).getFragmentManager(), TAG);
                     FileUtilities.logResults(mContext, TAG, "Failed to get feed");
                 }
             });
@@ -181,7 +183,7 @@ public class FeedGridViewAdapter extends BaseAdapter {
      * the list of images
      */
     public void clearCache() {
-        mDatabaseHelper.clearFeed();
+        mDatabaseHelper.clearCachedImages();
         mImageList.removeAll(mImageList);
         notifyDataSetChanged();
     }
