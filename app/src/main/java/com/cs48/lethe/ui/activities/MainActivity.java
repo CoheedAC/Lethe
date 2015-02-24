@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.cs48.lethe.R;
+import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.ui.adapters.TabsPagerAdapter;
 import com.cs48.lethe.ui.fragments.FeedFragment;
 import com.cs48.lethe.ui.fragments.MeFragment;
@@ -40,6 +41,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        DatabaseHelper db = new DatabaseHelper(this);
 
         setTitle("Home");
         setUpActionBar();
@@ -148,7 +151,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
                 }
             }
-
         }
     }
 

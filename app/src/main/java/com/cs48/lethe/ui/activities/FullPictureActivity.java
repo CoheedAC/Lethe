@@ -12,6 +12,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.cs48.lethe.R;
+import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.server.DislikePicture;
 import com.cs48.lethe.server.LikePicture;
 import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
@@ -41,6 +42,7 @@ public class FullPictureActivity extends ActionBarActivity {
     public static final String TAG = FullPictureActivity.class.getSimpleName();
     public static final String VIEW_ONLY = "VIEW_ONLY";
     public static final String VIEW_OVERLAY = "VIEW_OVERLAY";
+    public static final int LIKED = 0;
 
     public static final int FULL_IMAGE_REQUEST = 99;
 
@@ -124,7 +126,7 @@ public class FullPictureActivity extends ActionBarActivity {
              */
             @Override
             public void onSwipeLeft() {
-                new LikePicture(FullPictureActivity.this).execute(mImage.getId());
+                new LikePicture(FullPictureActivity.this).execute(mImage.getUniqueId());
                 finish();
             }
 
@@ -133,7 +135,10 @@ public class FullPictureActivity extends ActionBarActivity {
              */
             @Override
             public void onSwipeRight() {
-                new DislikePicture(FullPictureActivity.this).execute(mImage.getId());
+                DatabaseHelper db = new DatabaseHelper(FullPictureActivity.this);
+                db.hideImage(mImage.getUniqueId());
+                setResult(LIKED);
+                new DislikePicture(FullPictureActivity.this).execute(mImage.getUniqueId());
                 finish();
             }
 

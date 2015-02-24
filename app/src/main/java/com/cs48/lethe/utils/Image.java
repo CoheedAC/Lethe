@@ -62,7 +62,7 @@ public class Image implements Serializable {
         this.fullUrl = fullUrl;
     }
 
-    public String getId() {
+    public String getUniqueId() {
         return id;
     }
 

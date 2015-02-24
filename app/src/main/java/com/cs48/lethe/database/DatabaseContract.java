@@ -20,6 +20,11 @@ public final class DatabaseContract {
         public static final String COLUMN_NAME_FULL_URL = "fullurl";
         public static final String COLUMN_NAME_VIEWS = "views";
         public static final String COLUMN_NAME_LIKES = "likes";
+        public static final String COLUMN_NAME_VISIBILITY = "visibility";
+
+        public static final int VISIBLE = 1;
+        public static final int HIDDEN = 0;
+
     }
 
     public static abstract class MeEntry implements BaseColumns {

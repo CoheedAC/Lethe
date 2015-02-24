@@ -36,6 +36,7 @@ public class FeedFragment extends Fragment {
 
     private FeedGridViewAdapter mGridAdapter;
     private GridView mGridView;
+    private int FULL_IMAGE_REQUEST_CODE = 1;
 
     private OnFragmentInteractionListener mListener;
 
@@ -84,7 +85,7 @@ public class FeedFragment extends Fragment {
                 showImageIntent.putExtra("image", image);
                 showImageIntent.setAction(FullPictureActivity.VIEW_ONLY);
 
-                startActivity(showImageIntent);
+                startActivityForResult(showImageIntent, FULL_IMAGE_REQUEST_CODE);
             }
         });
 
@@ -101,6 +102,15 @@ public class FeedFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.findItem(R.id.action_delete_images).setVisible(true);
         menu.findItem(R.id.action_refresh).setVisible(true);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == FULL_IMAGE_REQUEST_CODE && resultCode == FullPictureActivity.LIKED) {
+            mGridAdapter.fetchImageList();
+        }
     }
 
     /**
