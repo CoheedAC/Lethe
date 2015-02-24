@@ -26,7 +26,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         FeedFragment.OnFragmentInteractionListener, PeekFragment.OnFragmentInteractionListener,
         MeFragment.OnFragmentInteractionListener, MoreFragment.OnFragmentInteractionListener {
 
-    public static final String TAG = MainActivity.class.getSimpleName();
+    public static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     private TabsPagerAdapter mTabsPagerAdapter;
     private ViewPager mViewPager;
@@ -126,7 +126,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == CameraActivity.IMAGE_POST_REQUEST && resultCode == CameraActivity.SUCCESSFUL_POST) {
+        if (requestCode == CameraActivity.IMAGE_POST_REQUEST && resultCode == CameraActivity.POST_SUCCESS) {
             FeedFragment feedFragment = (FeedFragment) findFragmentByPosition(0);
             feedFragment.fetchFeedFromServer();
 

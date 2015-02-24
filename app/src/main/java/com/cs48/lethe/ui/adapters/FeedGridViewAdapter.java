@@ -11,12 +11,13 @@ import android.widget.ImageView;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
+import com.cs48.lethe.server.HerokuClient;
 import com.cs48.lethe.ui.activities.MainActivity;
 import com.cs48.lethe.ui.dialogs.NetworkUnavailableDialog;
 import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
+import com.cs48.lethe.ui.view_helpers.ScrollableSwipeRefreshLayout;
 import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.Image;
-import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.squareup.picasso.Picasso;
 
@@ -34,7 +35,7 @@ import java.util.List;
  */
 public class FeedGridViewAdapter extends BaseAdapter {
 
-    public static final String TAG = FeedGridViewAdapter.class.getSimpleName();
+    public static final String LOG_TAG = FeedGridViewAdapter.class.getSimpleName();
 
     private Context mContext;
     private List<Image> mImageList;
@@ -44,7 +45,7 @@ public class FeedGridViewAdapter extends BaseAdapter {
         mContext = context;
         mDatabaseHelper = DatabaseHelper.getInstance(mContext);
         mImageList = mDatabaseHelper.getCachedImages();
-        fetchFeedFromServer();
+        fetchFeedFromServer(null);
     }
 
     /**
@@ -96,18 +97,80 @@ public class FeedGridViewAdapter extends BaseAdapter {
      * grid with the new list of images from the
      * internal database.
      */
-    public void fetchFeedFromServer() {
+//    public void fetchFeedFromServer() {
+//        // check if there is internet
+//        if (FileUtilities.isNetworkAvailable(mContext)) {
+//            // get current location
+//            String[] coordinates = FileUtilities.getLocationCoordinates(mContext);
+//            String url = mContext.getString(R.string.server_recent) +
+//                    coordinates[1].replace(".", "a") + "," +    // latitude
+//                    coordinates[0].replace(".", "a");           // longitude
+//
+//            HerokuClient.get(url, null, new AsyncHttpResponseHandler() {
+//
+//                @Override
+//                public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+//                    try {
+//                        // temporary list to store list of images
+//                        List<Image> serverImageList = new ArrayList<>();
+//
+//                        // parses the data received from the server
+//                        String jsonData = new String(responseBody);
+//                        JSONArray jsonArray = new JSONArray(jsonData);
+//                        for (int i = 0; i < jsonArray.length(); i++) {
+//                            JSONObject jsonObject = jsonArray.getJSONObject(i);
+//                            Date date = new Date();
+//
+//                            // adds a new image to the list with the info from the server
+//                            serverImageList.add(new Image(
+//                                    jsonObject.getString(mContext.getString(R.string.json_id)),
+//                                    date.getTime() + "",
+////                                jsonObject.getString(mContext.getString(R.string.json_date_posted)),
+//                                    jsonObject.getString(mContext.getString(R.string.json_url_thumbnail)),
+//                                    jsonObject.getString(mContext.getString(R.string.json_url_full)),
+//                                    jsonObject.getInt(mContext.getString(R.string.json_views)),
+//                                    jsonObject.getInt(mContext.getString(R.string.json_likes))));
+//                        }
+//
+//                        // updates the database with the new image list
+//                        // (while keeping the integrity of mImageList)
+//                        mDatabaseHelper.updateCache(serverImageList);
+//
+//                        // gets an updated list of images from the database
+//                        mImageList = mDatabaseHelper.getCachedImages();
+//
+//                        // updates the grid to reflect the new data in the image list
+//                        notifyDataSetChanged();
+//                    } catch (JSONException e) {
+//                        Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+//                    }
+//                }
+//
+//                @Override
+//                public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+//                    new OperationFailedDialog().show(((MainActivity) mContext).getFragmentManager(), LOG_TAG);
+//                    FileUtilities.logResults(mContext, LOG_TAG, "Failed to get feed");
+//                }
+//            });
+//        } else {
+//            new NetworkUnavailableDialog().show(((Activity) mContext).getFragmentManager(), LOG_TAG);
+//        }
+//    }
+
+    public void fetchFeedFromServer(final ScrollableSwipeRefreshLayout scrollableSwipeRefreshLayout) {
         // check if there is internet
         if (FileUtilities.isNetworkAvailable(mContext)) {
+            if (scrollableSwipeRefreshLayout != null)
+                scrollableSwipeRefreshLayout.setRefreshing(true);
+
             // get current location
             String[] coordinates = FileUtilities.getLocationCoordinates(mContext);
-            String url = mContext.getString(R.string.server) +
-                    mContext.getString(R.string.server_recent) +
+            String url = mContext.getString(R.string.server_recent) +
                     coordinates[1].replace(".", "a") + "," +    // latitude
                     coordinates[0].replace(".", "a");           // longitude
 
-            AsyncHttpClient client = new AsyncHttpClient();
-            client.get(url, new AsyncHttpResponseHandler() {
+            HerokuClient.get(url, null, new AsyncHttpResponseHandler() {
+
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                     try {
@@ -139,21 +202,26 @@ public class FeedGridViewAdapter extends BaseAdapter {
                         // gets an updated list of images from the database
                         mImageList = mDatabaseHelper.getCachedImages();
 
+                        if (scrollableSwipeRefreshLayout != null)
+                            scrollableSwipeRefreshLayout.setRefreshing(false);
+
                         // updates the grid to reflect the new data in the image list
                         notifyDataSetChanged();
                     } catch (JSONException e) {
-                        Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                        Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                     }
                 }
 
                 @Override
                 public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                    new OperationFailedDialog().show(((MainActivity) mContext).getFragmentManager(), TAG);
-                    FileUtilities.logResults(mContext, TAG, "Failed to get feed");
+                    new OperationFailedDialog().show(((MainActivity) mContext).getFragmentManager(), LOG_TAG);
+                    if (scrollableSwipeRefreshLayout != null)
+                        scrollableSwipeRefreshLayout.setRefreshing(false);
+                    FileUtilities.logResults(mContext, LOG_TAG, "Failed to get feed");
                 }
             });
         } else {
-            new NetworkUnavailableDialog().show(((Activity) mContext).getFragmentManager(), TAG);
+            new NetworkUnavailableDialog().show(((Activity) mContext).getFragmentManager(), LOG_TAG);
         }
     }
 

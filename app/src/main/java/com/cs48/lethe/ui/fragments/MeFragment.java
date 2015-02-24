@@ -29,6 +29,8 @@ import com.cs48.lethe.utils.Image;
  */
 public class MeFragment extends Fragment {
 
+    public static final String LOG_TAG = MeFragment.class.getSimpleName();
+
     private MeGridViewAdapter mGridAdapter;
     private GridView mGridView;
 

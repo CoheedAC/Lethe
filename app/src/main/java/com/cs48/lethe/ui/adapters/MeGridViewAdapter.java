@@ -24,7 +24,7 @@ import java.util.List;
  */
 public class MeGridViewAdapter extends BaseAdapter {
 
-    public static final String TAG = MeGridViewAdapter.class.getSimpleName();
+    public static final String LOG_TAG = MeGridViewAdapter.class.getSimpleName();
 
     private Context mContext;
     private List<Image> mImageList;
@@ -94,7 +94,7 @@ public class MeGridViewAdapter extends BaseAdapter {
             image.getFile().delete();
         mImageList.removeAll(mImageList);
         notifyDataSetChanged();
-        FileUtilities.logResults(mContext, TAG, "Deleted all images");
+        FileUtilities.logResults(mContext, LOG_TAG, "Deleted all images");
     }
 
     /**
@@ -130,7 +130,7 @@ public class MeGridViewAdapter extends BaseAdapter {
         try {
             Image image = mImageList.get(0);
             File src = image.getFile();
-            Log.d(TAG, src.getAbsolutePath());
+            Log.d(LOG_TAG, src.getAbsolutePath());
 
             for (int i = 0; i < 50; i++)
                 mImageList.add(new Image(image.getUniqueId(),
@@ -138,11 +138,11 @@ public class MeGridViewAdapter extends BaseAdapter {
                         image.getFile(),
                         image.getViews(),
                         image.getLikes()));
-            new DeleteImageWarningDialog().show(((MainActivity) mContext).getFragmentManager(), TAG);
+            new DeleteImageWarningDialog().show(((MainActivity) mContext).getFragmentManager(), LOG_TAG);
             notifyDataSetChanged();
-            FileUtilities.logResults(mContext, TAG, "Copied first image");
+            FileUtilities.logResults(mContext, LOG_TAG, "Copied first image");
         } catch (Exception e) {
-            FileUtilities.logResults(mContext, TAG, "No image to copy");
+            FileUtilities.logResults(mContext, LOG_TAG, "No image to copy");
         }
     }
 

@@ -32,7 +32,7 @@ import java.net.URL;
  */
 public class PostPicture extends AsyncTask<String, String, Integer> {
 
-    public static final String TAG = PostPicture.class.getSimpleName();
+    public static final String LOG_TAG = PostPicture.class.getSimpleName();
     public static final int SUCCESS = 0;
     public static final int FAILED = 1;
 
@@ -110,8 +110,8 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
             imageAsStream.close();
             requestBody.flush();
             requestBody.close();
-            Log.d(TAG, "progress: END");
-            Log.d(TAG, "ConnectionType: " + connection.getHeaderField("Content-Type"));
+            Log.d(LOG_TAG, "progress: END");
+            Log.d(LOG_TAG, "ConnectionType: " + connection.getHeaderField("Content-Type"));
 
             // response from server
             InputStream inputStreamResponse = connection.getInputStream();
@@ -124,13 +124,13 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
 
             connection.disconnect();
         } catch (NetworkOnMainThreadException e) {
-            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+            Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             return FAILED;
         } catch (IOException e) {
-            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+            Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             return FAILED;
         } catch (JSONException e) {
-            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+            Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             return FAILED;
         }
         return SUCCESS;
@@ -150,20 +150,20 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
     protected void onPostExecute(Integer integer) {
         mCameraActivity.hideProgressBar();
         if (integer == SUCCESS) {
-            FileUtilities.logResults(mCameraActivity, TAG, "Posted pic successfully!");
+            FileUtilities.logResults(mCameraActivity, LOG_TAG, "Posted pic successfully!");
 
-            Log.d(TAG, mUniqueId);
-            Log.d(TAG, mDatePosted);
-            Log.d(TAG, mImageFile.getAbsolutePath());
+            Log.d(LOG_TAG, mUniqueId);
+            Log.d(LOG_TAG, mDatePosted);
+            Log.d(LOG_TAG, mImageFile.getAbsolutePath());
 
             DatabaseHelper db = DatabaseHelper.getInstance(mCameraActivity);
             db.insertPostedImage(new Image(mUniqueId, mDatePosted, mImageFile, 0, 0));
 
-            mCameraActivity.setResult(mCameraActivity.SUCCESSFUL_POST);
+            mCameraActivity.setResult(mCameraActivity.POST_SUCCESS);
             mCameraActivity.finish();
         } else {
-            mCameraActivity.onPostPictureFailed();
-            new OperationFailedDialog().show(mCameraActivity.getFragmentManager(), TAG);
+            mCameraActivity.onPostPictureDone();
+            new OperationFailedDialog().show(mCameraActivity.getFragmentManager(), LOG_TAG);
         }
         super.onPostExecute(integer);
     }

@@ -14,12 +14,12 @@ import android.widget.Toast;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
+import com.cs48.lethe.server.HerokuClient;
 import com.cs48.lethe.ui.dialogs.AlreadyLikedImageDialog;
 import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
 import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.Image;
-import com.cs48.lethe.utils.OnSwipeTouchListener;
-import com.loopj.android.http.AsyncHttpClient;
+import com.cs48.lethe.ui.view_helpers.OnSwipeTouchListener;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
@@ -52,7 +52,7 @@ public class FullPictureActivity extends ActionBarActivity {
     @InjectView(R.id.viewsTextView)
     TextView mViewsTextView;
 
-    public static final String TAG = FullPictureActivity.class.getSimpleName();
+    public static final String LOG_TAG = FullPictureActivity.class.getSimpleName();
     public static final String CACHED_IMAGE_INTERFACE = "CACHED_IMAGE_INTERFACE";
     public static final String POSTED_IMAGE_INTERFACE= "POSTED_IMAGE_INTERFACE";
     public static final int HIDDEN = -100;
@@ -88,7 +88,7 @@ public class FullPictureActivity extends ActionBarActivity {
 
             mImage = mDatabaseHelper.getPostedImage(uniqueId);  // get image from me table
 
-            FileUtilities.logResults(this, TAG, mImage.getFile().getAbsolutePath());
+            FileUtilities.logResults(this, LOG_TAG, mImage.getFile().getAbsolutePath());
 
             mDatabaseHelper.viewImage(mImage);    // update views in table
             Picasso.with(this).load(mImage.getFile()).into(mImageView); // load image from file into imageview
@@ -114,7 +114,7 @@ public class FullPictureActivity extends ActionBarActivity {
                 @Override
                 public void onBitmapFailed(Drawable errorDrawable) {
                     mProgressBar.setVisibility(View.GONE);
-                    new OperationFailedDialog().show(getFragmentManager(), TAG);
+                    new OperationFailedDialog().show(getFragmentManager(), LOG_TAG);
                 }
 
                 @Override
@@ -154,7 +154,7 @@ public class FullPictureActivity extends ActionBarActivity {
                     likePicture();
                     finish();
                 } else
-                    new AlreadyLikedImageDialog().show(getFragmentManager(), TAG);
+                    new AlreadyLikedImageDialog().show(getFragmentManager(), LOG_TAG);
             }
 
             /**
@@ -183,18 +183,16 @@ public class FullPictureActivity extends ActionBarActivity {
      * Likes the picture on the server
      */
     public void likePicture() {
-        String url = getString(R.string.server) + getString(R.string.server_like) + mImage.getUniqueId();
-
-        AsyncHttpClient client = new AsyncHttpClient();
-        client.get(url, new AsyncHttpResponseHandler() {
+        String url = getString(R.string.server_like) + mImage.getUniqueId();
+        HerokuClient.get(url, null, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                FileUtilities.logResults(FullPictureActivity.this, TAG, "Liked pic!");
+                FileUtilities.logResults(FullPictureActivity.this, LOG_TAG, "Liked pic!");
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                FileUtilities.logResults(FullPictureActivity.this, TAG, "Failed to like pic!");
+                FileUtilities.logResults(FullPictureActivity.this, LOG_TAG, "Failed to like pic!");
             }
         });
     }
@@ -203,18 +201,16 @@ public class FullPictureActivity extends ActionBarActivity {
      * Dislikes the picture on the server
      */
     public void dislikePicture() {
-        String url = getString(R.string.server) + getString(R.string.server_dislike) + mImage.getUniqueId();
-
-        AsyncHttpClient client = new AsyncHttpClient();
-        client.get(url, new AsyncHttpResponseHandler() {
+        String url = getString(R.string.server_dislike) + mImage.getUniqueId();
+        HerokuClient.get(url, null, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                FileUtilities.logResults(FullPictureActivity.this, TAG, "Disliked pic!");
+                FileUtilities.logResults(FullPictureActivity.this, LOG_TAG, "Disliked pic!");
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                FileUtilities.logResults(FullPictureActivity.this, TAG, "Failed to dislike pic!");
+                FileUtilities.logResults(FullPictureActivity.this, LOG_TAG, "Failed to dislike pic!");
             }
         });
     }
@@ -225,10 +221,7 @@ public class FullPictureActivity extends ActionBarActivity {
      * displays the new statistics on the screen.
      */
     public void fetchPictureStatistics() {
-        String url = getString(R.string.server) + mImage.getUniqueId();
-
-        AsyncHttpClient client = new AsyncHttpClient();
-        client.get(url, new AsyncHttpResponseHandler() {
+        HerokuClient.get(mImage.getUniqueId(), null, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 try {
@@ -242,13 +235,13 @@ public class FullPictureActivity extends ActionBarActivity {
                     mLikesTextView.setText("Likes: " + mImage.getLikes());
                     mViewsTextView.setText("Views: " + mImage.getViews());
                 } catch (JSONException e) {
-                    Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                    Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                 }
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                FileUtilities.logResults(FullPictureActivity.this, TAG, "Request for statistics failed");
+                FileUtilities.logResults(FullPictureActivity.this, LOG_TAG, "Request for statistics failed");
             }
         });
     }

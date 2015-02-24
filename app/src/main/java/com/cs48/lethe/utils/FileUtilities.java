@@ -31,7 +31,7 @@ import java.util.Date;
  */
 public class FileUtilities {
 
-    public static final String TAG = FileUtilities.class.getSimpleName();
+    public static final String LOG_TAG = FileUtilities.class.getSimpleName();
 
     /**
      * Returns directory where images will be stored
@@ -45,7 +45,7 @@ public class FileUtilities {
              where files created with openFileOutput(String, int) are stored.
              In other words, this is internal storage.
              */
-            Log.d(TAG, "INTERNAL");
+            Log.d(LOG_TAG, "INTERNAL");
             return context.getFilesDir();
         } else if (storageType.equals(StorageType.PRIVATE_EXTERNAL)) {
             /**
@@ -54,7 +54,7 @@ public class FileUtilities {
              not always available: they will disappear if the user mounts the
              external storage on a computer or removes it.
              */
-            Log.d(TAG, "PRIVATE EXTERNAL");
+            Log.d(LOG_TAG, "PRIVATE EXTERNAL");
             return context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         } else {
             /**
@@ -62,7 +62,7 @@ public class FileUtilities {
              so you should be careful about what you put here to ensure you don't erase
              their files or get in the way of their own organization.
              */
-            Log.d(TAG, "PUBLIC EXTERNAL");
+            Log.d(LOG_TAG, "PUBLIC EXTERNAL");
             return getSharedExternalDirectory(context);
         }
     }
@@ -119,7 +119,7 @@ public class FileUtilities {
         File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
                 context.getResources().getString(R.string.app_name).replace(" ", "").toLowerCase());
         if (!dir.mkdirs())
-            Log.e(TAG, "Directory not created");
+            Log.e(LOG_TAG, "Directory not created");
         return dir;
     }
 

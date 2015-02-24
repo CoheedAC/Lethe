@@ -21,10 +21,9 @@ import java.util.List;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static DatabaseHelper sInstance;
-    ;
 
     // Logcat tag
-    private static final String LOG = "DatabaseHelper";
+    private static final String LOG_TAG = "DatabaseHelper";
 
     // Database Version
     private static final int DATABASE_VERSION = 1;
@@ -39,7 +38,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Table Create Statements
     // Feed table create statement
-    private static final String CREATE_TABLE_FEED =
+    private static final String CREATE_CACHED_IMAGES_TABLE =
             "CREATE TABLE " + CachedImagesTable.TABLE_NAME + " (" +
                     CachedImagesTable._ID + " INTEGER PRIMARY KEY," +
                     CachedImagesTable.COLUMN_NAME_PHOTO_ID + TEXT_TYPE + COMMA_SEP +
@@ -53,7 +52,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     ")";
 
     // Me table create statement
-    private static final String CREATE_TABLE_ME =
+    private static final String CREATE_POSTED_IMAGES_TABLE =
             "CREATE TABLE " + PostedImagesTable.TABLE_NAME + " (" +
                     PostedImagesTable._ID + " INTEGER PRIMARY KEY," +
                     PostedImagesTable.COLUMN_NAME_PHOTO_ID + TEXT_TYPE + COMMA_SEP +
@@ -82,8 +81,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(CREATE_TABLE_FEED);
-        db.execSQL(CREATE_TABLE_ME);
+        db.execSQL(CREATE_CACHED_IMAGES_TABLE);
+        db.execSQL(CREATE_POSTED_IMAGES_TABLE);
     }
 
     @Override
@@ -295,7 +294,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         if (c.moveToFirst()) {
             do {
-
                 Image image = new Image(c.getString(c.getColumnIndex(CachedImagesTable.COLUMN_NAME_PHOTO_ID)),
                         c.getString(c.getColumnIndex(CachedImagesTable.COLUMN_NAME_DATE_POSTED)),
                         c.getString(c.getColumnIndex(CachedImagesTable.COLUMN_NAME_THUMBNAIL_URL)),
@@ -321,7 +319,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         if (c.moveToFirst()) {
             do {
-                Log.d(LOG, c.getString(c.getColumnIndex(PostedImagesTable.COLUMN_NAME_FILE)));
+                Log.d(LOG_TAG, c.getString(c.getColumnIndex(PostedImagesTable.COLUMN_NAME_FILE)));
                 imageList.add(
                         new Image(c.getString(c.getColumnIndex(PostedImagesTable.COLUMN_NAME_PHOTO_ID)),
                                 c.getString(c.getColumnIndex(PostedImagesTable.COLUMN_NAME_DATE_POSTED)),

@@ -20,6 +20,8 @@ import com.cs48.lethe.R;
  */
 public class PeekFragment extends Fragment {
 
+    public static final String LOG_TAG = PeekFragment.class.getSimpleName();
+
     private OnFragmentInteractionListener mListener;
 
     public static PeekFragment newInstance() {

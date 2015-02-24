@@ -1,4 +1,4 @@
-package com.cs48.lethe.utils;
+package com.cs48.lethe.ui.view_helpers;
 
 import android.content.Context;
 import android.view.GestureDetector;

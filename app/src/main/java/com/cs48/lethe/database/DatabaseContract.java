@@ -32,8 +32,8 @@ public final class DatabaseContract {
         public static final int VISIBLE = 1;
         public static final int HIDDEN = 0;
 
-        public static final int FALSE = 0;
         public static final int TRUE = 1;
+        public static final int FALSE = 0;
     }
 
     /* Inner class that defines the table contents */

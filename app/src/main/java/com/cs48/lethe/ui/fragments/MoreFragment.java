@@ -29,6 +29,9 @@ import com.cs48.lethe.R;
  */
 
 public class MoreFragment extends Fragment {
+
+    public static final String LOG_TAG = MoreFragment.class.getSimpleName();
+
     private OnFragmentInteractionListener mListener;
 
     // Fragment Buttons
