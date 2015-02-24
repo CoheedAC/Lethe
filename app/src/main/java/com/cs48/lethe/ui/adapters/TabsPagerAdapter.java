@@ -52,4 +52,8 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
         return fragments.size();
     }
 
+    private static String makeFragmentName(int viewPagerId, int position) {
+        return "android:switcher:" + viewPagerId + ":" + position;
+    }
+
 }

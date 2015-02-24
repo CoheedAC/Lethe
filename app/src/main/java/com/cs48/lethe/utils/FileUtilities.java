@@ -1,5 +1,6 @@
 package com.cs48.lethe.utils;
 
+import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -39,7 +40,7 @@ public class FileUtilities {
     /**
      * Returns directory where images will be stored
      */
-    public static File getFileDirectory(Context context) {
+    public static String getFileDirectory(Context context) {
         ApplicationSettings settings = new ApplicationSettings(context);
         String storageType = settings.getStoragePreference();
         if (storageType.equals(StorageType.INTERNAL) || !isExternalStorageAvailable()) {
@@ -48,7 +49,7 @@ public class FileUtilities {
              where files created with openFileOutput(String, int) are stored.
              In other words, this is internal storage.
              */
-            return context.getFilesDir();
+            return context.getFilesDir().getAbsolutePath() + File.separator + getSubdirectoryName(context);
         } else if (storageType.equals(StorageType.PRIVATE_EXTERNAL)) {
             /**
              This is like getFilesDir() in that these files will be deleted
@@ -56,14 +57,15 @@ public class FileUtilities {
              not always available: they will disappear if the user mounts the
              external storage on a computer or removes it.
              */
-            return context.getExternalFilesDir(getSubdirectoryName(context));
+
+            return context.getExternalFilesDir(null).getAbsolutePath() + File.separator + getSubdirectoryName(context);
         } else {
             /**
              This is where the user will typically place and manage their own files,
              so you should be careful about what you put here to ensure you don't erase
              their files or get in the way of their own organization.
              */
-            return getSharedExternalDirectory(context);
+            return getSharedExternalDirectory(context).getAbsolutePath();
         }
     }
 
@@ -148,14 +150,14 @@ public class FileUtilities {
      * Returns an array of jpg files that are saved in the storage directory
      */
     public static List<File> getPostedImages(Context context) {
-        File fileDirectory = getFileDirectory(context);
+        File fileDirectory = new File(getFileDirectory(context));
         File[] filteredFiles = fileDirectory.listFiles(new FileFilter() {
             @Override
             public boolean accept(File file) {
                 return (file.getAbsolutePath().contains(".jpg")) ? true : false;
             }
         });
-        return new ArrayList<File>(Arrays.asList(filteredFiles));
+        return new ArrayList<>(Arrays.asList(filteredFiles));
     }
 
     /**
@@ -200,17 +202,16 @@ public class FileUtilities {
     /**
      * Create a File for saving an image or video
      */
+    @SuppressLint("SimpleDateFormat")
     public static File savePostedImage(Context context) {
-        File fileDirectory = getFileDirectory(context);
-        return new File(fileDirectory.getPath() + File.separator + getImageFileName());
-    }
-
-    /**
-     * Returns a string of a file name based upon the timestamp
-     */
-    private static String getImageFileName() {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        return "IMG_" + timeStamp + ".jpg";
+        String dir = getFileDirectory(context);
+        Log.d(TAG, "dir = " + dir);
+        File fileDirectory = new File(getFileDirectory(context));
+        if (!fileDirectory.exists())
+            fileDirectory.mkdir();
+        return new File(fileDirectory.getAbsolutePath() +
+                File.separator +
+                "IMG_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".jpg");
     }
 
     /**

@@ -12,14 +12,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.cs48.lethe.R;
-import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.ui.adapters.TabsPagerAdapter;
 import com.cs48.lethe.ui.fragments.FeedFragment;
 import com.cs48.lethe.ui.fragments.MeFragment;
 import com.cs48.lethe.ui.fragments.MoreFragment;
 import com.cs48.lethe.ui.fragments.PeekFragment;
-
-import java.util.List;
 
 /**
  * The main activity where the app launches. It handles all of the tab fragments
@@ -42,8 +39,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        DatabaseHelper db = new DatabaseHelper(this);
-
         setTitle("Home");
         setUpActionBar();
     }
@@ -61,7 +56,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         actionBar.setDisplayShowHomeEnabled(true);
         actionBar.setIcon(R.drawable.ic_launcher);
 
-        // Create the adapter that will return a fragment for each of the three
+        // Create the adapter that will return a fragment for each of the four
         // primary sections of the activity.
         mTabsPagerAdapter = new TabsPagerAdapter(getSupportFragmentManager(), this);
 
@@ -128,40 +123,22 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * Handles the actions performed when an activity finishes.
-     * For example, it handles updating the grids on the Feed
-     * and Me tabs whenever a user takes a new picture.
-     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == CameraActivity.IMAGE_POST_REQUEST && resultCode == CameraActivity.SUCCESSFUL_POST) {
+            FeedFragment feedFragment = (FeedFragment) findFragmentByPosition(0);
+            feedFragment.fetchFeedFromServer();
 
-        // Dynamically refreshes grid of me and feed fragment after posting a pic to the server
-        if (requestCode == CameraActivity.IMAGE_POST_REQUEST && resultCode == RESULT_OK) {
-            List<Fragment> fragmentList = getSupportFragmentManager().getFragments();
-            if (fragmentList != null) {
-                for (Fragment fragment: fragmentList) {
-                    if (fragment instanceof MeFragment) {
-                        ((MeFragment) fragment).update();
-                    }
-                    if (fragment instanceof FeedFragment) {
-                        ((FeedFragment) fragment).update();
-                    }
-
-                }
-            }
+            MeFragment meFragment = (MeFragment) findFragmentByPosition(2);
+            meFragment.fetchImagesFromDatabase();
         }
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-//Save the fragment's instance
-//        getSupportFragmentManager().putFragment(outState, "mContent", mContent);
-
-
+    public Fragment findFragmentByPosition(int position) {
+        return getSupportFragmentManager().findFragmentByTag(
+                "android:switcher:" + mViewPager.getId() + ":"
+                        + mTabsPagerAdapter.getItemId(position));
     }
 
     /**
@@ -201,8 +178,17 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
+    public void onGridItemSelected(int position) {
+        // The user selected the headline of an article from the HeadlinesFragment
+        // Do something here to display that article
+        Fragment fragment = mTabsPagerAdapter.getItem(position);
+
+
     }
 
 
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
 }

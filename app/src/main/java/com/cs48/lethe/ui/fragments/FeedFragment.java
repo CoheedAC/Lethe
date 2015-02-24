@@ -2,7 +2,6 @@ package com.cs48.lethe.ui.fragments;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -34,7 +33,6 @@ public class FeedFragment extends Fragment {
 
     private FeedGridViewAdapter mGridAdapter;
     private GridView mGridView;
-    private int FULL_IMAGE_REQUEST_CODE = 1;
 
     private OnFragmentInteractionListener mListener;
 
@@ -79,18 +77,15 @@ public class FeedFragment extends Fragment {
                 Intent showImageIntent = new Intent(getActivity(), FullPictureActivity.class);
 
                 Image image = (Image) mGridAdapter.getItem(position);
-                showImageIntent.putExtra("image", image);
-                showImageIntent.setAction(FullPictureActivity.VIEW_ONLY);
+                showImageIntent.putExtra("uniqueId", image.getUniqueId());
+                showImageIntent.putExtra("position", position);
+                showImageIntent.setAction(FullPictureActivity.FEED_OVERLAY);
 
-                startActivityForResult(showImageIntent, FULL_IMAGE_REQUEST_CODE);
+                startActivityForResult(showImageIntent, FullPictureActivity.FULL_PICTURE_REQUEST);
             }
         });
 
         return rootView;
-    }
-
-    public void update() {
-        mGridAdapter.requestFeed();
     }
 
     /**
@@ -105,10 +100,16 @@ public class FeedFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == FULL_IMAGE_REQUEST_CODE && resultCode == FullPictureActivity.LIKED) {
-            mGridAdapter.fetchImageList();
+        if (requestCode == FullPictureActivity.FULL_PICTURE_REQUEST) {
+            if (resultCode == FullPictureActivity.HIDDEN) {
+                data.getIntExtra("position", -1);
+                mGridAdapter.hideImageFromFeed(data.getIntExtra("position", -1));
+            } else {
+                mGridAdapter.updateImageStatistics(data.getIntExtra("position", -1));
+            }
         }
     }
+
 
     /**
      * Handles action bar menu button clicks.
@@ -130,27 +131,25 @@ public class FeedFragment extends Fragment {
          * Requests to get new images on the server.
          */
         if (id == R.id.action_refresh) {
-            mGridAdapter.requestFeed();
             Toast.makeText(getActivity(), "Refreshing...", Toast.LENGTH_SHORT).show();
+            mGridAdapter.fetchFeedFromServer();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void fetchFeedFromServer() {
+        mGridAdapter.fetchFeedFromServer();
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-
-
     }
 
-
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
+    public void onGridItemClick(GridView g, View v, int position, long id) {
+        // Send the event to the host activity
+        mListener.onGridItemSelected(position);
     }
 
     @Override
@@ -182,7 +181,7 @@ public class FeedFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFragmentInteraction(Uri uri);
+        public void onGridItemSelected(int position);
     }
 
 }

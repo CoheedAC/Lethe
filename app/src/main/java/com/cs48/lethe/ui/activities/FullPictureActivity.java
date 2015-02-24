@@ -1,25 +1,35 @@
 package com.cs48.lethe.ui.activities;
 
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cs48.lethe.R;
+import com.cs48.lethe.database.DatabaseContract.*;
 import com.cs48.lethe.database.DatabaseHelper;
-import com.cs48.lethe.server.DislikePicture;
-import com.cs48.lethe.server.LikePicture;
+import com.cs48.lethe.ui.dialogs.AlreadyLikedImageDialog;
 import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
+import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.Image;
 import com.cs48.lethe.utils.OnSwipeTouchListener;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
+
+import org.apache.http.Header;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -38,14 +48,19 @@ public class FullPictureActivity extends ActionBarActivity {
     ImageButton mCopyButton;
     @InjectView(R.id.progressBar)
     ProgressBar mProgressBar;
+    @InjectView(R.id.likesTextView)
+    TextView mLikesTextView;
+    @InjectView(R.id.viewsTextView)
+    TextView mViewsTextView;
 
     public static final String TAG = FullPictureActivity.class.getSimpleName();
-    public static final String VIEW_ONLY = "VIEW_ONLY";
-    public static final String VIEW_OVERLAY = "VIEW_OVERLAY";
-    public static final int LIKED = 0;
+    public static final String FEED_OVERLAY = "FEED_OVERLAY";
+    public static final String ME_OVERLAY = "ME_OVERLAY";
+    public static final int HIDDEN = -100;
+    public static final int DELETED = -101;
+    public static final int FULL_PICTURE_REQUEST = 100;
 
-    public static final int FULL_IMAGE_REQUEST = 99;
-
+    private DatabaseHelper mDatabaseHelper;
     private Image mImage;
 
     /**
@@ -60,37 +75,34 @@ public class FullPictureActivity extends ActionBarActivity {
 
         ButterKnife.inject(this);
 
-        // Hide action bar
-        getSupportActionBar().hide();
+        mDatabaseHelper = DatabaseHelper.getInstance(this);
 
+        // Hide action bar and progress bar
+        getSupportActionBar().hide();
         mProgressBar.setVisibility(View.GONE);
 
         // Get intent and extras
-        Intent intent = getIntent();
-        mImage = (Image) intent.getSerializableExtra("image");
+        setResult(RESULT_OK, getIntent());
+        String uniqueId = getIntent().getStringExtra("uniqueId");
 
+        if (getIntent().getAction().equals(ME_OVERLAY)) {
 
-        if (intent.getAction().equals(VIEW_OVERLAY)) {
-            Picasso.with(this).load(mImage.getFile()).into(mImageView);
-            showPictureOverlay();
+            mImage = mDatabaseHelper.getImage(uniqueId, MeTable.TABLE_NAME);  // get image from me table
+            mDatabaseHelper.viewImage(mImage);    // update views in table
+            Picasso.with(this).load(mImage.getFile()).into(mImageView); // load image from file into imageview
+            showMeUI();   // show buttons related to me UI
             mImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     finish();
                 }
             });
+
         } else {
-            Picasso.with(this).load(mImage.getFullUrl()).into(mImageView);
-            hidePictureOverlay();
-            setUpGestureListener();
-        }
-    }
 
-    public void setImageView(Image image) {
-        mImage = image;
-
-        if (!mImage.isHidden()) {
-            Target target = new Target() {
+            mImage = mDatabaseHelper.getImage(uniqueId, FeedTable.TABLE_NAME);    // get image from feed table
+            mDatabaseHelper.viewImage(mImage);    // update views in table
+            final Target target = new Target() {
                 @Override
                 public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
                     mProgressBar.setVisibility(View.GONE);
@@ -105,14 +117,23 @@ public class FullPictureActivity extends ActionBarActivity {
 
                 @Override
                 public void onPrepareLoad(Drawable placeHolderDrawable) {
+                    mProgressBar.setVisibility(View.VISIBLE);
+                    Picasso.with(FullPictureActivity.this).load(mImage.getThumbnailUrl()).into(mImageView);
                 }
             };
-
-
-            Picasso.with(this)
-                    .load(mImage.getFullUrl())
-                    .into(target);
+            mImageView.setTag(target);
+            Picasso.with(this).load(mImage.getFullUrl()).into(target);  // load image from url into imageview
+            showFeedUI();   // show buttons related to feed UI
+            setUpGestureListener();
         }
+        showStatistics();
+    }
+
+    private void showStatistics() {
+        mLikesTextView.setText("Likes: " + mImage.getLikes());
+        mViewsTextView.setText("Views: " + mImage.getViews());
+        if (FileUtilities.isNetworkAvailable(this))
+            fetchPictureStatistics();
     }
 
     /**
@@ -126,19 +147,23 @@ public class FullPictureActivity extends ActionBarActivity {
              */
             @Override
             public void onSwipeLeft() {
-                new LikePicture(FullPictureActivity.this).execute(mImage.getUniqueId());
-                finish();
+                if (!mDatabaseHelper.isImageLiked(mImage)) {
+                    mDatabaseHelper.likeImage(mImage);
+                    likePicture();
+                    finish();
+                } else
+                    new AlreadyLikedImageDialog().show(getFragmentManager(), TAG);
             }
 
             /**
-             * Swiping right hides the photo from the feed.
+             * Swiping right hides the photo from the feed and dislikes
+             * it on the server, then returns to the feed.
              */
             @Override
             public void onSwipeRight() {
-                DatabaseHelper db = new DatabaseHelper(FullPictureActivity.this);
-                db.hideImage(mImage.getUniqueId());
-                setResult(LIKED);
-                new DislikePicture(FullPictureActivity.this).execute(mImage.getUniqueId());
+                mDatabaseHelper.hideImage(mImage);
+                setResult(HIDDEN, getIntent());
+                dislikePicture();
                 finish();
             }
 
@@ -153,10 +178,84 @@ public class FullPictureActivity extends ActionBarActivity {
     }
 
     /**
+     * Likes the picture on the server
+     */
+    public void likePicture() {
+        String url = getString(R.string.server) + getString(R.string.server_like) + mImage.getUniqueId();
+
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.get(url, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                FileUtilities.logResults(FullPictureActivity.this, TAG, "Liked pic!");
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                FileUtilities.logResults(FullPictureActivity.this, TAG, "Failed to like pic!");
+            }
+        });
+    }
+
+    /**
+     * Dislikes the picture on the server
+     */
+    public void dislikePicture() {
+        String url = getString(R.string.server) + getString(R.string.server_dislike) + mImage.getUniqueId();
+
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.get(url, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                FileUtilities.logResults(FullPictureActivity.this, TAG, "Disliked pic!");
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                FileUtilities.logResults(FullPictureActivity.this, TAG, "Failed to dislike pic!");
+            }
+        });
+    }
+
+    /**
+     * Gets the image statistics from the server and updates
+     * the internal database with the new statistics. Also
+     * displays the new statistics on the screen.
+     */
+    public void fetchPictureStatistics() {
+        String url = getString(R.string.server) + mImage.getUniqueId();
+
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.get(url, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                try {
+                    String jsonData = new String(responseBody);
+                    JSONObject jsonObject = new JSONObject(jsonData);
+                    mImage.setViews(jsonObject.getInt("view"));
+                    mImage.setLikes(jsonObject.getInt(getString(R.string.json_likes)));
+
+                    mDatabaseHelper.updateDatabaseStatisticsFromImage(mImage);
+
+                    mLikesTextView.setText("Likes: " + mImage.getLikes());
+                    mViewsTextView.setText("Views: " + mImage.getViews());
+                } catch (JSONException e) {
+                    Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                FileUtilities.logResults(FullPictureActivity.this, TAG, "Request for statistics failed");
+            }
+        });
+    }
+
+    /**
      * Hides the delete and copy button but shows the
      * like button. Also handles like button presses.
      */
-    private void hidePictureOverlay() {
+    private void showFeedUI() {
         mDeleteButton.setVisibility(View.GONE);
         mCopyButton.setVisibility(View.GONE);
     }
@@ -165,7 +264,7 @@ public class FullPictureActivity extends ActionBarActivity {
      * Hides the like button but shows the delete and
      * copy buttons. Handles the visible button presses.
      */
-    private void showPictureOverlay() {
+    private void showMeUI() {
         mDeleteButton.setVisibility(View.VISIBLE);
         mCopyButton.setVisibility(View.VISIBLE);
 
@@ -175,9 +274,8 @@ public class FullPictureActivity extends ActionBarActivity {
         mDeleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                FileUtilities.deleteImage(mImageUri);
-                Toast.makeText(FullPictureActivity.this, "Deleted image", Toast.LENGTH_SHORT).show();
-                setResult(RESULT_OK);
+                setResult(DELETED, getIntent());
+                Toast.makeText(FullPictureActivity.this, "Deleted image (UNIMPLEMENTED)", Toast.LENGTH_SHORT).show();
                 finish();
             }
         });
@@ -189,12 +287,12 @@ public class FullPictureActivity extends ActionBarActivity {
         mCopyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                try {
-//                    FileUtilities.saveImageForSharing(ImageActivity.this, mImageUri.getPath());
-                Toast.makeText(FullPictureActivity.this, "Saved to shared storage.", Toast.LENGTH_SHORT).show();
-//                } catch (IOException e) {
-//                    Toast.makeText(ImageActivity.this, "Cannot copy to shared storage.", Toast.LENGTH_SHORT).show();
-//                }
+                try {
+                    FileUtilities.saveImageForSharing(FullPictureActivity.this, mImage.getFile().getAbsolutePath());
+                    Toast.makeText(FullPictureActivity.this, "Saved to shared storage.", Toast.LENGTH_SHORT).show();
+                } catch (IOException e) {
+                    Toast.makeText(FullPictureActivity.this, "Cannot copy to shared storage.", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
