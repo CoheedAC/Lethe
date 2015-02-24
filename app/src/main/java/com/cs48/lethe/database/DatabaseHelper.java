@@ -109,7 +109,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return (count != 0);
     }
 
-    public void createFeed(List<Image> imageList) {
+    public void updateFeedFromImages(List<Image> imageList) {
         SQLiteDatabase db = getWritableDatabase();
 
         for (Image image : imageList) {
@@ -222,7 +222,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         String whereClause = MeTable.COLUMN_NAME_PHOTO_ID + " = " + imageToDelete.getUniqueId();
         String[] whereArgs = new String[] { imageToDelete.getUniqueId() };
-        db.delete(MeTable.TABLE_NAME, whereClause, whereArgs);
+        db.delete(MeTable.TABLE_NAME, whereClause, null);
 
         db.close();
     }
@@ -291,15 +291,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             if (c.moveToFirst()) {
                 do {
-                    Log.d(LOG, "id = " + c.getColumnIndex(FeedTable.COLUMN_NAME_PHOTO_ID));
-                    Log.d(LOG, "posted = " + c.getColumnIndex(FeedTable.COLUMN_NAME_DATE_POSTED));
-                    imageList.add(
-                            new Image(c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_PHOTO_ID)),
-                                    c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_DATE_POSTED)),
-                                    c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_THUMBNAIL_URL)),
-                                    c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_FULL_URL)),
-                                    c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_VIEWS)),
-                                    c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_LIKES))));
+
+                    Image image = new Image(c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_PHOTO_ID)),
+                            c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_DATE_POSTED)),
+                            c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_THUMBNAIL_URL)),
+                            c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_FULL_URL)),
+                            c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_VIEWS)),
+                            c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_LIKES)));
+                    imageList.add(image);
+                    updateDatabaseStatisticsFromImage(image );
                 } while (c.moveToNext());
             }
             c.close();

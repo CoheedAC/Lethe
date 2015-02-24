@@ -57,7 +57,7 @@ public class FullPictureActivity extends ActionBarActivity {
     public static final String FEED_OVERLAY = "FEED_OVERLAY";
     public static final String ME_OVERLAY = "ME_OVERLAY";
     public static final int HIDDEN = -100;
-    public static final int DELETED = -101;
+    public static final int DELETE_IMAGE = -101;
     public static final int FULL_PICTURE_REQUEST = 100;
 
     private DatabaseHelper mDatabaseHelper;
@@ -88,6 +88,9 @@ public class FullPictureActivity extends ActionBarActivity {
         if (getIntent().getAction().equals(ME_OVERLAY)) {
 
             mImage = mDatabaseHelper.getImage(uniqueId, MeTable.TABLE_NAME);  // get image from me table
+
+            FileUtilities.logResults(this, TAG, mImage.getFile().getAbsolutePath());
+
             mDatabaseHelper.viewImage(mImage);    // update views in table
             Picasso.with(this).load(mImage.getFile()).into(mImageView); // load image from file into imageview
             showMeUI();   // show buttons related to me UI
@@ -274,7 +277,8 @@ public class FullPictureActivity extends ActionBarActivity {
         mDeleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setResult(DELETED, getIntent());
+                setResult(DELETE_IMAGE, getIntent());
+                mDatabaseHelper.deletePostedImage(mImage);
                 Toast.makeText(FullPictureActivity.this, "Deleted image (UNIMPLEMENTED)", Toast.LENGTH_SHORT).show();
                 finish();
             }
@@ -282,7 +286,7 @@ public class FullPictureActivity extends ActionBarActivity {
 
         /**
          * Copies the image from the private external (or internal) storage
-         * into the public storage where othe apps can access the photo.
+         * into the public storage where the apps can access the photo.
          */
         mCopyButton.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -12,12 +12,12 @@ public final class DatabaseContract {
     public DatabaseContract() {
     }
 
+    /* Inner class that defines the table contents */
     private static abstract class Table {
         public static final String COLUMN_NAME_PHOTO_ID = "photoid";
         public static final String COLUMN_NAME_DATE_POSTED = "dateposted";
         public static final String COLUMN_NAME_VIEWS = "views";
         public static final String COLUMN_NAME_LIKES = "likes";
-
     }
 
     /* Inner class that defines the table contents */
@@ -36,6 +36,7 @@ public final class DatabaseContract {
         public static final int TRUE = 1;
     }
 
+    /* Inner class that defines the table contents */
     public static abstract class MeTable extends Table implements BaseColumns {
         public static final String TABLE_NAME = "metable";
 

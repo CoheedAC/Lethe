@@ -1,6 +1,7 @@
 package com.cs48.lethe.ui.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -10,15 +11,13 @@ import android.widget.ImageView;
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseContract.MeTable;
 import com.cs48.lethe.database.DatabaseHelper;
+import com.cs48.lethe.ui.activities.MainActivity;
+import com.cs48.lethe.ui.dialogs.DeleteImageWarningDialog;
 import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.Image;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 
 /**
@@ -107,9 +106,7 @@ public class MeGridViewAdapter extends BaseAdapter {
      */
     public void deletePostedImage(int position) {
         if (position >= 0 && position < mImageList.size()) {
-            Image imageToDelete = mImageList.get(position);
-            mDatabaseHelper.deletePostedImage(imageToDelete);
-            imageToDelete.getFile().delete();
+            mImageList.get(position).getFile().delete();
             mImageList.remove(position);
             notifyDataSetChanged();
         }
@@ -124,31 +121,26 @@ public class MeGridViewAdapter extends BaseAdapter {
     }
 
     /**
-     * Copies the first image in the grid 50 times to test a full grid.
+     * Populates 50 temporary image objects from the
+     * first image object in the image list.
+     *
+     * WARNING: if you press delete in the full screen view
+     * it will delete all 50 images
      */
     public void copyFirstImage() {
         try {
             Image image = mImageList.get(0);
-            for (int i = 0; i < 50; i++) {
-                File dst = new File(image.getFile().getParent() + File.separator + image.getFile().getName() + "_" + i + ".jpg");
+            File src = image.getFile();
+            Log.d(TAG, src.getAbsolutePath());
 
-                InputStream in = new FileInputStream(image.getFile());
-                OutputStream out = new FileOutputStream(dst);
-
-                // Transfer bytes from in to out
-                byte[] buf = new byte[1024];
-                int len;
-                while ((len = in.read(buf)) > 0) {
-                    out.write(buf, 0, len);
-                }
-
-                mImageList.add(new Image(image.getUniqueId(), image.getDatePosted(), dst, image.getViews(), image.getLikes()));
-                notifyDataSetChanged();
-                in.close();
-                out.close();
-            }
-
-
+            for (int i = 0; i < 50; i++)
+                mImageList.add(new Image(image.getUniqueId(),
+                        image.getDatePosted(),
+                        image.getFile(),
+                        image.getViews(),
+                        image.getLikes()));
+            new DeleteImageWarningDialog().show(((MainActivity) mContext).getFragmentManager(), TAG);
+            notifyDataSetChanged();
             FileUtilities.logResults(mContext, TAG, "Copied first image");
         } catch (Exception e) {
             FileUtilities.logResults(mContext, TAG, "No image to copy");

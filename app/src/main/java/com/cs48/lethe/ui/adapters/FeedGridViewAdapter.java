@@ -133,7 +133,7 @@ public class FeedGridViewAdapter extends BaseAdapter {
 
                         // updates the database with the new image list
                         // (while keeping the integrity of mImageList)
-                        mDatabaseHelper.createFeed(serverImageList);
+                        mDatabaseHelper.updateFeedFromImages(serverImageList);
 
                         // gets an updated list of images from the database
                         mImageList = mDatabaseHelper.getImages(FeedTable.TABLE_NAME);

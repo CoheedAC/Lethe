@@ -18,16 +18,12 @@ import com.cs48.lethe.ApplicationSettings;
 import com.cs48.lethe.R;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Utility class that handles tasks related to file storage
@@ -40,7 +36,7 @@ public class FileUtilities {
     /**
      * Returns directory where images will be stored
      */
-    public static String getFileDirectory(Context context) {
+    public static File getFileDirectory(Context context) {
         ApplicationSettings settings = new ApplicationSettings(context);
         String storageType = settings.getStoragePreference();
         if (storageType.equals(StorageType.INTERNAL) || !isExternalStorageAvailable()) {
@@ -49,7 +45,8 @@ public class FileUtilities {
              where files created with openFileOutput(String, int) are stored.
              In other words, this is internal storage.
              */
-            return context.getFilesDir().getAbsolutePath() + File.separator + getSubdirectoryName(context);
+            Log.d(TAG, "INTERNAL");
+            return context.getFilesDir();
         } else if (storageType.equals(StorageType.PRIVATE_EXTERNAL)) {
             /**
              This is like getFilesDir() in that these files will be deleted
@@ -57,15 +54,16 @@ public class FileUtilities {
              not always available: they will disappear if the user mounts the
              external storage on a computer or removes it.
              */
-
-            return context.getExternalFilesDir(null).getAbsolutePath() + File.separator + getSubdirectoryName(context);
+            Log.d(TAG, "PRIVATE EXTERNAL");
+            return context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         } else {
             /**
              This is where the user will typically place and manage their own files,
              so you should be careful about what you put here to ensure you don't erase
              their files or get in the way of their own organization.
              */
-            return getSharedExternalDirectory(context).getAbsolutePath();
+            Log.d(TAG, "PUBLIC EXTERNAL");
+            return getSharedExternalDirectory(context);
         }
     }
 
@@ -115,72 +113,14 @@ public class FileUtilities {
     }
 
     /**
-     * Returns string of app name
-     */
-    public static String getSubdirectoryName(Context context) {
-        return context.getResources().getString(R.string.app_name).replace(" ", "");
-    }
-
-    /**
      * Returns app subdirectory in the external public storage. If directory doesn't exist, then it's created.
      */
     public static File getSharedExternalDirectory(Context context) {
-        File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + File.separator + getSubdirectoryName(context));
-        if (!dir.exists()) {
-            if (!dir.mkdirs()) {
-                Log.d(TAG, "Failed to make directory.");
-            }
-        }
+        File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                context.getResources().getString(R.string.app_name).replace(" ", "").toLowerCase());
+        if (!dir.mkdirs())
+            Log.e(TAG, "Directory not created");
         return dir;
-    }
-
-    /**
-     * Returns the cache directory.
-     */
-    public static File getCachedDirectory(Context context) {
-        ApplicationSettings settings = new ApplicationSettings(context);
-        String storageType = settings.getStoragePreference();
-        if (storageType.equals(StorageType.INTERNAL) || !isExternalStorageAvailable()) {
-            return context.getCacheDir();
-        } else
-            return context.getExternalCacheDir();
-    }
-
-    /**
-     * Returns an array of jpg files that are saved in the storage directory
-     */
-    public static List<File> getPostedImages(Context context) {
-        File fileDirectory = new File(getFileDirectory(context));
-        File[] filteredFiles = fileDirectory.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                return (file.getAbsolutePath().contains(".jpg")) ? true : false;
-            }
-        });
-        return new ArrayList<>(Arrays.asList(filteredFiles));
-    }
-
-    /**
-     * Returns an array of jpg files that are saved in the storage directory
-     */
-    public static List<File> getCachedImages(Context context) {
-        File cachedDirectory = getCachedDirectory(context);
-        Log.d(TAG, cachedDirectory.getAbsolutePath());
-        File[] filteredFiles = cachedDirectory.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                return (file.getAbsolutePath().contains(".jpg")) ? true : false;
-            }
-        });
-        return new ArrayList<>(Arrays.asList(filteredFiles));
-    }
-
-    /**
-     * Deletes the image from a given Uri path
-     */
-    public static boolean deleteImage(Uri deleteUri) {
-        File imageFile = new File(deleteUri.getPath());
-        return imageFile.delete();
     }
 
     /**
@@ -204,34 +144,11 @@ public class FileUtilities {
      */
     @SuppressLint("SimpleDateFormat")
     public static File savePostedImage(Context context) {
-        String dir = getFileDirectory(context);
-        Log.d(TAG, "dir = " + dir);
-        File fileDirectory = new File(getFileDirectory(context));
-        if (!fileDirectory.exists())
-            fileDirectory.mkdir();
-        return new File(fileDirectory.getAbsolutePath() +
-                File.separator +
+        File fileDirectory = getFileDirectory(context);
+        return new File(fileDirectory.getAbsolutePath(),
                 "IMG_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".jpg");
     }
 
-    /**
-     * Returns the file name without the extension and without the full
-     * path location.
-     */
-    public static String getSimpleName(String absolutePath) {
-        String reverse = new StringBuilder(absolutePath).reverse().toString();
-        String result;
-        int index = reverse.indexOf("/");
-        if (index != -1) {
-            result = absolutePath.substring(absolutePath.length() - index);
-            index = result.indexOf("jpg");
-            if (index != -1)
-                result = result.substring(0, index + 3);
-            return result;
-        } else {
-            return null;
-        }
-    }
 
     /**
      * Returns the full sized bitmap of the image.
@@ -259,13 +176,4 @@ public class FileUtilities {
             return null;
         }
     }
-
-    /**
-     * Returns the unique picture ID of an image file.
-     * (i.e. turns "IMG_xxx.jpg" -> "xxx")
-     */
-    public static String getUniqueId(String filename) {
-        return filename.substring(4, filename.length() - 4);
-    }
-
 }

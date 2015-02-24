@@ -134,7 +134,7 @@ public class MeFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == FullPictureActivity.FULL_PICTURE_REQUEST) {
-            if (resultCode == FullPictureActivity.DELETED) {
+            if (resultCode == FullPictureActivity.DELETE_IMAGE) {
                 data.getIntExtra("position", -1);
                 mGridAdapter.deletePostedImage(data.getIntExtra("position", -1));
             } else {
