@@ -15,6 +15,7 @@ import android.widget.ProgressBar;
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.server.HerokuClient;
+import com.cs48.lethe.server.PostPicture;
 import com.cs48.lethe.ui.dialogs.NetworkUnavailableDialog;
 import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
 import com.cs48.lethe.utils.FileUtilities;
@@ -174,8 +175,8 @@ public class CameraActivity extends ActionBarActivity {
         if (id == R.id.action_post) {
             if (FileUtilities.isNetworkAvailable(this)) {
                 onPostPictureStart();
-                postPicture();
-//                new PostPicture(this, mImageFile).execute();
+//                postPicture();
+                new PostPicture(this, mImageFile).execute();
                 return true;
             } else {
                 new NetworkUnavailableDialog().show(getFragmentManager(), LOG_TAG);
