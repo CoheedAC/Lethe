@@ -20,6 +20,8 @@ import com.cs48.lethe.ui.activities.FullPictureActivity;
 import com.cs48.lethe.ui.adapters.FeedGridViewAdapter;
 import com.cs48.lethe.utils.Image;
 
+import java.io.Serializable;
+
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
@@ -55,6 +57,7 @@ public class FeedFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
     }
+
 
     /**
      * Creates the feed grid and handles image taps on grid.
@@ -136,16 +139,6 @@ public class FeedFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-
-
-    }
-
-
-
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
@@ -163,6 +156,28 @@ public class FeedFragment extends Fragment {
                     + " must implement OnFragmentInteractionListener");
         }
     }
+
+
+    /**
+     * Runs when the fragment is selected, checking to see if it has a previous state saved, and
+     * putting the user back to their current scroll location in the fragment
+     * @param savedInstanceState
+     */
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            mGridAdapter = (FeedGridViewAdapter) savedInstanceState.getSerializable("theFeed");
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable("theFeed", (Serializable) mGridAdapter);
+    }
+
 
     @Override
     public void onDetach() {

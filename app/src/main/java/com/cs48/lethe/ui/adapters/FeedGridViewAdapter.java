@@ -9,19 +9,20 @@ import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.cs48.lethe.R;
-import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.server.RequestFeed;
 import com.cs48.lethe.ui.dialogs.NetworkUnavailableDialog;
 import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.Image;
 import com.squareup.picasso.Picasso;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * A BaseAdapter that handles the grid for the feed tab.
  */
-public class FeedGridViewAdapter extends BaseAdapter {
+public class  FeedGridViewAdapter extends BaseAdapter implements Serializable {
 
     public static final String TAG = FeedGridViewAdapter.class.getSimpleName();
 
@@ -30,14 +31,11 @@ public class FeedGridViewAdapter extends BaseAdapter {
 
     public FeedGridViewAdapter(Context context) {
         mContext = context;
-        fetchImageList();
-        requestFeed();
+        mImageList = new ArrayList<>();
     }
 
-    public void fetchImageList() {
-        DatabaseHelper databaseHelper = new DatabaseHelper(mContext);
-        mImageList = databaseHelper.fetchImageList();
-        notifyDataSetChanged();
+    public void setImageList(List<Image> list) {
+        mImageList = list;
     }
 
     /**
