@@ -29,6 +29,8 @@ import com.cs48.lethe.utils.Image;
  */
 public class MeFragment extends Fragment {
 
+    public static final String LOG_TAG = MeFragment.class.getSimpleName();
+
     private MeGridViewAdapter mGridAdapter;
     private GridView mGridView;
 
@@ -59,13 +61,6 @@ public class MeFragment extends Fragment {
     }
 
     /**
-     * Updates the grid.
-     */
-    public void update() {
-        mGridAdapter.update();
-    }
-
-    /**
      * Sets up the grid and handles the image click event.
      */
     @Override
@@ -87,10 +82,11 @@ public class MeFragment extends Fragment {
                 Intent showImageIntent = new Intent(getActivity(), FullPictureActivity.class);
 
                 Image image = (Image) mGridAdapter.getItem(position);
-                showImageIntent.putExtra("image", image);
-                showImageIntent.setAction(FullPictureActivity.VIEW_OVERLAY);
+                showImageIntent.putExtra("uniqueId", image.getUniqueId());
+                showImageIntent.putExtra("position", position);
+                showImageIntent.setAction(FullPictureActivity.POSTED_IMAGE_INTERFACE);
 
-                startActivityForResult(showImageIntent, FullPictureActivity.FULL_IMAGE_REQUEST);
+                startActivityForResult(showImageIntent, FullPictureActivity.FULL_PICTURE_REQUEST);
             }
         });
 
@@ -117,7 +113,7 @@ public class MeFragment extends Fragment {
          * testing purposes.
          */
         if (id == R.id.action_delete_images) {
-            mGridAdapter.deletePostedImages();
+            mGridAdapter.deleteAllPostedImages();
             return true;
         }
 
@@ -131,6 +127,7 @@ public class MeFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+
     /**
      * Handles actions when a requested activity is finished.
      */
@@ -138,10 +135,23 @@ public class MeFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        // updates the grid if the user deletes the image in the full screen view
-        if (requestCode == FullPictureActivity.FULL_IMAGE_REQUEST && resultCode == FullPictureActivity.RESULT_OK) {
-            update();
+        if (requestCode == FullPictureActivity.FULL_PICTURE_REQUEST) {
+            if (resultCode == FullPictureActivity.DELETE_IMAGE) {
+                data.getIntExtra("position", -1);
+                mGridAdapter.deletePostedImage(data.getIntExtra("position", -1));
+            } else {
+                mGridAdapter.updateImageStatistics(data.getIntExtra("position", -1));
+            }
         }
+
+        // updates the grid if the user deletes the image in the full screen view
+        if (requestCode == FullPictureActivity.FULL_PICTURE_REQUEST && resultCode == FullPictureActivity.RESULT_OK) {
+            mGridAdapter.notifyDataSetChanged();
+        }
+    }
+
+    public void fetchImagesFromDatabase() {
+        mGridAdapter.fetchImagesFromDatabase();
     }
 
     // TODO: Rename method, update argument and hook method into UI event

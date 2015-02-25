@@ -1,6 +1,6 @@
 package com.cs48.lethe.utils;
 
-import android.content.ContentResolver;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.location.Criteria;
@@ -8,7 +8,6 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
@@ -17,16 +16,12 @@ import com.cs48.lethe.ApplicationSettings;
 import com.cs48.lethe.R;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Utility class that handles tasks related to file storage
@@ -34,7 +29,7 @@ import java.util.List;
  */
 public class FileUtilities {
 
-    public static final String TAG = FileUtilities.class.getSimpleName();
+    public static final String LOG_TAG = FileUtilities.class.getSimpleName();
 
     /**
      * Returns directory where images will be stored
@@ -48,6 +43,7 @@ public class FileUtilities {
              where files created with openFileOutput(String, int) are stored.
              In other words, this is internal storage.
              */
+            Log.d(LOG_TAG, "INTERNAL");
             return context.getFilesDir();
         } else if (storageType.equals(StorageType.PRIVATE_EXTERNAL)) {
             /**
@@ -56,13 +52,15 @@ public class FileUtilities {
              not always available: they will disappear if the user mounts the
              external storage on a computer or removes it.
              */
-            return context.getExternalFilesDir(getSubdirectoryName(context));
+            Log.d(LOG_TAG, "PRIVATE EXTERNAL");
+            return context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         } else {
             /**
              This is where the user will typically place and manage their own files,
              so you should be careful about what you put here to ensure you don't erase
              their files or get in the way of their own organization.
              */
+            Log.d(LOG_TAG, "PUBLIC EXTERNAL");
             return getSharedExternalDirectory(context);
         }
     }
@@ -113,158 +111,72 @@ public class FileUtilities {
     }
 
     /**
-     * Returns string of app name
-     */
-    public static String getSubdirectoryName(Context context) {
-        return context.getResources().getString(R.string.app_name).replace(" ", "");
-    }
-
-    /**
      * Returns app subdirectory in the external public storage. If directory doesn't exist, then it's created.
      */
     public static File getSharedExternalDirectory(Context context) {
-        File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + File.separator + getSubdirectoryName(context));
-        if (!dir.exists()) {
-            if (!dir.mkdirs()) {
-                Log.d(TAG, "Failed to make directory.");
-            }
-        }
+        File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                context.getResources().getString(R.string.app_name).replace(" ", "").toLowerCase());
+        if (!dir.mkdirs())
+            Log.e(LOG_TAG, "Directory not created");
         return dir;
-    }
-
-    /**
-     * Returns the cache directory.
-     */
-    public static File getCachedDirectory(Context context) {
-        ApplicationSettings settings = new ApplicationSettings(context);
-        String storageType = settings.getStoragePreference();
-        if (storageType.equals(StorageType.INTERNAL) || !isExternalStorageAvailable()) {
-            return context.getCacheDir();
-        } else
-            return context.getExternalCacheDir();
-    }
-
-    /**
-     * Returns an array of jpg files that are saved in the storage directory
-     */
-    public static List<File> getPostedImages(Context context) {
-        File fileDirectory = getFileDirectory(context);
-        File[] filteredFiles = fileDirectory.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                return (file.getAbsolutePath().contains(".jpg")) ? true : false;
-            }
-        });
-        return new ArrayList<File>(Arrays.asList(filteredFiles));
-    }
-
-    /**
-     * Returns an array of jpg files that are saved in the storage directory
-     */
-    public static List<File> getCachedImages(Context context) {
-        File cachedDirectory = getCachedDirectory(context);
-        Log.d(TAG, cachedDirectory.getAbsolutePath());
-        File[] filteredFiles = cachedDirectory.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                return (file.getAbsolutePath().contains(".jpg")) ? true : false;
-            }
-        });
-        return new ArrayList<>(Arrays.asList(filteredFiles));
-    }
-
-    /**
-     * Deletes the image from a given Uri path
-     */
-    public static boolean deleteImage(Uri deleteUri) {
-        File imageFile = new File(deleteUri.getPath());
-        return imageFile.delete();
     }
 
     /**
      * Copies the image to the public storage directory and returns the Uri
      */
-    public static void saveImageForSharing(Context context, String imagePath) throws IOException {
+    public static boolean saveImageForSharing(Context context, String imagePath) throws IOException {
         File imageSource = new File(imagePath);
         File imageDestination = new File(getSharedExternalDirectory(context) + "/" + imageSource.getName());
 
-        FileInputStream inStream = new FileInputStream(imageSource);
-        FileOutputStream outStream = new FileOutputStream(imageDestination);
-        FileChannel inChannel = inStream.getChannel();
-        FileChannel outChannel = outStream.getChannel();
-        inChannel.transferTo(0, inChannel.size(), outChannel);
-        inStream.close();
-        outStream.close();
+        if (!imageDestination.exists()) {
+            FileInputStream inStream = new FileInputStream(imageSource);
+            FileOutputStream outStream = new FileOutputStream(imageDestination);
+            FileChannel inChannel = inStream.getChannel();
+            FileChannel outChannel = outStream.getChannel();
+            inChannel.transferTo(0, inChannel.size(), outChannel);
+            inStream.close();
+            outStream.close();
+            return true;
+        }
+        return false;
     }
 
     /**
      * Create a File for saving an image or video
      */
+    @SuppressLint("SimpleDateFormat")
     public static File savePostedImage(Context context) {
         File fileDirectory = getFileDirectory(context);
-        return new File(fileDirectory.getPath() + File.separator + getImageFileName());
-    }
-
-    /**
-     * Returns a string of a file name based upon the timestamp
-     */
-    private static String getImageFileName() {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        return "IMG_" + timeStamp + ".jpg";
-    }
-
-    /**
-     * Returns the file name without the extension and without the full
-     * path location.
-     */
-    public static String getSimpleName(String absolutePath) {
-        String reverse = new StringBuilder(absolutePath).reverse().toString();
-        String result;
-        int index = reverse.indexOf("/");
-        if (index != -1) {
-            result = absolutePath.substring(absolutePath.length() - index);
-            index = result.indexOf("jpg");
-            if (index != -1)
-                result = result.substring(0, index + 3);
-            return result;
-        } else {
-            return null;
-        }
+        return new File(fileDirectory.getAbsolutePath(),
+                "IMG_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".jpg");
     }
 
     /**
      * Returns the full sized bitmap of the image.
      */
-    public static Bitmap getValidSizedBitmap(ContentResolver cr, Uri mImageUri) {
-        return (getXYCompressedBitmap(cr, mImageUri, 2048, 2048));
+    public static Bitmap getValidSizedBitmap(Bitmap bitmap) {
+        return getXYSizedBitmap(bitmap, 1024, 1024);
     }
 
     /**
      * Returns the thumbnail sized bitmap of the image.
      */
-    public static Bitmap getThumbnailSizedBitmap(ContentResolver cr, Uri mImageUri) {
-        return (getXYCompressedBitmap(cr, mImageUri, 150, 150));
+    public static Bitmap getThumbnailSizedBitmap(Bitmap bitmap) {
+        return getXYSizedBitmap(bitmap, 171, 171);
     }
 
     /**
      * Returns the custom sized bitmap of the image.
      */
-    public static Bitmap getXYCompressedBitmap(ContentResolver cr, Uri mImageUri, int x, int y) {
-        try {
-            Bitmap bp = android.provider.MediaStore.Images.Media.getBitmap(cr, mImageUri);
-            return (Bitmap.createScaledBitmap(bp, x, y, false)); //low quality
+    public static Bitmap getXYSizedBitmap(Bitmap bitmap, int maxWidth, int maxHeight) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
 
-        } catch (Exception e) {
-            return null;
+        while (width > maxWidth && height > maxHeight) {
+            width *= .9;
+            height *= .9;
         }
-    }
-
-    /**
-     * Returns the unique picture ID of an image file.
-     * (i.e. turns "IMG_xxx.jpg" -> "xxx")
-     */
-    public static String getUniqueId(String filename) {
-        return filename.substring(4, filename.length() - 4);
+        return Bitmap.createScaledBitmap(bitmap, width, height, false);
     }
 
 }

@@ -1,4 +1,4 @@
-package com.cs48.lethe.utils;
+package com.cs48.lethe.ui.view_helpers;
 
 import android.content.Context;
 import android.view.GestureDetector;
@@ -8,11 +8,11 @@ import android.view.View;
 /**
  * Detects left and right swipes across a view as well as single taps.
  */
-public class OnSwipeTouchListener implements View.OnTouchListener {
+public class OnHorizontalSwipeTouchListener implements View.OnTouchListener {
 
     private final GestureDetector gestureDetector;
 
-    public OnSwipeTouchListener(Context context) {
+    public OnHorizontalSwipeTouchListener(Context context) {
         gestureDetector = new GestureDetector(context, new GestureListener());
     }
 

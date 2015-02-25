@@ -1,20 +1,22 @@
 package com.cs48.lethe.server;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.NetworkOnMainThreadException;
 import android.util.Log;
 
 import com.cs48.lethe.R;
+import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.ui.activities.CameraActivity;
 import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
 import com.cs48.lethe.utils.FileUtilities;
+import com.cs48.lethe.utils.Image;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -30,23 +32,19 @@ import java.net.URL;
  */
 public class PostPicture extends AsyncTask<String, String, Integer> {
 
-    public static final String TAG = PostPicture.class.getSimpleName();
+    public static final String LOG_TAG = PostPicture.class.getSimpleName();
     public static final int SUCCESS = 0;
     public static final int FAILED = 1;
 
     private final String boundary = "---------------------Boundary";
     private CameraActivity mCameraActivity;
-    private String mImagePath;
+    private File mImageFile;
     private String mUniqueId;
     private String mDatePosted;
 
-    public PostPicture(Context context) {
+    public PostPicture(Context context, File imageFile) {
         mCameraActivity = (CameraActivity) context;
-    }
-
-    @Override
-    protected void onCancelled(Integer integer) {
-        mCameraActivity.hideProgressBar();
+        mImageFile = imageFile;
     }
 
     @Override
@@ -61,22 +59,23 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
      */
     @Override
     protected Integer doInBackground(String... path) {
-        mImagePath = path[0];
-        Log.d(TAG, "first");
         try {
-            URL address = new URL(mCameraActivity.getString(R.string.server) + mCameraActivity.getString(R.string.server_post));
-            HttpURLConnection connection = (HttpURLConnection) (address.openConnection());
+            URL url = new URL(mCameraActivity.getString(R.string.server) + mCameraActivity.getString(R.string.server_post));
+            HttpURLConnection connection = (HttpURLConnection) (url.openConnection());
 
+            // Allow Inputs &amp; Outputs.
             connection.setDoInput(true);
             connection.setDoOutput(true);
             connection.setUseCaches(false);
+
+            // Set HTTP method to POST.
             connection.setRequestMethod("POST");
+
             connection.setRequestProperty("Connection", "Keep-Alive");
             connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
             connection.setRequestProperty("Accept", "application/json");
-            Log.d(TAG, "first");
+
             OutputStream requestBody = connection.getOutputStream();
-            Log.d(TAG, "progress: made it to data");
 
             String[] coordinates = FileUtilities.getLocationCoordinates(mCameraActivity);
             String latitude = generateForSimpleText("latitude", coordinates[0]);
@@ -86,13 +85,12 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
             byte[] writer = combined.getBytes();
             requestBody.write(writer, 0, writer.length);
 
-            String imageName = FileUtilities.getSimpleName(mImagePath);
-            String frontBoilerForImage = generateImageBoilerplateFront(imageName);
+            String frontBoilerForImage = generateImageBoilerplateFront(mImageFile.getName());
             writer = frontBoilerForImage.getBytes();
             requestBody.write(writer, 0, writer.length);
 
             //now encode image
-            FileInputStream imageAsStream = new FileInputStream(mImagePath);
+            FileInputStream imageAsStream = new FileInputStream(mImageFile.getAbsolutePath());
             int bytesAvailable = imageAsStream.available();
             int bufferSize = Math.min(bytesAvailable, 1 * 1024 * 1024);
             byte[] buffer = new byte[bufferSize];
@@ -112,8 +110,8 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
             imageAsStream.close();
             requestBody.flush();
             requestBody.close();
-            Log.d(TAG, "progress: END");
-            Log.d(TAG, "ConnectionType: " + connection.getHeaderField("Content-Type"));
+            Log.d(LOG_TAG, "progress: END");
+            Log.d(LOG_TAG, "ConnectionType: " + connection.getHeaderField("Content-Type"));
 
             // response from server
             InputStream inputStreamResponse = connection.getInputStream();
@@ -126,13 +124,13 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
 
             connection.disconnect();
         } catch (NetworkOnMainThreadException e) {
-            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+            Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             return FAILED;
         } catch (IOException e) {
-            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+            Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             return FAILED;
         } catch (JSONException e) {
-            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+            Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             return FAILED;
         }
         return SUCCESS;
@@ -152,28 +150,20 @@ public class PostPicture extends AsyncTask<String, String, Integer> {
     protected void onPostExecute(Integer integer) {
         mCameraActivity.hideProgressBar();
         if (integer == SUCCESS) {
-            FileUtilities.logResults(mCameraActivity, TAG, "Posted pic successfully!");
+            FileUtilities.logResults(mCameraActivity, LOG_TAG, "Posted pic successfully!");
 
-            Log.d(TAG, "Response:");
-            Log.d(TAG, "id: " + mUniqueId);
-            Log.d(TAG, "created: " + mDatePosted);
+            Log.d(LOG_TAG, mUniqueId);
+            Log.d(LOG_TAG, mDatePosted);
+            Log.d(LOG_TAG, mImageFile.getAbsolutePath());
 
-            /*
-            FeedDbHelper feedDbHelper = new FeedDbHelper(mCameraActivity);
-            SQLiteDatabase db = feedDbHelper.getWritableDatabase();
-            ContentValues values = new ContentValues();
-            values.put(MeEntry.COLUMN_NAME_PHOTO_ID, mUniqueId);
-            values.put(MeEntry.COLUMN_NAME_POST_DATE, mDatePosted);
-            values.put(MeEntry.COLUMN_NAME_VIEWS, 0);
-            values.put(MeEntry.COLUMN_NAME_LIKES, 0);
-            long newRowId = db.insert(MeEntry.TABLE_NAME, "null", values);
-            */
+            DatabaseHelper db = DatabaseHelper.getInstance(mCameraActivity);
+            db.insertPostedImage(new Image(mUniqueId, mDatePosted, mImageFile, 0, 0));
 
-            mCameraActivity.setResult(Activity.RESULT_OK);
+            mCameraActivity.setResult(mCameraActivity.POST_SUCCESS);
             mCameraActivity.finish();
         } else {
-            mCameraActivity.onPostPictureFailed();
-            new OperationFailedDialog().show(mCameraActivity.getFragmentManager(), TAG);
+            mCameraActivity.onPostPictureDone();
+            new OperationFailedDialog().show(mCameraActivity.getFragmentManager(), LOG_TAG);
         }
         super.onPostExecute(integer);
     }

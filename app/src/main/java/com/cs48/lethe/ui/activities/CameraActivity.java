@@ -13,11 +13,23 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import com.cs48.lethe.R;
+import com.cs48.lethe.database.DatabaseHelper;
+import com.cs48.lethe.server.HerokuClient;
 import com.cs48.lethe.server.PostPicture;
 import com.cs48.lethe.ui.dialogs.NetworkUnavailableDialog;
+import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
 import com.cs48.lethe.utils.FileUtilities;
+import com.cs48.lethe.utils.Image;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+import com.squareup.picasso.Picasso;
+
+import org.apache.http.Header;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
+import java.io.IOException;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -28,13 +40,16 @@ import butterknife.InjectView;
  */
 public class CameraActivity extends ActionBarActivity {
 
-    public static final String TAG = CameraActivity.class.getSimpleName();
+    public static final String LOG_TAG = CameraActivity.class.getSimpleName();
     public static final int IMAGE_CAPTURE_REQUEST = 100;
     public static final int IMAGE_POST_REQUEST = 200;
+    public static final int POST_SUCCESS = 300;
+    public static final int POST_FAILED = -300;
 
-    private Uri mImageUri;
     private File mImageFile;
     private MenuItem mPostButton;
+    private boolean mCurrentlyPosting;
+    private DatabaseHelper mDatabaseHelper;
 
     @InjectView(R.id.progressBar)
     ProgressBar mProgressBar;
@@ -52,6 +67,8 @@ public class CameraActivity extends ActionBarActivity {
 
         ButterKnife.inject(this);
 
+        mDatabaseHelper = DatabaseHelper.getInstance(this);
+        mCurrentlyPosting = false;
         mProgressBar.setVisibility(View.GONE);
 
         // Displays back button
@@ -69,9 +86,7 @@ public class CameraActivity extends ActionBarActivity {
         Intent imageCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
         mImageFile = FileUtilities.savePostedImage(this); // create a file to save the image
-        mImageUri = Uri.fromFile(mImageFile); // gets Uri of saved image
-        imageCaptureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mImageUri); // set the image file name
-
+        imageCaptureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(mImageFile)); // set the image file name
 
         // start the image capture Intent
         startActivityForResult(imageCaptureIntent, IMAGE_CAPTURE_REQUEST);
@@ -101,8 +116,10 @@ public class CameraActivity extends ActionBarActivity {
      */
     @Override
     public void onBackPressed() {
-        goBack();
-        super.onBackPressed();
+        if (!mCurrentlyPosting) {
+            goBack();
+            super.onBackPressed();
+        }
     }
 
     /**
@@ -110,8 +127,11 @@ public class CameraActivity extends ActionBarActivity {
      */
     @Override
     public boolean onSupportNavigateUp() {
-        goBack();
-        return true;
+        if (!mCurrentlyPosting) {
+            goBack();
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -119,25 +139,19 @@ public class CameraActivity extends ActionBarActivity {
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == IMAGE_CAPTURE_REQUEST) {
             // If user presses okay on camera, then it saves it to storage
             if (resultCode == RESULT_OK) {
-                try {
-                    mImageView.setImageBitmap(FileUtilities.getValidSizedBitmap(getContentResolver(),mImageUri));
-                }
-                catch(Exception e){
-                    Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
-                }
-
+                Picasso.with(this).load(mImageFile).into(mImageView);
                 // if user cancels image capture, then return to main screen
             } else if (resultCode == RESULT_CANCELED) {
                 if (mImageFile != null)
                     mImageFile.delete();
+                setResult(RESULT_CANCELED);
                 finish();
             }
         }
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
     /**
@@ -160,24 +174,106 @@ public class CameraActivity extends ActionBarActivity {
         // Returns to main screen and prints out image location if user presses post button
         if (id == R.id.action_post) {
             if (FileUtilities.isNetworkAvailable(this)) {
-                onPostPicture();
-                new PostPicture(this).execute(mImageUri.getPath());
+                onPostPictureStart();
+//                postPicture();
+                new PostPicture(this, mImageFile).execute();
                 return true;
-            }else {
-                new NetworkUnavailableDialog().show(getFragmentManager(), TAG);
+            } else {
+                new NetworkUnavailableDialog().show(getFragmentManager(), LOG_TAG);
                 return false;
             }
         }
         return super.onOptionsItemSelected(item);
     }
 
-    public void onPostPicture() {
+    /**
+     * NOT FULLY WORKING
+     * Post the picture on the server and stores the
+     * image in the internal database.
+     */
+    public void postPicture() {
+        mProgressBar.setVisibility(View.VISIBLE);
+        mCurrentlyPosting = true;
+        onPostPictureStart();
+
+        try {
+            Log.d(LOG_TAG, "file: " + mImageFile.getAbsolutePath());
+            Log.d(LOG_TAG, "name: " + mImageFile.getName());
+            Log.d(LOG_TAG, "exists: " + mImageFile.exists());
+            Log.d(LOG_TAG, "size: " + mImageFile.length() + " bytes");
+
+
+            String[] coordinates = FileUtilities.getLocationCoordinates(this);
+            RequestParams params = new RequestParams();
+            params.put("avatar", mImageFile, "image/jpeg");
+            params.put("latitude", coordinates[0]);
+            params.put("longitude", coordinates[1]);
+
+
+            HerokuClient.post(getString(R.string.server_post), params, new AsyncHttpResponseHandler() {
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                    mProgressBar.setVisibility(View.GONE);
+                    mCurrentlyPosting = false;
+                    onPostPictureDone();
+                    try {
+                        String jsonData = new String(responseBody);
+                        JSONObject jsonObject = new JSONObject(jsonData);
+
+                        mDatabaseHelper.insertPostedImage(
+                                new Image(jsonObject.getString("id"),
+                                        jsonObject.getString("created"),
+                                        mImageFile, 0, 0));
+
+                        setResult(POST_SUCCESS);
+
+                    } catch (JSONException e) {
+                        Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                    }
+                    setResult(POST_SUCCESS);
+                    finish();
+                }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                    Log.d(LOG_TAG, "Error : " + error.getLocalizedMessage());
+                    Log.d(LOG_TAG, "Status code : " + statusCode);
+                    for (Header header : headers)
+                        Log.d(LOG_TAG, header.getName() + " : " + header.getValue());
+                    String response = new String(responseBody);
+                    Log.d(LOG_TAG, "Response : " + response);
+
+
+                    mProgressBar.setVisibility(View.GONE);
+                    mCurrentlyPosting = false;
+                    setResult(POST_FAILED);
+                    new OperationFailedDialog().show(getFragmentManager(), LOG_TAG);
+                    onPostPictureDone();
+                }
+            });
+        } catch (IOException e) {
+            Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+        }
+    }
+
+    /**
+     * Hides the back button in the action bar. Hides the
+     * post button. And changes the title to reflect
+     * that the image is currently being posted
+     * to the server.
+     */
+    public void onPostPictureStart() {
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         mPostButton.setVisible(false);
         setTitle("Posting...");
     }
 
-    public void onPostPictureFailed() {
+    /**
+     * Shows the back button in the action bar. Shows the
+     * post button. And changes the title back to the
+     * normal title.
+     */
+    public void onPostPictureDone() {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mPostButton.setVisible(true);
         setTitle(getString(R.string.title_activity_camera));

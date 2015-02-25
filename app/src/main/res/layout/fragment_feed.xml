@@ -1,17 +1,19 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.cs48.lethe.ui.view_helpers.ScrollableSwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
              xmlns:tools="http://schemas.android.com/tools"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
+             android:id="@+id/swipeRefreshLayout"
              tools:context="com.cs48.lethe.ui.fragments.FeedFragment">
 
-    <GridView
+    <com.cs48.lethe.ui.view_helpers.ExpandableHeightGridView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/feedGridView"
         android:layout_gravity="left|top"
         android:numColumns="3"
-        android:verticalSpacing="3dp"
-        android:horizontalSpacing="3dp"
-        android:stretchMode="columnWidth"/>
+        android:verticalSpacing="2dp"
+        android:horizontalSpacing="4dp"
+        android:stretchMode="columnWidth"
+        />
 
-</FrameLayout>
+</com.cs48.lethe.ui.view_helpers.ScrollableSwipeRefreshLayout>

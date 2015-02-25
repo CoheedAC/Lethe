@@ -2,23 +2,29 @@ package com.cs48.lethe.ui.fragments;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.GridView;
 import android.widget.Toast;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.ui.activities.FullPictureActivity;
 import com.cs48.lethe.ui.adapters.FeedGridViewAdapter;
+import com.cs48.lethe.ui.view_helpers.ExpandableHeightGridView;
+import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.Image;
+import com.cs48.lethe.ui.view_helpers.ScrollableSwipeRefreshLayout;
+
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -30,11 +36,14 @@ import com.cs48.lethe.utils.Image;
  */
 public class FeedFragment extends Fragment {
 
-    public static final String TAG = FeedFragment.class.getSimpleName();
+    public static final String LOG_TAG = FeedFragment.class.getSimpleName();
 
     private FeedGridViewAdapter mGridAdapter;
-    private GridView mGridView;
-    private int FULL_IMAGE_REQUEST_CODE = 1;
+
+    @InjectView(R.id.feedGridView)
+    ExpandableHeightGridView mGridView;
+    @InjectView(R.id.swipeRefreshLayout)
+    ScrollableSwipeRefreshLayout mSwipeRefreshLayout;
 
     private OnFragmentInteractionListener mListener;
 
@@ -64,8 +73,12 @@ public class FeedFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_feed, container, false);
-        mGridView = (GridView) rootView.findViewById(R.id.feedGridView);
 
+        ButterKnife.inject(this, rootView);
+
+        pullToRefreshSetUp();
+
+        mGridView.setExpanded(true);
         mGridAdapter = new FeedGridViewAdapter(getActivity());
         mGridView.setAdapter(mGridAdapter);
 
@@ -79,18 +92,47 @@ public class FeedFragment extends Fragment {
                 Intent showImageIntent = new Intent(getActivity(), FullPictureActivity.class);
 
                 Image image = (Image) mGridAdapter.getItem(position);
-                showImageIntent.putExtra("image", image);
-                showImageIntent.setAction(FullPictureActivity.VIEW_ONLY);
+                showImageIntent.putExtra("uniqueId", image.getUniqueId());
+                showImageIntent.putExtra("position", position);
+                showImageIntent.setAction(FullPictureActivity.CACHED_IMAGE_INTERFACE);
 
-                startActivityForResult(showImageIntent, FULL_IMAGE_REQUEST_CODE);
+                startActivityForResult(showImageIntent, FullPictureActivity.FULL_PICTURE_REQUEST);
             }
         });
 
         return rootView;
     }
 
-    public void update() {
-        mGridAdapter.requestFeed();
+    /**
+     * Sets up the listeners for pull-to-refresh on the grid
+     */
+    private void pullToRefreshSetUp() {
+
+        mGridView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+                if (scrollState == SCROLL_STATE_IDLE && view.getChildAt(0).getTop() >= 0)
+                    mSwipeRefreshLayout.setEnabled(true);
+                else
+                    mSwipeRefreshLayout.setEnabled(false);
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                if (totalItemCount == 0)
+                    mSwipeRefreshLayout.setEnabled(true);
+            }
+
+        });
+
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                FileUtilities.logResults(getActivity(), LOG_TAG, "Refreshing...");
+                mGridAdapter.fetchFeedFromServer(mSwipeRefreshLayout);
+            }
+        });
+
     }
 
     /**
@@ -98,17 +140,26 @@ public class FeedFragment extends Fragment {
      */
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.findItem(R.id.action_delete_images).setVisible(true);
-        menu.findItem(R.id.action_refresh).setVisible(true);
     }
 
+    /**
+     * Hides the image from the feed or updates the database with the new
+     * likes and views when returning from the full screen activity
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == FULL_IMAGE_REQUEST_CODE && resultCode == FullPictureActivity.LIKED) {
-            mGridAdapter.fetchImageList();
+        if (requestCode == FullPictureActivity.FULL_PICTURE_REQUEST) {
+            if (resultCode == FullPictureActivity.HIDDEN) {
+                data.getIntExtra("position", -1);
+                mGridAdapter.hideImage(data.getIntExtra("position", -1));
+            } else {
+                mGridAdapter.updateImageStatistics(data.getIntExtra("position", -1));
+            }
         }
     }
+
 
     /**
      * Handles action bar menu button clicks.
@@ -126,31 +177,17 @@ public class FeedFragment extends Fragment {
             return true;
         }
 
-        /**
-         * Requests to get new images on the server.
-         */
-        if (id == R.id.action_refresh) {
-            mGridAdapter.requestFeed();
-            Toast.makeText(getActivity(), "Refreshing...", Toast.LENGTH_SHORT).show();
-        }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void fetchFeedFromServer() {
+        mGridAdapter.fetchFeedFromServer(null);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-
-
-    }
-
-
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
     }
 
     @Override
@@ -182,7 +219,7 @@ public class FeedFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFragmentInteraction(Uri uri);
+        public void onGridItemSelected(int position);
     }
 
 }
