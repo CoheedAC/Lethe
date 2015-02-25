@@ -1,5 +1,6 @@
 package com.cs48.lethe.ui.activities;
 
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,6 +18,8 @@ import com.cs48.lethe.ui.fragments.FeedFragment;
 import com.cs48.lethe.ui.fragments.MeFragment;
 import com.cs48.lethe.ui.fragments.MoreFragment;
 import com.cs48.lethe.ui.fragments.PeekFragment;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
 
 /**
  * The main activity where the app launches. It handles all of the tab fragments
@@ -24,12 +27,14 @@ import com.cs48.lethe.ui.fragments.PeekFragment;
  */
 public class MainActivity extends ActionBarActivity implements ActionBar.TabListener,
         FeedFragment.OnFragmentInteractionListener, PeekFragment.OnFragmentInteractionListener,
-        MeFragment.OnFragmentInteractionListener, MoreFragment.OnFragmentInteractionListener {
+        MeFragment.OnFragmentInteractionListener, MoreFragment.OnFragmentInteractionListener, OnMapReadyCallback{
 
     public static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     private TabsPagerAdapter mTabsPagerAdapter;
     private ViewPager mViewPager;
+
+    public static FragmentManager fragmentManager;
 
     /**
      * Creates the action bar and title.
@@ -41,6 +46,9 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         setTitle("Home");
         setUpActionBar();
+
+        fragmentManager = getFragmentManager();
+
     }
 
     /**
@@ -189,6 +197,11 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
     @Override
     public void onFragmentInteraction(Uri uri) {
+
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
 
     }
 }

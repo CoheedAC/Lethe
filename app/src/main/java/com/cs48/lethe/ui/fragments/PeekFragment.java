@@ -4,11 +4,13 @@ import android.app.Activity;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.cs48.lethe.R;
+import com.google.android.gms.maps.GoogleMap;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -21,6 +23,10 @@ import com.cs48.lethe.R;
 public class PeekFragment extends Fragment {
 
     public static final String LOG_TAG = PeekFragment.class.getSimpleName();
+    private static View view;
+    private static GoogleMap mMap;
+    private static double latitude, longitude;
+
 
     private OnFragmentInteractionListener mListener;
 
@@ -42,6 +48,7 @@ public class PeekFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+
 
         View rootView = inflater.inflate(R.layout.fragment_peek, container, false);
 
