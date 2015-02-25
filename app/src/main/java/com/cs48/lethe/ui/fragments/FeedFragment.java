@@ -15,7 +15,7 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 
 import com.cs48.lethe.R;
-import com.cs48.lethe.ui.activities.FullPictureActivity;
+import com.cs48.lethe.ui.activities.FullCachedPictureActivity;
 import com.cs48.lethe.ui.adapters.FeedGridViewAdapter;
 import com.cs48.lethe.ui.view_helpers.ExpandableHeightGridView;
 import com.cs48.lethe.ui.view_helpers.ScrollableSwipeRefreshLayout;
@@ -87,13 +87,12 @@ public class FeedFragment extends Fragment {
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent showImageIntent = new Intent(getActivity(), FullPictureActivity.class);
+                Intent showImageIntent = new Intent(getActivity(), FullCachedPictureActivity.class);
 
                 Image image = (Image) mGridAdapter.getItem(position);
                 showImageIntent.putExtra("uniqueId", image.getUniqueId());
-                showImageIntent.setAction(FullPictureActivity.CACHED_IMAGE_INTERFACE);
 
-                startActivityForResult(showImageIntent, FullPictureActivity.FULL_PICTURE_REQUEST);
+                startActivityForResult(showImageIntent, FullCachedPictureActivity.SHOW_CACHED_IMAGE_REQUEST);
             }
         });
 
@@ -146,7 +145,7 @@ public class FeedFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == FullPictureActivity.FULL_PICTURE_REQUEST && resultCode == FullPictureActivity.HIDE_PICTURE)
+        if (requestCode == FullCachedPictureActivity.SHOW_CACHED_IMAGE_REQUEST && resultCode == FullCachedPictureActivity.HIDE_PICTURE)
             fetchFeedFromServer();
     }
 

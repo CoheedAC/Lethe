@@ -2,7 +2,7 @@
 manifest
 ADDED from AndroidManifest.xml:2:1
 	package
-		ADDED from AndroidManifest.xml:3:11
+		ADDED from AndroidManifest.xml:3:5
 		INJECTED from AndroidManifest.xml:0:0
 		INJECTED from AndroidManifest.xml:0:0
 	android:versionName
@@ -64,50 +64,56 @@ MERGED from com.android.support:support-v4:21.0.3:16:5
 	android:theme
 		ADDED from AndroidManifest.xml:23:9
 meta-data#com.google.android.gms.version
-ADDED from AndroidManifest.xml:25:9
+ADDED from AndroidManifest.xml:24:9
 MERGED from com.google.android.gms:play-services:6.5.87:21:9
 	android:value
-		ADDED from AndroidManifest.xml:27:13
-	android:name
 		ADDED from AndroidManifest.xml:26:13
+	android:name
+		ADDED from AndroidManifest.xml:25:13
 activity#com.cs48.lethe.ui.activities.MainActivity
-ADDED from AndroidManifest.xml:29:9
+ADDED from AndroidManifest.xml:28:9
 	android:screenOrientation
-		ADDED from AndroidManifest.xml:32:13
-	android:label
 		ADDED from AndroidManifest.xml:31:13
-	android:name
+	android:label
 		ADDED from AndroidManifest.xml:30:13
+	android:name
+		ADDED from AndroidManifest.xml:29:13
 intent-filter#android.intent.action.MAIN+android.intent.category.LAUNCHER
-ADDED from AndroidManifest.xml:33:13
+ADDED from AndroidManifest.xml:32:13
 action#android.intent.action.MAIN
-ADDED from AndroidManifest.xml:34:17
+ADDED from AndroidManifest.xml:33:17
 	android:name
-		ADDED from AndroidManifest.xml:34:25
+		ADDED from AndroidManifest.xml:33:25
 category#android.intent.category.LAUNCHER
-ADDED from AndroidManifest.xml:36:17
+ADDED from AndroidManifest.xml:35:17
 	android:name
-		ADDED from AndroidManifest.xml:36:27
-activity#com.cs48.lethe.ui.activities.CameraActivity
-ADDED from AndroidManifest.xml:39:9
+		ADDED from AndroidManifest.xml:35:27
+activity#com.cs48.lethe.ui.activities.PostPictureActivity
+ADDED from AndroidManifest.xml:38:9
 	android:screenOrientation
-		ADDED from AndroidManifest.xml:42:13
-	android:label
 		ADDED from AndroidManifest.xml:41:13
-	android:name
-		ADDED from AndroidManifest.xml:40:13
-activity#com.cs48.lethe.ui.activities.FullPictureActivity
-ADDED from AndroidManifest.xml:43:9
 	android:label
-		ADDED from AndroidManifest.xml:45:13
+		ADDED from AndroidManifest.xml:40:13
 	android:name
+		ADDED from AndroidManifest.xml:39:13
+activity#com.cs48.lethe.ui.activities.FullPostedPictureActivity
+ADDED from AndroidManifest.xml:42:9
+	android:label
 		ADDED from AndroidManifest.xml:44:13
-meta-data#com.google.android.maps.v2.AIzaSyD2Bm0ISoNhNqDC7xVOyhPS8oc5pYfEYvs
-ADDED from AndroidManifest.xml:48:9
-	android:value
-		ADDED from AndroidManifest.xml:50:13
 	android:name
+		ADDED from AndroidManifest.xml:43:13
+meta-data#com.google.android.maps.v2.AIzaSyD2Bm0ISoNhNqDC7xVOyhPS8oc5pYfEYvs
+ADDED from AndroidManifest.xml:47:9
+	android:value
 		ADDED from AndroidManifest.xml:49:13
+	android:name
+		ADDED from AndroidManifest.xml:48:13
+activity#com.cs48.lethe.ui.activities.FullCachedPictureActivity
+ADDED from AndroidManifest.xml:51:9
+	android:label
+		ADDED from AndroidManifest.xml:53:13
+	android:name
+		ADDED from AndroidManifest.xml:52:13
 uses-sdk
 INJECTED from AndroidManifest.xml:0:0 reason: use-sdk injection requested
 MERGED from com.android.support:appcompat-v7:21.0.3:15:5

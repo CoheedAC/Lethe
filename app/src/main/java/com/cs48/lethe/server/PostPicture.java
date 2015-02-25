@@ -33,7 +33,8 @@ public class PostPicture extends AsyncTask<String, String, String> {
 
     public static final String LOG_TAG = PostPicture.class.getSimpleName();
 
-    private final String boundary = "---------------------Boundary";
+    private final String BOUNDARY = "---------------------Boundary";
+
     private PostPictureActivity mPostPictureActivity;
     private File mImageFile;
 
@@ -70,7 +71,7 @@ public class PostPicture extends AsyncTask<String, String, String> {
             connection.setRequestMethod("POST");
 
             connection.setRequestProperty("Connection", "Keep-Alive");
-            connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+            connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + BOUNDARY);
             connection.setRequestProperty("Accept", "application/json");
 
             requestBody = connection.getOutputStream();
@@ -164,15 +165,15 @@ public class PostPicture extends AsyncTask<String, String, String> {
     }
 
     private String generateForSimpleText(String name, String value) {
-        return ("--" + boundary + "\r\nContent-Disposition: form-data; name=\"" + name + "\"\r\n\r\n" + value + "\r\n");
+        return ("--" + BOUNDARY + "\r\nContent-Disposition: form-data; name=\"" + name + "\"\r\n\r\n" + value + "\r\n");
     }
 
     private String generateImageBoilerplateFront(String filename) {
-        return ("--" + boundary + "\r\nContent-Disposition: form-data; name=\"avatar\"; filename=\"" + filename + "\"\r\nContent-Type: image/jpeg\r\n\r\n");
+        return ("--" + BOUNDARY + "\r\nContent-Disposition: form-data; name=\"avatar\"; filename=\"" + filename + "\"\r\nContent-Type: image/jpeg\r\n\r\n");
     }
 
     private String generateImageBoilerPlateEnd() {
-        return ("\r\n--" + boundary + "--");
+        return ("\r\n--" + BOUNDARY + "--");
     }
 
 }

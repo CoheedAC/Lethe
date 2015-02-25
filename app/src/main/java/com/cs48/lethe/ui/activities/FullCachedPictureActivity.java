@@ -6,19 +6,16 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.server.HerokuClient;
 import com.cs48.lethe.ui.dialogs.AlreadyLikedImageDialog;
 import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
-import com.cs48.lethe.ui.view_helpers.OnHorizontalSwipeTouchListener;
+import com.cs48.lethe.ui.view_helpers.OnHorizontalSwipeListener;
 import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.Image;
 import com.loopj.android.http.AsyncHttpResponseHandler;
@@ -29,51 +26,35 @@ import org.apache.http.Header;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 /**
  * The activity that handles showing the full-sized image
- * whenever the user tabs on an image in the grid.
+ * whenever the user tabs on an image in the grid of feed images.
  */
-public class FullPictureActivity extends ActionBarActivity {
+public class FullCachedPictureActivity extends ActionBarActivity {
 
-    public static final String LOG_TAG = FullPictureActivity.class.getSimpleName();
-    public static final String CACHED_IMAGE_INTERFACE = "CACHED_IMAGE_INTERFACE";
-    public static final String POSTED_IMAGE_INTERFACE = "POSTED_IMAGE_INTERFACE";
-    public static final int HIDE_PICTURE = -100;
-    public static final int DELETE_PICTURE = -101;
-    public static final int FULL_PICTURE_REQUEST = 100;
+    public static final String LOG_TAG = FullCachedPictureActivity.class.getSimpleName();
+    public static final int HIDE_PICTURE = -75;
+    public static final int SHOW_CACHED_IMAGE_REQUEST = 75;
 
     private DatabaseHelper mDatabaseHelper;
     private Image mImage;
 
-    @InjectView(R.id.fullImageView)
+    @InjectView(R.id.imageView)
     ImageView mImageView;
-    @InjectView(R.id.deleteButton)
-    ImageButton mDeleteButton;
-    @InjectView(R.id.saveButton)
-    ImageButton mCopyButton;
     @InjectView(R.id.progressBar)
     ProgressBar mProgressBar;
     @InjectView(R.id.likesTextView)
     TextView mLikesTextView;
     @InjectView(R.id.viewsTextView)
     TextView mViewsTextView;
-    @InjectView(R.id.buttonLinearLayout)
-    LinearLayout mButtonLinearLayout;
 
-    /**
-     * Hides the action bar and gets all of the necessary data from
-     * the Bundle that was passed from the calling activity. Shows/hides
-     * buttons on the screen depending upon which view state was requested.
-     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_full_picture);
+        setContentView(R.layout.activity_full_posted_image);
 
         ButterKnife.inject(this);
 
@@ -86,26 +67,6 @@ public class FullPictureActivity extends ActionBarActivity {
 
         // Get photo id from intent
         String uniqueId = getIntent().getStringExtra("uniqueId");
-
-        String interfaceType = getIntent().getAction();
-        if (interfaceType.equals(POSTED_IMAGE_INTERFACE))
-            showPostedImage(uniqueId);
-        else if (interfaceType.equals(CACHED_IMAGE_INTERFACE))
-            showCachedImage(uniqueId);
-
-        // Displays the statistics on the screen and fetches the statistics from the server
-        mLikesTextView.setText("Likes: " + mImage.getLikes());
-        mViewsTextView.setText("Views: " + mImage.getViews());
-        if (FileUtilities.isNetworkAvailable(this))
-            fetchPictureStatisticsFromServer();
-    }
-
-    /**
-     * Shows the interface for an image pulled from the server
-     */
-    private void showCachedImage(String uniqueId) {
-        // Hides the image action buttons
-        mButtonLinearLayout.setVisibility(View.GONE);
 
         // Show the loading progress bar
         mProgressBar.setVisibility(View.VISIBLE);
@@ -146,86 +107,24 @@ public class FullPictureActivity extends ActionBarActivity {
         mImageView.setTag(target);
         Picasso.with(this)
                 .load(mImage.getFullUrl())
-                .resize(1024,0)
+                .resize(1024, 0)
                 .onlyScaleDown()
                 .into(target);  // load image from url into imageview
 
+        // Displays the statistics on the screen and fetches the statistics from the server
+        mLikesTextView.setText("Likes: " + mImage.getLikes());
+        mViewsTextView.setText("Views: " + mImage.getViews());
+        if (FileUtilities.isNetworkAvailable(this))
+            fetchPictureStatisticsFromServer();
+
         setUpOnSwipeListener();
-    }
-
-    /**
-     * Shows the interface for an image posted to the server
-     */
-    private void showPostedImage(String uniqueId) {
-        // Shows the image action buttons
-        mButtonLinearLayout.setVisibility(View.VISIBLE);
-
-        mImage = mDatabaseHelper.getPostedImage(uniqueId);  // get image from me table
-        mDatabaseHelper.viewImage(mImage);    // update views in table
-
-        // Display full image
-        int rotationDegrees = FileUtilities.getImageOrientation(mImage.getFile().getAbsolutePath());
-        Picasso.with(this)
-                .load(mImage.getFile()).
-                rotate(rotationDegrees)
-                .resize(1024, 0)
-                .onlyScaleDown()
-                .into(mImageView); // load image from file into imageview
-
-        setUpOnClickListeners();
-    }
-
-    /**
-     * Handles the tab gestures
-     */
-    private void setUpOnClickListeners() {
-        /**
-         * Exits the full screen view
-         */
-        mImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
-
-        /**
-         * Deletes the image stored on the device and goes back to the grid.
-         */
-        mDeleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setResult(DELETE_PICTURE, getIntent());
-                mDatabaseHelper.deletePostedImage(mImage);
-                Toast.makeText(FullPictureActivity.this, "Deleted image", Toast.LENGTH_SHORT).show();
-                finish();
-            }
-        });
-
-        /**
-         * Copies the image from the private external (or internal) storage
-         * into the public storage where the apps can access the photo.
-         */
-        mCopyButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    if (FileUtilities.saveImageForSharing(FullPictureActivity.this, mImage.getFile().getAbsolutePath()))
-                        Toast.makeText(FullPictureActivity.this, "Saved picture to shared storage.", Toast.LENGTH_SHORT).show();
-                    else
-                        Toast.makeText(FullPictureActivity.this, "Picture already exists in shared storage", Toast.LENGTH_SHORT).show();
-                } catch (IOException e) {
-                    Toast.makeText(FullPictureActivity.this, "Cannot copy to shared storage.", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
     }
 
     /**
      * Handles the swipe / tap gestures.
      */
     private void setUpOnSwipeListener() {
-        mImageView.setOnTouchListener(new OnHorizontalSwipeTouchListener(this) {
+        mImageView.setOnTouchListener(new OnHorizontalSwipeListener(this) {
 
             /**
              * Swiping left likes the photo then goes back to the feed.
@@ -271,7 +170,7 @@ public class FullPictureActivity extends ActionBarActivity {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 try {
-                    FileUtilities.logResults(FullPictureActivity.this, LOG_TAG, "Liked pic!");
+                    FileUtilities.logResults(FullCachedPictureActivity.this, LOG_TAG, "Liked pic!");
                     String jsonData = new String(responseBody);
                     JSONObject jsonObject = new JSONObject(jsonData);
                     mImage.setLikes(jsonObject.getInt(getString(R.string.json_likes)));
@@ -284,7 +183,7 @@ public class FullPictureActivity extends ActionBarActivity {
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                FileUtilities.logResults(FullPictureActivity.this, LOG_TAG, "Failed to like pic!");
+                FileUtilities.logResults(FullCachedPictureActivity.this, LOG_TAG, "Failed to like pic!");
             }
         });
     }
@@ -298,7 +197,7 @@ public class FullPictureActivity extends ActionBarActivity {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 try {
-                    FileUtilities.logResults(FullPictureActivity.this, LOG_TAG, "Disliked pic!");
+                    FileUtilities.logResults(FullCachedPictureActivity.this, LOG_TAG, "Disliked pic!");
                     String jsonData = new String(responseBody);
                     JSONObject jsonObject = new JSONObject(jsonData);
                     mImage.setLikes(jsonObject.getInt(getString(R.string.json_likes)));
@@ -311,7 +210,7 @@ public class FullPictureActivity extends ActionBarActivity {
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                FileUtilities.logResults(FullPictureActivity.this, LOG_TAG, "Failed to dislike pic!");
+                FileUtilities.logResults(FullCachedPictureActivity.this, LOG_TAG, "Failed to dislike pic!");
             }
         });
     }
@@ -343,8 +242,10 @@ public class FullPictureActivity extends ActionBarActivity {
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                FileUtilities.logResults(FullPictureActivity.this, LOG_TAG, "Request for statistics failed");
+                FileUtilities.logResults(FullCachedPictureActivity.this, LOG_TAG, "Request for statistics failed");
             }
         });
     }
+
+
 }

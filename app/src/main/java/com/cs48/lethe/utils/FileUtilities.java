@@ -1,6 +1,5 @@
 package com.cs48.lethe.utils;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -109,7 +108,7 @@ public class FileUtilities {
      */
     public static boolean isExternalStorageAvailable() {
         String state = Environment.getExternalStorageState();
-        return (Environment.MEDIA_MOUNTED.equals(state)) ? true : false;
+        return (Environment.MEDIA_MOUNTED.equals(state));
     }
 
     /**
@@ -146,20 +145,24 @@ public class FileUtilities {
     /**
      * Create a File for saving an image or video
      */
-    @SuppressLint("SimpleDateFormat")
     public static File savePostedImage(Context context) {
         File fileDirectory = getFileDirectory(context);
         return new File(fileDirectory.getAbsolutePath(),
                 "IMG_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".jpg");
     }
 
+    /**
+     * Rotates a bitmap by the specified degrees
+     */
     public static Bitmap rotateBitmap(Bitmap source, float angle) {
         Matrix matrix = new Matrix();
         matrix.postRotate(angle);
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
     }
 
-
+    /**
+     * Returns the orientation of the image taken by the camera
+     */
     public static int getImageOrientation(String imagePath){
         int rotate = 0;
         try {
@@ -183,12 +186,6 @@ public class FileUtilities {
             e.printStackTrace();
         }
         return rotate;
-    }
-
-    public static Bitmap getAdjustedBitmap(Bitmap bitmap, String imagePath) {
-        Matrix matrix = new Matrix();
-        matrix.preRotate(getImageOrientation(imagePath));
-        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
     }
 
 }

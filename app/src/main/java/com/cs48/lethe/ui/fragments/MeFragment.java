@@ -15,7 +15,7 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 
 import com.cs48.lethe.R;
-import com.cs48.lethe.ui.activities.FullPictureActivity;
+import com.cs48.lethe.ui.activities.FullPostedPictureActivity;
 import com.cs48.lethe.ui.adapters.MeGridViewAdapter;
 import com.cs48.lethe.utils.Image;
 
@@ -79,13 +79,12 @@ public class MeFragment extends Fragment {
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent showImageIntent = new Intent(getActivity(), FullPictureActivity.class);
+                Intent showImageIntent = new Intent(getActivity(), FullPostedPictureActivity.class);
 
                 Image image = (Image) mGridAdapter.getItem(position);
                 showImageIntent.putExtra("uniqueId", image.getUniqueId());
-                showImageIntent.setAction(FullPictureActivity.POSTED_IMAGE_INTERFACE);
 
-                startActivityForResult(showImageIntent, FullPictureActivity.FULL_PICTURE_REQUEST);
+                startActivityForResult(showImageIntent, FullPostedPictureActivity.SHOW_POSTED_PICTURE_REQUEST);
             }
         });
 
@@ -134,7 +133,7 @@ public class MeFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == FullPictureActivity.FULL_PICTURE_REQUEST && resultCode == FullPictureActivity.DELETE_PICTURE)
+        if (requestCode == FullPostedPictureActivity.SHOW_POSTED_PICTURE_REQUEST && resultCode == FullPostedPictureActivity.DELETE_PICTURE)
             fetchPostedImagesFromDatabase();
 
     }

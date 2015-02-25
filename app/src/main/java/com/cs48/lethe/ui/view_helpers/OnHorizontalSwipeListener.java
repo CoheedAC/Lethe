@@ -8,11 +8,11 @@ import android.view.View;
 /**
  * Detects left and right swipes across a view as well as single taps.
  */
-public class OnHorizontalSwipeTouchListener implements View.OnTouchListener {
+public class OnHorizontalSwipeListener implements View.OnTouchListener {
 
     private final GestureDetector gestureDetector;
 
-    public OnHorizontalSwipeTouchListener(Context context) {
+    public OnHorizontalSwipeListener(Context context) {
         gestureDetector = new GestureDetector(context, new GestureListener());
     }
 

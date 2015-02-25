@@ -82,14 +82,6 @@ public class PostPictureActivity extends ActionBarActivity {
                 .into(mImageView);
     }
 
-    public void showProgressBar() {
-        mProgressBar.setVisibility(View.VISIBLE);
-    }
-
-    public void hideProgressBar() {
-        mProgressBar.setVisibility(View.GONE);
-    }
-
     /**
      * Deletes the image that the user captured and restarts the
      * camera intent.
@@ -128,7 +120,7 @@ public class PostPictureActivity extends ActionBarActivity {
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_camera, menu);
+        getMenuInflater().inflate(R.menu.menu_post_picture, menu);
         mPostButton = menu.findItem(R.id.action_post);
         return true;
     }
@@ -245,7 +237,7 @@ public class PostPictureActivity extends ActionBarActivity {
         mCurrentlyPosting = false;
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mPostButton.setVisible(true);
-        setTitle(getString(R.string.title_activity_camera));
+        setTitle(getString(R.string.title_activity_post_picture));
     }
 
 }
