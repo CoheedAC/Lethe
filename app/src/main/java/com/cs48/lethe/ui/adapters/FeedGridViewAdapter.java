@@ -225,7 +225,7 @@ public class FeedGridViewAdapter extends BaseAdapter {
      * set to HIDDEN in the database in the swipeRight()
      * in the FullPictureActivity class
      */
-    public void hideImageFromFeed(int position) {
+    public void hideImage(int position) {
         if (position >= 0 && position < mImageList.size()) {
             mImageList.remove(position);
             notifyDataSetChanged();
@@ -246,7 +246,7 @@ public class FeedGridViewAdapter extends BaseAdapter {
      */
     public void clearCache() {
         mDatabaseHelper.clearCachedImages();
-        mImageList.removeAll(mImageList);
+        mImageList = new ArrayList<>();
         notifyDataSetChanged();
     }
 

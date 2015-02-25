@@ -119,6 +119,8 @@ public class FeedFragment extends Fragment {
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                if (totalItemCount == 0)
+                    mSwipeRefreshLayout.setEnabled(true);
             }
 
         });
@@ -151,7 +153,7 @@ public class FeedFragment extends Fragment {
         if (requestCode == FullPictureActivity.FULL_PICTURE_REQUEST) {
             if (resultCode == FullPictureActivity.HIDDEN) {
                 data.getIntExtra("position", -1);
-                mGridAdapter.hideImageFromFeed(data.getIntExtra("position", -1));
+                mGridAdapter.hideImage(data.getIntExtra("position", -1));
             } else {
                 mGridAdapter.updateImageStatistics(data.getIntExtra("position", -1));
             }
