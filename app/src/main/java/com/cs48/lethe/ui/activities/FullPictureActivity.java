@@ -17,9 +17,9 @@ import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.server.HerokuClient;
 import com.cs48.lethe.ui.dialogs.AlreadyLikedImageDialog;
 import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
+import com.cs48.lethe.ui.view_helpers.OnSwipeTouchListener;
 import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.Image;
-import com.cs48.lethe.ui.view_helpers.OnSwipeTouchListener;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
@@ -54,7 +54,7 @@ public class FullPictureActivity extends ActionBarActivity {
 
     public static final String LOG_TAG = FullPictureActivity.class.getSimpleName();
     public static final String CACHED_IMAGE_INTERFACE = "CACHED_IMAGE_INTERFACE";
-    public static final String POSTED_IMAGE_INTERFACE= "POSTED_IMAGE_INTERFACE";
+    public static final String POSTED_IMAGE_INTERFACE = "POSTED_IMAGE_INTERFACE";
     public static final int HIDDEN = -100;
     public static final int DELETE_IMAGE = -101;
     public static final int FULL_PICTURE_REQUEST = 100;
@@ -121,6 +121,7 @@ public class FullPictureActivity extends ActionBarActivity {
 
             mImage = mDatabaseHelper.getCachedImage(uniqueId);    // get image from feed table
             mDatabaseHelper.viewImage(mImage);    // update views in table
+            mProgressBar.setVisibility(View.VISIBLE);
 
             final Target thumbnailTarget = new Target() {
                 @Override
@@ -137,12 +138,13 @@ public class FullPictureActivity extends ActionBarActivity {
                 }
             };
             mImageView.setTag(thumbnailTarget);
+            Picasso.with(FullPictureActivity.this).load(mImage.getThumbnailUrl()).into(thumbnailTarget);
 
             final Target fullTarget = new Target() {
                 @Override
                 public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
                     mProgressBar.setVisibility(View.GONE);
-                    mImageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, 2048, 2048, false));
+                    mImageView.setImageBitmap(FileUtilities.getValidSizedBitmap(bitmap));
                 }
 
                 @Override
@@ -153,8 +155,6 @@ public class FullPictureActivity extends ActionBarActivity {
 
                 @Override
                 public void onPrepareLoad(Drawable placeHolderDrawable) {
-                    mProgressBar.setVisibility(View.VISIBLE);
-                    Picasso.with(FullPictureActivity.this).load(mImage.getThumbnailUrl()).into(thumbnailTarget);
                 }
             };
             mImageView.setTag(fullTarget);
@@ -319,8 +319,10 @@ public class FullPictureActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 try {
-                    FileUtilities.saveImageForSharing(FullPictureActivity.this, mImage.getFile().getAbsolutePath());
-                    Toast.makeText(FullPictureActivity.this, "Saved to shared storage.", Toast.LENGTH_SHORT).show();
+                    if (FileUtilities.saveImageForSharing(FullPictureActivity.this, mImage.getFile().getAbsolutePath()))
+                        Toast.makeText(FullPictureActivity.this, "Saved picture to shared storage.", Toast.LENGTH_SHORT).show();
+                    else
+                        Toast.makeText(FullPictureActivity.this, "Picture already exists in shared storage", Toast.LENGTH_SHORT).show();
                 } catch (IOException e) {
                     Toast.makeText(FullPictureActivity.this, "Cannot copy to shared storage.", Toast.LENGTH_SHORT).show();
                 }

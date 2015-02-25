@@ -126,17 +126,21 @@ public class FileUtilities {
     /**
      * Copies the image to the public storage directory and returns the Uri
      */
-    public static void saveImageForSharing(Context context, String imagePath) throws IOException {
+    public static boolean saveImageForSharing(Context context, String imagePath) throws IOException {
         File imageSource = new File(imagePath);
         File imageDestination = new File(getSharedExternalDirectory(context) + "/" + imageSource.getName());
 
-        FileInputStream inStream = new FileInputStream(imageSource);
-        FileOutputStream outStream = new FileOutputStream(imageDestination);
-        FileChannel inChannel = inStream.getChannel();
-        FileChannel outChannel = outStream.getChannel();
-        inChannel.transferTo(0, inChannel.size(), outChannel);
-        inStream.close();
-        outStream.close();
+        if (!imageDestination.exists()) {
+            FileInputStream inStream = new FileInputStream(imageSource);
+            FileOutputStream outStream = new FileOutputStream(imageDestination);
+            FileChannel inChannel = inStream.getChannel();
+            FileChannel outChannel = outStream.getChannel();
+            inChannel.transferTo(0, inChannel.size(), outChannel);
+            inStream.close();
+            outStream.close();
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -154,24 +158,23 @@ public class FileUtilities {
      * Returns the full sized bitmap of the image.
      */
     public static Bitmap getValidSizedBitmap(Bitmap bitmap) {
-        final int WIDTH = 2048;
-        final int HEIGHT = 2048;
-
-        if (bitmap.getWidth() > WIDTH || bitmap.getHeight() > HEIGHT)
-            return Bitmap.createScaledBitmap(bitmap, WIDTH, HEIGHT, false);
-        else return bitmap;
+        return getCustomSizedBitmap(bitmap, 2048, 2048);
     }
 
     /**
      * Returns the thumbnail sized bitmap of the image.
      */
     public static Bitmap getThumbnailSizedBitmap(Bitmap bitmap) {
-        final int WIDTH = 150;
-        final int HEIGHT = 150;
+        return getCustomSizedBitmap(bitmap, 150, 150);
+    }
 
-        if (bitmap.getWidth() > WIDTH || bitmap.getHeight() > HEIGHT)
-            return Bitmap.createScaledBitmap(bitmap, WIDTH, HEIGHT, false);
-        else return bitmap;
+    /**
+     * Returns the custom sized bitmap of the image.
+     */
+    public static Bitmap getCustomSizedBitmap(Bitmap bitmap, int width, int height) {
+        if (bitmap.getWidth() > width || bitmap.getHeight() > height)
+            return Bitmap.createScaledBitmap(bitmap, width, height, false);
+        return bitmap;
     }
 
 //    /**
