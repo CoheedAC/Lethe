@@ -103,15 +103,11 @@ public class FeedFragment extends Fragment {
         return rootView;
     }
 
+    /**
+     * Sets up the listeners for pull-to-refresh on the grid
+     */
     private void pullToRefreshSetUp() {
-//        mSwipeRefreshLayout.setColorScheme(android.R.color.holo_blue_bright,
-//                android.R.color.holo_green_light,
-//                android.R.color.holo_orange_light,
-//                android.R.color.holo_red_light);
 
-        /**
-         * Scroll state for pull-to-refresh implementation
-         */
         mGridView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
@@ -144,6 +140,10 @@ public class FeedFragment extends Fragment {
         menu.findItem(R.id.action_delete_images).setVisible(true);
     }
 
+    /**
+     * Hides the image from the feed or updates the database with the new
+     * likes and views when returning from the full screen activity
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

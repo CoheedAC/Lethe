@@ -91,7 +91,24 @@ public class FullPictureActivity extends ActionBarActivity {
             FileUtilities.logResults(this, LOG_TAG, mImage.getFile().getAbsolutePath());
 
             mDatabaseHelper.viewImage(mImage);    // update views in table
-            Picasso.with(this).load(mImage.getFile()).into(mImageView); // load image from file into imageview
+
+            final Target target = new Target() {
+                @Override
+                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                    mImageView.setImageBitmap(FileUtilities.getValidSizedBitmap(bitmap));
+                }
+
+                @Override
+                public void onBitmapFailed(Drawable errorDrawable) {
+                }
+
+                @Override
+                public void onPrepareLoad(Drawable placeHolderDrawable) {
+                }
+            };
+            mImageView.setTag(target);
+
+            Picasso.with(this).load(mImage.getFile()).into(target); // load image from file into imageview
             showMeUI();   // show buttons related to me UI
             mImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -104,11 +121,28 @@ public class FullPictureActivity extends ActionBarActivity {
 
             mImage = mDatabaseHelper.getCachedImage(uniqueId);    // get image from feed table
             mDatabaseHelper.viewImage(mImage);    // update views in table
-            final Target target = new Target() {
+
+            final Target thumbnailTarget = new Target() {
+                @Override
+                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                    mImageView.setImageBitmap(FileUtilities.getThumbnailSizedBitmap(bitmap));
+                }
+
+                @Override
+                public void onBitmapFailed(Drawable errorDrawable) {
+                }
+
+                @Override
+                public void onPrepareLoad(Drawable placeHolderDrawable) {
+                }
+            };
+            mImageView.setTag(thumbnailTarget);
+
+            final Target fullTarget = new Target() {
                 @Override
                 public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
                     mProgressBar.setVisibility(View.GONE);
-                    mImageView.setImageBitmap(bitmap);
+                    mImageView.setImageBitmap(Bitmap.createScaledBitmap(bitmap, 2048, 2048, false));
                 }
 
                 @Override
@@ -120,11 +154,12 @@ public class FullPictureActivity extends ActionBarActivity {
                 @Override
                 public void onPrepareLoad(Drawable placeHolderDrawable) {
                     mProgressBar.setVisibility(View.VISIBLE);
-                    Picasso.with(FullPictureActivity.this).load(mImage.getThumbnailUrl()).into(mImageView);
+                    Picasso.with(FullPictureActivity.this).load(mImage.getThumbnailUrl()).into(thumbnailTarget);
                 }
             };
-            mImageView.setTag(target);
-            Picasso.with(this).load(mImage.getFullUrl()).into(target);  // load image from url into imageview
+            mImageView.setTag(fullTarget);
+            Picasso.with(this).load(mImage.getFullUrl()).into(fullTarget);  // load image from url into imageview
+
             showFeedUI();   // show buttons related to feed UI
             setUpGestureListener();
         }

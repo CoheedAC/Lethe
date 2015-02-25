@@ -153,16 +153,50 @@ public class FileUtilities {
     /**
      * Returns the full sized bitmap of the image.
      */
-    public static Bitmap getValidSizedBitmap(ContentResolver cr, Uri mImageUri) {
-        return (getXYCompressedBitmap(cr, mImageUri, 2048, 2048));
+    public static Bitmap getValidSizedBitmap(Bitmap bitmap) {
+        final int WIDTH = 2048;
+        final int HEIGHT = 2048;
+
+        if (bitmap.getWidth() > WIDTH || bitmap.getHeight() > HEIGHT)
+            return Bitmap.createScaledBitmap(bitmap, WIDTH, HEIGHT, false);
+        else return bitmap;
     }
 
     /**
      * Returns the thumbnail sized bitmap of the image.
      */
-    public static Bitmap getThumbnailSizedBitmap(ContentResolver cr, Uri mImageUri) {
-        return (getXYCompressedBitmap(cr, mImageUri, 150, 150));
+    public static Bitmap getThumbnailSizedBitmap(Bitmap bitmap) {
+        final int WIDTH = 150;
+        final int HEIGHT = 150;
+
+        if (bitmap.getWidth() > WIDTH || bitmap.getHeight() > HEIGHT)
+            return Bitmap.createScaledBitmap(bitmap, WIDTH, HEIGHT, false);
+        else return bitmap;
     }
+
+//    /**
+//     * Returns the full sized bitmap of the image.
+//     */
+//    public static Bitmap getValidSizedBitmap(ContentResolver cr, Uri mImageUri) {
+//        return (getXYCompressedBitmap(cr, mImageUri, 2048, 2048));
+//    }
+//
+//    /**
+//     * Returns the thumbnail sized bitmap of the image.
+//     */
+//    public static Bitmap getThumbnailSizedBitmap(ContentResolver cr, Uri mImageUri) {
+//        return (getXYCompressedBitmap(cr, mImageUri, 150, 150));
+//    }
+//
+//    public static Bitmap getXYCompressedBitmap(ContentResolver cr, Uri mImageUri, int x, int y) {
+//        try {
+//            Bitmap bp = android.provider.MediaStore.Images.Media.getBitmap(cr, mImageUri);
+//            return (Bitmap.createScaledBitmap(bp, x, y, false)); //low quality
+//
+//        } catch (Exception e) {
+//            return null;
+//        }
+//    }
 
     /**
      * Returns the custom sized bitmap of the image.

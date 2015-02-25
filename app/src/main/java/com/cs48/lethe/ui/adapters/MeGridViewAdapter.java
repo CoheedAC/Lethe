@@ -1,6 +1,8 @@
 package com.cs48.lethe.ui.adapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +17,7 @@ import com.cs48.lethe.ui.dialogs.DeleteImageWarningDialog;
 import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.Image;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.io.File;
 import java.util.List;
@@ -29,6 +32,7 @@ public class MeGridViewAdapter extends BaseAdapter {
     private Context mContext;
     private List<Image> mImageList;
     private DatabaseHelper mDatabaseHelper;
+    private Target mTarget;
 
     public MeGridViewAdapter(Context context) {
         mContext = context;
@@ -67,22 +71,55 @@ public class MeGridViewAdapter extends BaseAdapter {
      * Creates a new ImageView for each item referenced by the Adapter
      */
     public View getView(int position, View convertView, ViewGroup parent) {
-        ImageView imageView = (ImageView) convertView;
-
         // if it's not recycled, initialize some attributes
         if (convertView == null) {
-            imageView = new ImageView(mContext);
+            final ImageView imageView = new ImageView(mContext);
             GridView.LayoutParams imageParams = new GridView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     300);
             imageView.setLayoutParams(imageParams);
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             imageView.setBackgroundColor(mContext.getResources().getColor(R.color.image_load));
+
+            mTarget = new Target() {
+                @Override
+                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                    imageView.setImageBitmap(FileUtilities.getThumbnailSizedBitmap(bitmap));
+                }
+
+                @Override
+                public void onBitmapFailed(Drawable errorDrawable) {
+                }
+
+                @Override
+                public void onPrepareLoad(Drawable placeHolderDrawable) {
+                }
+            };
+            imageView.setTag(mTarget);
+
+            Picasso.with(mContext).load(mImageList.get(position).getFile()).into(mTarget);
+            return imageView;
+        } else {
+            final ImageView imageView = (ImageView) convertView;
+
+            mTarget = new Target() {
+                @Override
+                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                    imageView.setImageBitmap(FileUtilities.getThumbnailSizedBitmap(bitmap));
+                }
+
+                @Override
+                public void onBitmapFailed(Drawable errorDrawable) {
+                }
+
+                @Override
+                public void onPrepareLoad(Drawable placeHolderDrawable) {
+                }
+            };
+            imageView.setTag(mTarget);
+
+            Picasso.with(mContext).load(mImageList.get(position).getFile()).into(mTarget);
+            return imageView;
         }
-
-        Image image = (Image) getItem(position);
-        Picasso.with(mContext).load(image.getFile()).into(imageView);
-
-        return imageView;
     }
 
     /**
@@ -90,7 +127,7 @@ public class MeGridViewAdapter extends BaseAdapter {
      */
     public void deleteAllPostedImages() {
         mDatabaseHelper.clearPostedImages();
-        for(Image image: mImageList)
+        for (Image image : mImageList)
             image.getFile().delete();
         mImageList.removeAll(mImageList);
         notifyDataSetChanged();
@@ -122,7 +159,7 @@ public class MeGridViewAdapter extends BaseAdapter {
     /**
      * Populates 50 temporary image objects from the
      * first image object in the image list.
-     *
+     * <p/>
      * WARNING: if you press delete in the full screen view
      * it will delete all 50 images
      */

@@ -2,6 +2,8 @@ package com.cs48.lethe.ui.adapters;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +22,7 @@ import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.Image;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import org.apache.http.Header;
 import org.json.JSONArray;
@@ -45,7 +48,7 @@ public class FeedGridViewAdapter extends BaseAdapter {
         mContext = context;
         mDatabaseHelper = DatabaseHelper.getInstance(mContext);
         mImageList = mDatabaseHelper.getCachedImages();
-        fetchFeedFromServer(null);
+        fetchFeedFromServer();
     }
 
     /**
@@ -74,21 +77,57 @@ public class FeedGridViewAdapter extends BaseAdapter {
      * Creates a new ImageView for each item referenced by the Adapter
      */
     public View getView(int position, View convertView, ViewGroup parent) {
-        ImageView imageView = (ImageView) convertView;
         // if it's not recycled, initialize some attributes
         if (convertView == null) {
-            imageView = new ImageView(mContext);
+            final ImageView imageView = new ImageView(mContext);
             GridView.LayoutParams imageParams = new GridView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     300);
             imageView.setLayoutParams(imageParams);
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             imageView.setBackgroundColor(mContext.getResources().getColor(R.color.image_load));
+
+            final Target target = new Target() {
+                @Override
+                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                    imageView.setImageBitmap(FileUtilities.getThumbnailSizedBitmap(bitmap));
+                }
+
+                @Override
+                public void onBitmapFailed(Drawable errorDrawable) {
+                }
+
+                @Override
+                public void onPrepareLoad(Drawable placeHolderDrawable) {
+                }
+            };
+            imageView.setTag(target);
+
+            Image image = (Image) getItem(position);
+            Picasso.with(mContext).load(image.getThumbnailUrl()).into(target);
+            return imageView;
+        } else {
+            final ImageView imageView = (ImageView) convertView;
+
+            final Target target = new Target() {
+                @Override
+                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                    imageView.setImageBitmap(FileUtilities.getThumbnailSizedBitmap(bitmap));
+                }
+
+                @Override
+                public void onBitmapFailed(Drawable errorDrawable) {
+                }
+
+                @Override
+                public void onPrepareLoad(Drawable placeHolderDrawable) {
+                }
+            };
+            imageView.setTag(target);
+
+            Picasso.with(mContext).load(mImageList.get(position).getThumbnailUrl()).into(target);
+            return imageView;
         }
 
-        Image image = (Image) getItem(position);
-        Picasso.with(mContext).load(image.getThumbnailUrl()).into(imageView);
-
-        return imageView;
     }
 
     /**
@@ -97,66 +136,16 @@ public class FeedGridViewAdapter extends BaseAdapter {
      * grid with the new list of images from the
      * internal database.
      */
-//    public void fetchFeedFromServer() {
-//        // check if there is internet
-//        if (FileUtilities.isNetworkAvailable(mContext)) {
-//            // get current location
-//            String[] coordinates = FileUtilities.getLocationCoordinates(mContext);
-//            String url = mContext.getString(R.string.server_recent) +
-//                    coordinates[1].replace(".", "a") + "," +    // latitude
-//                    coordinates[0].replace(".", "a");           // longitude
-//
-//            HerokuClient.get(url, null, new AsyncHttpResponseHandler() {
-//
-//                @Override
-//                public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-//                    try {
-//                        // temporary list to store list of images
-//                        List<Image> serverImageList = new ArrayList<>();
-//
-//                        // parses the data received from the server
-//                        String jsonData = new String(responseBody);
-//                        JSONArray jsonArray = new JSONArray(jsonData);
-//                        for (int i = 0; i < jsonArray.length(); i++) {
-//                            JSONObject jsonObject = jsonArray.getJSONObject(i);
-//                            Date date = new Date();
-//
-//                            // adds a new image to the list with the info from the server
-//                            serverImageList.add(new Image(
-//                                    jsonObject.getString(mContext.getString(R.string.json_id)),
-//                                    date.getTime() + "",
-////                                jsonObject.getString(mContext.getString(R.string.json_date_posted)),
-//                                    jsonObject.getString(mContext.getString(R.string.json_url_thumbnail)),
-//                                    jsonObject.getString(mContext.getString(R.string.json_url_full)),
-//                                    jsonObject.getInt(mContext.getString(R.string.json_views)),
-//                                    jsonObject.getInt(mContext.getString(R.string.json_likes))));
-//                        }
-//
-//                        // updates the database with the new image list
-//                        // (while keeping the integrity of mImageList)
-//                        mDatabaseHelper.updateCache(serverImageList);
-//
-//                        // gets an updated list of images from the database
-//                        mImageList = mDatabaseHelper.getCachedImages();
-//
-//                        // updates the grid to reflect the new data in the image list
-//                        notifyDataSetChanged();
-//                    } catch (JSONException e) {
-//                        Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
-//                    }
-//                }
-//
-//                @Override
-//                public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-//                    new OperationFailedDialog().show(((MainActivity) mContext).getFragmentManager(), LOG_TAG);
-//                    FileUtilities.logResults(mContext, LOG_TAG, "Failed to get feed");
-//                }
-//            });
-//        } else {
-//            new NetworkUnavailableDialog().show(((Activity) mContext).getFragmentManager(), LOG_TAG);
-//        }
-//    }
+    public void fetchFeedFromServer() {
+        fetchFeedFromServer(null);
+    }
 
+    /**
+     * Gets the list of images from the server and adds
+     * them to the internal database. Then updates the
+     * grid with the new list of images from the
+     * internal database.
+     */
     public void fetchFeedFromServer(final ScrollableSwipeRefreshLayout scrollableSwipeRefreshLayout) {
         // check if there is internet
         if (FileUtilities.isNetworkAvailable(mContext)) {

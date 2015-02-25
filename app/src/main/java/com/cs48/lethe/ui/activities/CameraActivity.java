@@ -205,7 +205,7 @@ public class CameraActivity extends ActionBarActivity {
 
             String[] coordinates = FileUtilities.getLocationCoordinates(this);
             RequestParams params = new RequestParams();
-            params.put("avatar", mImageFile); // , "image/jpeg");
+            params.put("avatar", mImageFile, "image/jpeg");
             params.put("latitude", coordinates[0]);
             params.put("longitude", coordinates[1]);
 
