@@ -1,7 +1,6 @@
 package com.cs48.lethe.utils;
 
 import android.annotation.SuppressLint;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.location.Criteria;
@@ -9,7 +8,6 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
@@ -153,25 +151,24 @@ public class FileUtilities {
                 "IMG_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".jpg");
     }
 
-
     /**
      * Returns the full sized bitmap of the image.
      */
     public static Bitmap getValidSizedBitmap(Bitmap bitmap) {
-        return getCustomSizedBitmap(bitmap, 1024, 1024);
+        return getXYSizedBitmap(bitmap, 1024, 1024);
     }
 
     /**
      * Returns the thumbnail sized bitmap of the image.
      */
     public static Bitmap getThumbnailSizedBitmap(Bitmap bitmap) {
-        return getCustomSizedBitmap(bitmap, 171, 171);
+        return getXYSizedBitmap(bitmap, 171, 171);
     }
 
     /**
      * Returns the custom sized bitmap of the image.
      */
-    public static Bitmap getCustomSizedBitmap(Bitmap bitmap, int maxWidth, int maxHeight) {
+    public static Bitmap getXYSizedBitmap(Bitmap bitmap, int maxWidth, int maxHeight) {
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
 
@@ -182,40 +179,4 @@ public class FileUtilities {
         return Bitmap.createScaledBitmap(bitmap, width, height, false);
     }
 
-//    /**
-//     * Returns the full sized bitmap of the image.
-//     */
-//    public static Bitmap getValidSizedBitmap(ContentResolver cr, Uri mImageUri) {
-//        return (getXYCompressedBitmap(cr, mImageUri, 2048, 2048));
-//    }
-//
-//    /**
-//     * Returns the thumbnail sized bitmap of the image.
-//     */
-//    public static Bitmap getThumbnailSizedBitmap(ContentResolver cr, Uri mImageUri) {
-//        return (getXYCompressedBitmap(cr, mImageUri, 150, 150));
-//    }
-//
-//    public static Bitmap getXYCompressedBitmap(ContentResolver cr, Uri mImageUri, int x, int y) {
-//        try {
-//            Bitmap bp = android.provider.MediaStore.Images.Media.getBitmap(cr, mImageUri);
-//            return (Bitmap.createScaledBitmap(bp, x, y, false)); //low quality
-//
-//        } catch (Exception e) {
-//            return null;
-//        }
-//    }
-
-    /**
-     * Returns the custom sized bitmap of the image.
-     */
-    public static Bitmap getXYCompressedBitmap(ContentResolver cr, Uri mImageUri, int x, int y) {
-        try {
-            Bitmap bp = android.provider.MediaStore.Images.Media.getBitmap(cr, mImageUri);
-            return (Bitmap.createScaledBitmap(bp, x, y, false)); //low quality
-
-        } catch (Exception e) {
-            return null;
-        }
-    }
 }

@@ -3,6 +3,7 @@ package com.cs48.lethe.ui.adapters;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -74,8 +75,11 @@ public class MeGridViewAdapter extends BaseAdapter {
         // if it's not recycled, initialize some attributes
         if (convertView == null) {
             final ImageView imageView = new ImageView(mContext);
-            GridView.LayoutParams imageParams = new GridView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                    300);
+            DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
+            GridView gridView = (GridView) parent;
+            int imageDimension = metrics.widthPixels / gridView.getNumColumns();
+
+            GridView.LayoutParams imageParams = new GridView.LayoutParams(imageDimension, imageDimension);
             imageView.setLayoutParams(imageParams);
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             imageView.setBackgroundColor(mContext.getResources().getColor(R.color.image_load));

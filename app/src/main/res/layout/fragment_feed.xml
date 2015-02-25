@@ -11,8 +11,9 @@
         android:id="@+id/feedGridView"
         android:layout_gravity="left|top"
         android:numColumns="3"
-        android:verticalSpacing="3dp"
-        android:horizontalSpacing="3dp"
-        android:stretchMode="columnWidth"/>
+        android:verticalSpacing="2dp"
+        android:horizontalSpacing="4dp"
+        android:stretchMode="columnWidth"
+        />
 
 </com.cs48.lethe.ui.view_helpers.ScrollableSwipeRefreshLayout>
