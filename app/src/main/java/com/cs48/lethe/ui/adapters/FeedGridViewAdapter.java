@@ -2,8 +2,6 @@ package com.cs48.lethe.ui.adapters;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
@@ -23,13 +21,13 @@ import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.Image;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 import org.apache.http.Header;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -48,8 +46,8 @@ public class FeedGridViewAdapter extends BaseAdapter {
     public FeedGridViewAdapter(Context context) {
         mContext = context;
         mDatabaseHelper = DatabaseHelper.getInstance(mContext);
-        mImageList = mDatabaseHelper.getCachedImages();
-        fetchFeedFromServer();
+        fetchCachedImagesFromDatabase();
+        fetchFeedFromServer(null);
     }
 
     /**
@@ -79,70 +77,23 @@ public class FeedGridViewAdapter extends BaseAdapter {
      */
     public View getView(int position, View convertView, ViewGroup parent) {
         // if it's not recycled, initialize some attributes
-        if (convertView == null) {
-            final ImageView imageView = new ImageView(mContext);
-
-            DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
+        ImageView imageView = (ImageView) convertView;
+        if (imageView == null) {
+            imageView = new ImageView(mContext);
             GridView gridView = (GridView) parent;
+            DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
+
             int imageDimension = metrics.widthPixels / gridView.getNumColumns();
-
-            GridView.LayoutParams imageParams = new GridView.LayoutParams(imageDimension, imageDimension);
-            imageView.setLayoutParams(imageParams);
+            imageView.setLayoutParams(new GridView.LayoutParams(imageDimension, imageDimension));
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            imageView.setBackgroundColor(mContext.getResources().getColor(R.color.image_load));
-
-            final Target target = new Target() {
-                @Override
-                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                    imageView.setImageBitmap(FileUtilities.getThumbnailSizedBitmap(bitmap));
-                }
-
-                @Override
-                public void onBitmapFailed(Drawable errorDrawable) {
-                }
-
-                @Override
-                public void onPrepareLoad(Drawable placeHolderDrawable) {
-                }
-            };
-            imageView.setTag(target);
-
-            Image image = (Image) getItem(position);
-            Picasso.with(mContext).load(image.getThumbnailUrl()).into(target);
-            return imageView;
-        } else {
-            final ImageView imageView = (ImageView) convertView;
-
-            final Target target = new Target() {
-                @Override
-                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                    imageView.setImageBitmap(FileUtilities.getThumbnailSizedBitmap(bitmap));
-                }
-
-                @Override
-                public void onBitmapFailed(Drawable errorDrawable) {
-                }
-
-                @Override
-                public void onPrepareLoad(Drawable placeHolderDrawable) {
-                }
-            };
-            imageView.setTag(target);
-
-            Picasso.with(mContext).load(mImageList.get(position).getThumbnailUrl()).into(target);
-            return imageView;
+            imageView.setBackgroundColor(mContext.getResources().getColor(R.color.empty_image));
         }
-
-    }
-
-    /**
-     * Gets the list of images from the server and adds
-     * them to the internal database. Then updates the
-     * grid with the new list of images from the
-     * internal database.
-     */
-    public void fetchFeedFromServer() {
-        fetchFeedFromServer(null);
+        Picasso.with(mContext)
+                .load(mImageList.get(position).getThumbnailUrl())
+                .resize(200, 0)
+                .onlyScaleDown()
+                .into(imageView);
+        return imageView;
     }
 
     /**
@@ -169,19 +120,18 @@ public class FeedGridViewAdapter extends BaseAdapter {
                 public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                     try {
                         // temporary list to store list of images
-                        List<Image> serverImageList = new ArrayList<>();
+                        List<Image> tmpImageList = new ArrayList<>();
 
                         // parses the data received from the server
                         String jsonData = new String(responseBody);
                         JSONArray jsonArray = new JSONArray(jsonData);
                         for (int i = 0; i < jsonArray.length(); i++) {
                             JSONObject jsonObject = jsonArray.getJSONObject(i);
-                            Date date = new Date();
 
                             // adds a new image to the list with the info from the server
-                            serverImageList.add(new Image(
+                            tmpImageList.add(new Image(
                                     jsonObject.getString(mContext.getString(R.string.json_id)),
-                                    date.getTime() + "",
+                                    new SimpleDateFormat("yyyyMMdd_HHmmssSS").format(new Date()),
 //                                jsonObject.getString(mContext.getString(R.string.json_date_posted)),
                                     jsonObject.getString(mContext.getString(R.string.json_url_thumbnail)),
                                     jsonObject.getString(mContext.getString(R.string.json_url_full)),
@@ -191,7 +141,7 @@ public class FeedGridViewAdapter extends BaseAdapter {
 
                         // updates the database with the new image list
                         // (while keeping the integrity of mImageList)
-                        mDatabaseHelper.updateCache(serverImageList);
+                        mDatabaseHelper.updateCache(tmpImageList);
 
                         // gets an updated list of images from the database
                         mImageList = mDatabaseHelper.getCachedImages();
@@ -222,22 +172,12 @@ public class FeedGridViewAdapter extends BaseAdapter {
     /**
      * Hides the image from the feed by removing it from the
      * list of images. The VISIBLE flag has already been
-     * set to HIDDEN in the database in the swipeRight()
+     * set to HIDE_PICTURE in the database in the swipeRight()
      * in the FullPictureActivity class
      */
-    public void hideImage(int position) {
-        if (position >= 0 && position < mImageList.size()) {
-            mImageList.remove(position);
-            notifyDataSetChanged();
-        }
-    }
-
-    /**
-     * Updates the image likes and dislikes from the server
-     */
-    public void updateImageStatistics(int position) {
-        if (position >= 0 && position < mImageList.size())
-            mDatabaseHelper.updateImageStatisticsFromDatabase(mImageList.get(position));
+    public void fetchCachedImagesFromDatabase() {
+        mImageList = mDatabaseHelper.getCachedImages();
+        notifyDataSetChanged();
     }
 
     /**

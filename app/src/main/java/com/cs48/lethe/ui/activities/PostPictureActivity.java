@@ -1,9 +1,6 @@
 package com.cs48.lethe.ui.activities;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -38,13 +35,13 @@ import butterknife.InjectView;
  * An activity that handles all actions taken with the camera including
  * image capture, image file storing, and posting image.
  */
-public class CameraActivity extends ActionBarActivity {
+public class PostPictureActivity extends ActionBarActivity {
 
-    public static final String LOG_TAG = CameraActivity.class.getSimpleName();
-    public static final int IMAGE_CAPTURE_REQUEST = 100;
-    public static final int IMAGE_POST_REQUEST = 200;
-    public static final int POST_SUCCESS = 300;
-    public static final int POST_FAILED = -300;
+    public static final String LOG_TAG = PostPictureActivity.class.getSimpleName();
+    public static final int POST_IMAGE_REQUEST = 10;
+    public static final int POST_SUCCESS = 1;
+    public static final int POST_CANCELLED = -1;
+    public static final int POST_FAILED = 0;
 
     private File mImageFile;
     private MenuItem mPostButton;
@@ -63,7 +60,7 @@ public class CameraActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_camera);
+        setContentView(R.layout.activity_post_picture);
 
         ButterKnife.inject(this);
 
@@ -74,22 +71,15 @@ public class CameraActivity extends ActionBarActivity {
         // Displays back button
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // Starts image capture
-        startCamera();
-    }
+        mImageFile = new File(getIntent().getData().getPath());
 
-    /**
-     * Starts built-in camera functionality and sets path to store file
-     */
-    private void startCamera() {
-        // create Intent to take a picture and return control to the calling application
-        Intent imageCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-        mImageFile = FileUtilities.savePostedImage(this); // create a file to save the image
-        imageCaptureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(mImageFile)); // set the image file name
-
-        // start the image capture Intent
-        startActivityForResult(imageCaptureIntent, IMAGE_CAPTURE_REQUEST);
+        int rotationDegrees = FileUtilities.getImageOrientation(mImageFile.getAbsolutePath());
+        Picasso.with(this)
+                .load(mImageFile)
+                .resize(1024,0)
+                .rotate(rotationDegrees)
+                .onlyScaleDown()
+                .into(mImageView);
     }
 
     public void showProgressBar() {
@@ -105,10 +95,9 @@ public class CameraActivity extends ActionBarActivity {
      * camera intent.
      */
     private void goBack() {
-        if (mImageFile != null)
-            mImageFile.delete();
-        setResult(RESULT_CANCELED);
-        startCamera();
+        setResult(POST_CANCELLED);
+        mImageFile.delete();
+        finish();
     }
 
     /**
@@ -132,26 +121,6 @@ public class CameraActivity extends ActionBarActivity {
             return true;
         }
         return false;
-    }
-
-    /**
-     * Actions performed after a called activity is finished.
-     */
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == IMAGE_CAPTURE_REQUEST) {
-            // If user presses okay on camera, then it saves it to storage
-            if (resultCode == RESULT_OK) {
-                Picasso.with(this).load(mImageFile).into(mImageView);
-                // if user cancels image capture, then return to main screen
-            } else if (resultCode == RESULT_CANCELED) {
-                if (mImageFile != null)
-                    mImageFile.delete();
-                setResult(RESULT_CANCELED);
-                finish();
-            }
-        }
     }
 
     /**
@@ -192,8 +161,6 @@ public class CameraActivity extends ActionBarActivity {
      * image in the internal database.
      */
     public void postPicture() {
-        mProgressBar.setVisibility(View.VISIBLE);
-        mCurrentlyPosting = true;
         onPostPictureStart();
 
         try {
@@ -213,29 +180,31 @@ public class CameraActivity extends ActionBarActivity {
             HerokuClient.post(getString(R.string.server_post), params, new AsyncHttpResponseHandler() {
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                    mProgressBar.setVisibility(View.GONE);
-                    mCurrentlyPosting = false;
-                    onPostPictureDone();
+                    onPostPictureEnd();
+                    setResult(POST_SUCCESS);
+
                     try {
                         String jsonData = new String(responseBody);
                         JSONObject jsonObject = new JSONObject(jsonData);
 
                         mDatabaseHelper.insertPostedImage(
-                                new Image(jsonObject.getString("id"),
-                                        jsonObject.getString("created"),
+                                new Image(jsonObject.getString(getString(R.string.json_id)),
+                                        jsonObject.getString(getString(R.string.json_date_posted)),
                                         mImageFile, 0, 0));
-
-                        setResult(POST_SUCCESS);
 
                     } catch (JSONException e) {
                         Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                     }
-                    setResult(POST_SUCCESS);
+
                     finish();
                 }
 
                 @Override
                 public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                    onPostPictureEnd();
+                    mCurrentlyPosting = false;
+                    setResult(POST_FAILED);
+
                     Log.d(LOG_TAG, "Error : " + error.getLocalizedMessage());
                     Log.d(LOG_TAG, "Status code : " + statusCode);
                     for (Header header : headers)
@@ -243,12 +212,8 @@ public class CameraActivity extends ActionBarActivity {
                     String response = new String(responseBody);
                     Log.d(LOG_TAG, "Response : " + response);
 
-
-                    mProgressBar.setVisibility(View.GONE);
-                    mCurrentlyPosting = false;
-                    setResult(POST_FAILED);
                     new OperationFailedDialog().show(getFragmentManager(), LOG_TAG);
-                    onPostPictureDone();
+
                 }
             });
         } catch (IOException e) {
@@ -263,6 +228,8 @@ public class CameraActivity extends ActionBarActivity {
      * to the server.
      */
     public void onPostPictureStart() {
+        mProgressBar.setVisibility(View.VISIBLE);
+        mCurrentlyPosting = true;
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         mPostButton.setVisible(false);
         setTitle("Posting...");
@@ -273,7 +240,9 @@ public class CameraActivity extends ActionBarActivity {
      * post button. And changes the title back to the
      * normal title.
      */
-    public void onPostPictureDone() {
+    public void onPostPictureEnd() {
+        mProgressBar.setVisibility(View.GONE);
+        mCurrentlyPosting = false;
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mPostButton.setVisible(true);
         setTitle(getString(R.string.title_activity_camera));

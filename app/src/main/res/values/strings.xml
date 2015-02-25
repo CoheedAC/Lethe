@@ -25,13 +25,11 @@
     <string name="server_like">like/</string>
 
     <string name="json_id">id</string>
+    <string name="json_date_posted">created</string>
     <string name="json_url_thumbnail">thumb</string>
     <string name="json_url_full">full</string>
     <string name="json_views">views</string>
     <string name="json_likes">likes</string>
 
-<!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="json_date_posted">created</string>
 
 </resources>

@@ -1,8 +1,10 @@
 package com.cs48.lethe.ui.activities;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
@@ -17,6 +19,9 @@ import com.cs48.lethe.ui.fragments.FeedFragment;
 import com.cs48.lethe.ui.fragments.MeFragment;
 import com.cs48.lethe.ui.fragments.MoreFragment;
 import com.cs48.lethe.ui.fragments.PeekFragment;
+import com.cs48.lethe.utils.FileUtilities;
+
+import java.io.File;
 
 /**
  * The main activity where the app launches. It handles all of the tab fragments
@@ -27,9 +32,12 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         MeFragment.OnFragmentInteractionListener, MoreFragment.OnFragmentInteractionListener {
 
     public static final String LOG_TAG = MainActivity.class.getSimpleName();
+    public static final int CAMERA_CAPTURE = 100;
 
     private TabsPagerAdapter mTabsPagerAdapter;
     private ViewPager mViewPager;
+
+    private Uri mImageUri;
 
     /**
      * Creates the action bar and title.
@@ -102,7 +110,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         menu.findItem(R.id.action_copy_images).setVisible(false);
-        menu.findItem(R.id.action_delete_images).setVisible(false);
+        menu.findItem(R.id.action_clear_cache).setVisible(false);
         menu.findItem(R.id.action_refresh).setVisible(false);
         return true;
     }
@@ -116,26 +124,72 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         // Starts camera activity if camera button pressed
         if (id == R.id.action_camera) {
-            Intent cameraIntent = new Intent(this, CameraActivity.class);
-            startActivityForResult(cameraIntent, CameraActivity.IMAGE_POST_REQUEST);
+            startCamera();
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == CameraActivity.IMAGE_POST_REQUEST && resultCode == CameraActivity.POST_SUCCESS) {
-            FeedFragment feedFragment = (FeedFragment) findFragmentByPosition(0);
-            feedFragment.fetchFeedFromServer();
+    /**
+     * Starts built-in camera functionality and sets path to store file
+     */
+    private void startCamera() {
+        try {
+            // create Intent to take a picture and return control to the calling application
+            Intent imageCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-            MeFragment meFragment = (MeFragment) findFragmentByPosition(2);
-            meFragment.fetchImagesFromDatabase();
+            File imageFile = FileUtilities.savePostedImage(this); // create a file to save the image
+            mImageUri = Uri.fromFile(imageFile);
+            imageCaptureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mImageUri); // set the image file name
+
+            // start the image capture Intent
+            startActivityForResult(imageCaptureIntent, CAMERA_CAPTURE);
+        } catch (ActivityNotFoundException e) {
+            FileUtilities.logResults(this, LOG_TAG, "Whoops - your device doesn't support capturing images!");
         }
     }
 
-    public Fragment findFragmentByPosition(int position) {
+    /**
+     * Handles responses when activities are done / destroyed
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Camera activity result
+        if (requestCode == CAMERA_CAPTURE) {
+            if (resultCode == RESULT_OK) {
+                Intent postImageIntent = new Intent(this, PostPictureActivity.class);
+                if (data != null && data.getData() != null)
+                    postImageIntent.setData(data.getData());
+                else
+                    postImageIntent.setData(mImageUri);
+                startActivityForResult(postImageIntent, PostPictureActivity.POST_IMAGE_REQUEST);
+            } else if (resultCode == RESULT_CANCELED) {
+                File imageFile;
+                if (data != null && data.getData() != null)
+                    imageFile = new File(data.getData().getPath());
+                else
+                    imageFile = new File(mImageUri.getPath());
+                imageFile.delete();
+            }
+        }
+
+        // PostPicture activity result
+        if (requestCode == PostPictureActivity.POST_IMAGE_REQUEST) {
+            if (resultCode == PostPictureActivity.POST_SUCCESS) {
+                FeedFragment feedFragment = (FeedFragment) findFragmentByPosition(0);
+                feedFragment.fetchFeedFromServer();
+
+                MeFragment meFragment = (MeFragment) findFragmentByPosition(2);
+                meFragment.fetchPostedImagesFromDatabase();
+            } else if (resultCode == PostPictureActivity.POST_CANCELLED) {
+                startCamera();
+            }
+        }
+    }
+
+    private Fragment findFragmentByPosition(int position) {
         return getSupportFragmentManager().findFragmentByTag(
                 "android:switcher:" + mViewPager.getId() + ":"
                         + mTabsPagerAdapter.getItemId(position));
@@ -185,7 +239,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
 
     }
-
 
     @Override
     public void onFragmentInteraction(Uri uri) {

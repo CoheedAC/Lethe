@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,6 +40,16 @@ import butterknife.InjectView;
  */
 public class FullPictureActivity extends ActionBarActivity {
 
+    public static final String LOG_TAG = FullPictureActivity.class.getSimpleName();
+    public static final String CACHED_IMAGE_INTERFACE = "CACHED_IMAGE_INTERFACE";
+    public static final String POSTED_IMAGE_INTERFACE = "POSTED_IMAGE_INTERFACE";
+    public static final int HIDE_PICTURE = -100;
+    public static final int DELETE_PICTURE = -101;
+    public static final int FULL_PICTURE_REQUEST = 100;
+
+    private DatabaseHelper mDatabaseHelper;
+    private Image mImage;
+
     @InjectView(R.id.fullImageView)
     ImageView mImageView;
     @InjectView(R.id.deleteButton)
@@ -51,16 +62,8 @@ public class FullPictureActivity extends ActionBarActivity {
     TextView mLikesTextView;
     @InjectView(R.id.viewsTextView)
     TextView mViewsTextView;
-
-    public static final String LOG_TAG = FullPictureActivity.class.getSimpleName();
-    public static final String CACHED_IMAGE_INTERFACE = "CACHED_IMAGE_INTERFACE";
-    public static final String POSTED_IMAGE_INTERFACE = "POSTED_IMAGE_INTERFACE";
-    public static final int HIDDEN = -100;
-    public static final int DELETE_IMAGE = -101;
-    public static final int FULL_PICTURE_REQUEST = 100;
-
-    private DatabaseHelper mDatabaseHelper;
-    private Image mImage;
+    @InjectView(R.id.buttonLinearLayout)
+    LinearLayout mButtonLinearLayout;
 
     /**
      * Hides the action bar and gets all of the necessary data from
@@ -74,231 +77,117 @@ public class FullPictureActivity extends ActionBarActivity {
 
         ButterKnife.inject(this);
 
+        // Get access to the database
         mDatabaseHelper = DatabaseHelper.getInstance(this);
 
         // Hide action bar and progress bar
         getSupportActionBar().hide();
         mProgressBar.setVisibility(View.GONE);
 
-        // Get intent and extras
-        setResult(RESULT_OK, getIntent());
+        // Get photo id from intent
         String uniqueId = getIntent().getStringExtra("uniqueId");
 
-        if (getIntent().getAction().equals(POSTED_IMAGE_INTERFACE)) {
+        String interfaceType = getIntent().getAction();
+        if (interfaceType.equals(POSTED_IMAGE_INTERFACE))
+            showPostedImage(uniqueId);
+        else if (interfaceType.equals(CACHED_IMAGE_INTERFACE))
+            showCachedImage(uniqueId);
 
-            mImage = mDatabaseHelper.getPostedImage(uniqueId);  // get image from me table
-
-            FileUtilities.logResults(this, LOG_TAG, mImage.getFile().getAbsolutePath());
-
-            mDatabaseHelper.viewImage(mImage);    // update views in table
-
-            final Target target = new Target() {
-                @Override
-                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                    mImageView.setImageBitmap(FileUtilities.getValidSizedBitmap(bitmap));
-                }
-
-                @Override
-                public void onBitmapFailed(Drawable errorDrawable) {
-                }
-
-                @Override
-                public void onPrepareLoad(Drawable placeHolderDrawable) {
-                }
-            };
-            mImageView.setTag(target);
-
-            Picasso.with(this).load(mImage.getFile()).into(target); // load image from file into imageview
-            showMeUI();   // show buttons related to me UI
-            mImageView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    finish();
-                }
-            });
-
-        } else {
-
-            mImage = mDatabaseHelper.getCachedImage(uniqueId);    // get image from feed table
-            mDatabaseHelper.viewImage(mImage);    // update views in table
-            mProgressBar.setVisibility(View.VISIBLE);
-
-            final Target thumbnailTarget = new Target() {
-                @Override
-                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                    mImageView.setImageBitmap(FileUtilities.getThumbnailSizedBitmap(bitmap));
-                }
-
-                @Override
-                public void onBitmapFailed(Drawable errorDrawable) {
-                }
-
-                @Override
-                public void onPrepareLoad(Drawable placeHolderDrawable) {
-                }
-            };
-            mImageView.setTag(thumbnailTarget);
-            Picasso.with(FullPictureActivity.this)
-                    .load(mImage.getThumbnailUrl())
-                    .into(thumbnailTarget);
-
-            final Target fullTarget = new Target() {
-                @Override
-                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                    mProgressBar.setVisibility(View.GONE);
-                    mImageView.setImageBitmap(FileUtilities.getValidSizedBitmap(bitmap));
-                }
-
-                @Override
-                public void onBitmapFailed(Drawable errorDrawable) {
-                    mProgressBar.setVisibility(View.GONE);
-                    new OperationFailedDialog().show(getFragmentManager(), LOG_TAG);
-                }
-
-                @Override
-                public void onPrepareLoad(Drawable placeHolderDrawable) {
-                }
-            };
-            mImageView.setTag(fullTarget);
-            Picasso.with(this).load(mImage.getFullUrl()).into(fullTarget);  // load image from url into imageview
-
-            showFeedUI();   // show buttons related to feed UI
-            setUpGestureListener();
-        }
-        showStatistics();
-    }
-
-    private void showStatistics() {
+        // Displays the statistics on the screen and fetches the statistics from the server
         mLikesTextView.setText("Likes: " + mImage.getLikes());
         mViewsTextView.setText("Views: " + mImage.getViews());
         if (FileUtilities.isNetworkAvailable(this))
-            fetchPictureStatistics();
+            fetchPictureStatisticsFromServer();
     }
 
     /**
-     * Handles the swipe / tap gestures.
+     * Shows the interface for an image pulled from the server
      */
-    private void setUpGestureListener() {
-        mImageView.setOnTouchListener(new OnHorizontalSwipeTouchListener(this) {
+    private void showCachedImage(String uniqueId) {
+        // Hides the image action buttons
+        mButtonLinearLayout.setVisibility(View.GONE);
 
-            /**
-             * Swiping left likes the photo then goes back to the feed.
-             */
+        // Show the loading progress bar
+        mProgressBar.setVisibility(View.VISIBLE);
+
+        // Database interactions
+        mImage = mDatabaseHelper.getCachedImage(uniqueId);    // get image from feed table
+        mDatabaseHelper.viewImage(mImage);    // update views in table
+
+        // Display thumbnail image while full image loads
+//        Picasso.with(this)
+//                .load(mImage.getThumbnailUrl())
+//                .resize(150, 0)
+//                .onlyScaleDown()
+//                .into(mImageView);
+
+        // Display full image
+        final Target target = new Target() {
             @Override
-            public void onSwipeLeft() {
-                if (!mDatabaseHelper.isImageLiked(mImage)) {
-                    mDatabaseHelper.likeImage(mImage);
-                    likePicture();
-                    finish();
-                } else
-                    new AlreadyLikedImageDialog().show(getFragmentManager(), LOG_TAG);
+            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                mProgressBar.setVisibility(View.GONE);
+
+//                    if (bitmap.getHeight() < bitmap.getWidth())
+//                        bitmap = FileUtilities.rotateBitmap(bitmap, 90);
+
+                mImageView.setImageBitmap(bitmap);
             }
 
-            /**
-             * Swiping right hides the photo from the feed and dislikes
-             * it on the server, then returns to the feed.
-             */
             @Override
-            public void onSwipeRight() {
-                mDatabaseHelper.hideImage(mImage);
-                setResult(HIDDEN, getIntent());
-                dislikePicture();
+            public void onBitmapFailed(Drawable errorDrawable) {
+                mProgressBar.setVisibility(View.GONE);
+                new OperationFailedDialog().show(getFragmentManager(), LOG_TAG);
+            }
+
+            @Override
+            public void onPrepareLoad(Drawable placeHolderDrawable) {
+            }
+        };
+        mImageView.setTag(target);
+        Picasso.with(this)
+                .load(mImage.getFullUrl())
+                .resize(1024,0)
+                .onlyScaleDown()
+                .into(target);  // load image from url into imageview
+
+        setUpOnSwipeListener();
+    }
+
+    /**
+     * Shows the interface for an image posted to the server
+     */
+    private void showPostedImage(String uniqueId) {
+        // Shows the image action buttons
+        mButtonLinearLayout.setVisibility(View.VISIBLE);
+
+        mImage = mDatabaseHelper.getPostedImage(uniqueId);  // get image from me table
+        mDatabaseHelper.viewImage(mImage);    // update views in table
+
+        // Display full image
+        int rotationDegrees = FileUtilities.getImageOrientation(mImage.getFile().getAbsolutePath());
+        Picasso.with(this)
+                .load(mImage.getFile()).
+                rotate(rotationDegrees)
+                .resize(1024, 0)
+                .onlyScaleDown()
+                .into(mImageView); // load image from file into imageview
+
+        setUpOnClickListeners();
+    }
+
+    /**
+     * Handles the tab gestures
+     */
+    private void setUpOnClickListeners() {
+        /**
+         * Exits the full screen view
+         */
+        mImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 finish();
             }
-
-            /**
-             * Tapping anywhere on the screen goes back to the feed.
-             */
-            @Override
-            public void onSingleTap() {
-                finish();
-            }
         });
-    }
-
-    /**
-     * Likes the picture on the server
-     */
-    public void likePicture() {
-        String url = getString(R.string.server_like) + mImage.getUniqueId();
-        HerokuClient.get(url, null, new AsyncHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                FileUtilities.logResults(FullPictureActivity.this, LOG_TAG, "Liked pic!");
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                FileUtilities.logResults(FullPictureActivity.this, LOG_TAG, "Failed to like pic!");
-            }
-        });
-    }
-
-    /**
-     * Dislikes the picture on the server
-     */
-    public void dislikePicture() {
-        String url = getString(R.string.server_dislike) + mImage.getUniqueId();
-        HerokuClient.get(url, null, new AsyncHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                FileUtilities.logResults(FullPictureActivity.this, LOG_TAG, "Disliked pic!");
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                FileUtilities.logResults(FullPictureActivity.this, LOG_TAG, "Failed to dislike pic!");
-            }
-        });
-    }
-
-    /**
-     * Gets the image statistics from the server and updates
-     * the internal database with the new statistics. Also
-     * displays the new statistics on the screen.
-     */
-    public void fetchPictureStatistics() {
-        HerokuClient.get(mImage.getUniqueId(), null, new AsyncHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                try {
-                    String jsonData = new String(responseBody);
-                    JSONObject jsonObject = new JSONObject(jsonData);
-                    mImage.setViews(jsonObject.getInt("view"));
-                    mImage.setLikes(jsonObject.getInt(getString(R.string.json_likes)));
-
-                    mDatabaseHelper.updateDatabaseStatisticsFromImage(mImage);
-
-                    mLikesTextView.setText("Likes: " + mImage.getLikes());
-                    mViewsTextView.setText("Views: " + mImage.getViews());
-                } catch (JSONException e) {
-                    Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
-                }
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                FileUtilities.logResults(FullPictureActivity.this, LOG_TAG, "Request for statistics failed");
-            }
-        });
-    }
-
-    /**
-     * Hides the delete and copy button but shows the
-     * like button. Also handles like button presses.
-     */
-    private void showFeedUI() {
-        mDeleteButton.setVisibility(View.GONE);
-        mCopyButton.setVisibility(View.GONE);
-    }
-
-    /**
-     * Hides the like button but shows the delete and
-     * copy buttons. Handles the visible button presses.
-     */
-    private void showMeUI() {
-        mDeleteButton.setVisibility(View.VISIBLE);
-        mCopyButton.setVisibility(View.VISIBLE);
 
         /**
          * Deletes the image stored on the device and goes back to the grid.
@@ -306,9 +195,9 @@ public class FullPictureActivity extends ActionBarActivity {
         mDeleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setResult(DELETE_IMAGE, getIntent());
+                setResult(DELETE_PICTURE, getIntent());
                 mDatabaseHelper.deletePostedImage(mImage);
-                Toast.makeText(FullPictureActivity.this, "Deleted image (UNIMPLEMENTED)", Toast.LENGTH_SHORT).show();
+                Toast.makeText(FullPictureActivity.this, "Deleted image", Toast.LENGTH_SHORT).show();
                 finish();
             }
         });
@@ -332,6 +221,130 @@ public class FullPictureActivity extends ActionBarActivity {
         });
     }
 
+    /**
+     * Handles the swipe / tap gestures.
+     */
+    private void setUpOnSwipeListener() {
+        mImageView.setOnTouchListener(new OnHorizontalSwipeTouchListener(this) {
+
+            /**
+             * Swiping left likes the photo then goes back to the feed.
+             */
+            @Override
+            public void onSwipeLeft() {
+                if (!mDatabaseHelper.isImageLiked(mImage)) {
+                    mDatabaseHelper.likeImage(mImage);
+                    likePicture();
+                    finish();
+                } else
+                    new AlreadyLikedImageDialog().show(getFragmentManager(), LOG_TAG);
+            }
+
+            /**
+             * Swiping right hides the photo from the feed and dislikes
+             * it on the server, then returns to the feed.
+             */
+            @Override
+            public void onSwipeRight() {
+                mDatabaseHelper.hideImage(mImage);
+                setResult(HIDE_PICTURE);
+                dislikePicture();
+                finish();
+            }
+
+            /**
+             * Tapping anywhere on the screen goes back to the feed.
+             */
+            @Override
+            public void onSingleTap() {
+                finish();
+            }
+        });
+    }
+
+    /**
+     * Likes the picture on the server
+     */
+    public void likePicture() {
+        String url = getString(R.string.server_like) + mImage.getUniqueId();
+        HerokuClient.get(url, null, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                try {
+                    FileUtilities.logResults(FullPictureActivity.this, LOG_TAG, "Liked pic!");
+                    String jsonData = new String(responseBody);
+                    JSONObject jsonObject = new JSONObject(jsonData);
+                    mImage.setLikes(jsonObject.getInt(getString(R.string.json_likes)));
+                    mImage.setViews(jsonObject.getInt(getString(R.string.json_views)));
+                    mDatabaseHelper.updateStatisticsFromImage(mImage);
+                } catch (JSONException e) {
+                    Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                FileUtilities.logResults(FullPictureActivity.this, LOG_TAG, "Failed to like pic!");
+            }
+        });
+    }
+
+    /**
+     * Dislikes the picture on the server
+     */
+    public void dislikePicture() {
+        String url = getString(R.string.server_dislike) + mImage.getUniqueId();
+        HerokuClient.get(url, null, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                try {
+                    FileUtilities.logResults(FullPictureActivity.this, LOG_TAG, "Disliked pic!");
+                    String jsonData = new String(responseBody);
+                    JSONObject jsonObject = new JSONObject(jsonData);
+                    mImage.setLikes(jsonObject.getInt(getString(R.string.json_likes)));
+                    mImage.setViews(jsonObject.getInt(getString(R.string.json_views)));
+                    mDatabaseHelper.updateStatisticsFromImage(mImage);
+                } catch (JSONException e) {
+                    Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                FileUtilities.logResults(FullPictureActivity.this, LOG_TAG, "Failed to dislike pic!");
+            }
+        });
+    }
+
+    /**
+     * Gets the image statistics from the server and updates
+     * the internal database with the new statistics. Also
+     * displays the new statistics on the screen.
+     */
+    public void fetchPictureStatisticsFromServer() {
+        HerokuClient.get(mImage.getUniqueId(), null, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                try {
+                    String jsonData = new String(responseBody);
+                    JSONObject jsonObject = new JSONObject(jsonData);
+                    mImage.setViews(jsonObject.getInt("view"));
+//                    mImage.setViews(jsonObject.getInt(getString(R.string.json_views)));
+                    mImage.setLikes(jsonObject.getInt(getString(R.string.json_likes)));
+
+                    mDatabaseHelper.updateStatisticsFromImage(mImage);
+
+                    mLikesTextView.setText("Likes: " + mImage.getLikes());
+                    mViewsTextView.setText("Views: " + mImage.getViews());
+                } catch (JSONException e) {
+                    Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                FileUtilities.logResults(FullPictureActivity.this, LOG_TAG, "Request for statistics failed");
+            }
+        });
+    }
 }
-
-

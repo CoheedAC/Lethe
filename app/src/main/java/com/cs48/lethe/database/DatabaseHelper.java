@@ -128,7 +128,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
                 db.insert(CachedImagesTable.TABLE_NAME, null, values);
             } else
-                updateDatabaseStatisticsFromImage(image);
+                updateStatisticsFromImage(image);
         }
         db.close();
     }
@@ -145,7 +145,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    public void updateDatabaseStatisticsFromImage(Image updatedImage) {
+    public void updateStatisticsFromImage(Image updatedImage) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues feedValues = new ContentValues();
@@ -158,21 +158,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         db.update(CachedImagesTable.TABLE_NAME, feedValues, CachedImagesTable.COLUMN_NAME_PHOTO_ID + " = ?", new String[]{updatedImage.getUniqueId()});
         db.update(PostedImagesTable.TABLE_NAME, feedValues, PostedImagesTable.COLUMN_NAME_PHOTO_ID + " = ?", new String[]{updatedImage.getUniqueId()});
-    }
-
-    public void updateImageStatisticsFromDatabase(Image imageToUpdate) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        String selectQuery = "SELECT * FROM " + CachedImagesTable.TABLE_NAME + " WHERE " + CachedImagesTable.COLUMN_NAME_PHOTO_ID
-                + " = " + imageToUpdate.getUniqueId();
-
-        Cursor c = db.rawQuery(selectQuery, null);
-        c.moveToFirst();
-
-        imageToUpdate.setViews(c.getInt(c.getColumnIndex(CachedImagesTable.COLUMN_NAME_VIEWS)));
-        imageToUpdate.setLikes(c.getInt(c.getColumnIndex(CachedImagesTable.COLUMN_NAME_LIKES)));
-
-        db.close();
     }
 
     public Image getCachedImage(String uniqueId) {
@@ -225,8 +210,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void deletePostedImage(Image imageToDelete) {
         SQLiteDatabase db = this.getWritableDatabase();
 
+        imageToDelete.getFile().delete();
+
         String whereClause = PostedImagesTable.COLUMN_NAME_PHOTO_ID + " = " + imageToDelete.getUniqueId();
-        String[] whereArgs = new String[]{imageToDelete.getUniqueId()};
         db.delete(PostedImagesTable.TABLE_NAME, whereClause, null);
 
         db.close();
@@ -301,7 +287,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         c.getInt(c.getColumnIndex(CachedImagesTable.COLUMN_NAME_VIEWS)),
                         c.getInt(c.getColumnIndex(CachedImagesTable.COLUMN_NAME_LIKES)));
                 imageList.add(image);
-                updateDatabaseStatisticsFromImage(image);
+                updateStatisticsFromImage(image);
             } while (c.moveToNext());
         }
         c.close();

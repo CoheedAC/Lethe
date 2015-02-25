@@ -16,11 +16,13 @@ public class Image {
     private int likes;
     private File file;
 
+    // Posted image constructor
     public Image(String uniqueId, String datePosted, File imageFile, int views, int likes) {
         this(uniqueId, datePosted, null, null, views, likes);
         file = imageFile;
     }
 
+    // Cached image constructor
     public Image(String uniqueId, String datePosted, String thumbnailUrl, String fullUrl, int views, int likes) {
         this.uniqueId = uniqueId;
         this.datePosted = datePosted;

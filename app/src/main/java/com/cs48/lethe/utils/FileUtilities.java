@@ -3,9 +3,11 @@ package com.cs48.lethe.utils;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
+import android.media.ExifInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
@@ -151,32 +153,42 @@ public class FileUtilities {
                 "IMG_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".jpg");
     }
 
-    /**
-     * Returns the full sized bitmap of the image.
-     */
-    public static Bitmap getValidSizedBitmap(Bitmap bitmap) {
-        return getXYSizedBitmap(bitmap, 1024, 1024);
+    public static Bitmap rotateBitmap(Bitmap source, float angle) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(angle);
+        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
     }
 
-    /**
-     * Returns the thumbnail sized bitmap of the image.
-     */
-    public static Bitmap getThumbnailSizedBitmap(Bitmap bitmap) {
-        return getXYSizedBitmap(bitmap, 171, 171);
-    }
 
-    /**
-     * Returns the custom sized bitmap of the image.
-     */
-    public static Bitmap getXYSizedBitmap(Bitmap bitmap, int maxWidth, int maxHeight) {
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
+    public static int getImageOrientation(String imagePath){
+        int rotate = 0;
+        try {
+            ExifInterface exif = new ExifInterface(imagePath);
+            int orientation = exif.getAttributeInt(
+                    ExifInterface.TAG_ORIENTATION,
+                    ExifInterface.ORIENTATION_NORMAL);
 
-        while (width > maxWidth && height > maxHeight) {
-            width *= .9;
-            height *= .9;
+            switch (orientation) {
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    rotate = 270;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    rotate = 180;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    rotate = 90;
+                    break;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return Bitmap.createScaledBitmap(bitmap, width, height, false);
+        return rotate;
+    }
+
+    public static Bitmap getAdjustedBitmap(Bitmap bitmap, String imagePath) {
+        Matrix matrix = new Matrix();
+        matrix.preRotate(getImageOrientation(imagePath));
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
     }
 
 }

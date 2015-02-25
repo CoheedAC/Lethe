@@ -1,8 +1,6 @@
 package com.cs48.lethe.ui.adapters;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
@@ -18,7 +16,6 @@ import com.cs48.lethe.ui.dialogs.DeleteImageWarningDialog;
 import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.Image;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 import java.io.File;
 import java.util.List;
@@ -33,15 +30,14 @@ public class MeGridViewAdapter extends BaseAdapter {
     private Context mContext;
     private List<Image> mImageList;
     private DatabaseHelper mDatabaseHelper;
-    private Target mTarget;
 
     public MeGridViewAdapter(Context context) {
         mContext = context;
         mDatabaseHelper = DatabaseHelper.getInstance(mContext);
-        mImageList = mDatabaseHelper.getPostedImages();
+        fetchPostedImagesFromDatabase();
     }
 
-    public void fetchImagesFromDatabase() {
+    public void fetchPostedImagesFromDatabase() {
         mImageList = mDatabaseHelper.getPostedImages();
         notifyDataSetChanged();
     }
@@ -73,57 +69,24 @@ public class MeGridViewAdapter extends BaseAdapter {
      */
     public View getView(int position, View convertView, ViewGroup parent) {
         // if it's not recycled, initialize some attributes
-        if (convertView == null) {
-            final ImageView imageView = new ImageView(mContext);
-            DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
+        // if it's not recycled, initialize some attributes
+        ImageView imageView = (ImageView) convertView;
+        if (imageView == null) {
+            imageView = new ImageView(mContext);
             GridView gridView = (GridView) parent;
+            DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
+
             int imageDimension = metrics.widthPixels / gridView.getNumColumns();
-
-            GridView.LayoutParams imageParams = new GridView.LayoutParams(imageDimension, imageDimension);
-            imageView.setLayoutParams(imageParams);
+            imageView.setLayoutParams(new GridView.LayoutParams(imageDimension, imageDimension));
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            imageView.setBackgroundColor(mContext.getResources().getColor(R.color.image_load));
-
-            mTarget = new Target() {
-                @Override
-                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                    imageView.setImageBitmap(FileUtilities.getThumbnailSizedBitmap(bitmap));
-                }
-
-                @Override
-                public void onBitmapFailed(Drawable errorDrawable) {
-                }
-
-                @Override
-                public void onPrepareLoad(Drawable placeHolderDrawable) {
-                }
-            };
-            imageView.setTag(mTarget);
-
-            Picasso.with(mContext).load(mImageList.get(position).getFile()).into(mTarget);
-            return imageView;
-        } else {
-            final ImageView imageView = (ImageView) convertView;
-
-            mTarget = new Target() {
-                @Override
-                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                    imageView.setImageBitmap(FileUtilities.getThumbnailSizedBitmap(bitmap));
-                }
-
-                @Override
-                public void onBitmapFailed(Drawable errorDrawable) {
-                }
-
-                @Override
-                public void onPrepareLoad(Drawable placeHolderDrawable) {
-                }
-            };
-            imageView.setTag(mTarget);
-
-            Picasso.with(mContext).load(mImageList.get(position).getFile()).into(mTarget);
-            return imageView;
+            imageView.setBackgroundColor(mContext.getResources().getColor(R.color.empty_image));
         }
+        Picasso.with(mContext)
+                .load(mImageList.get(position).getFile())
+                .resize(200, 0)
+                .onlyScaleDown()
+                .into(imageView);
+        return imageView;
     }
 
     /**
@@ -135,29 +98,6 @@ public class MeGridViewAdapter extends BaseAdapter {
             image.getFile().delete();
         mImageList.removeAll(mImageList);
         notifyDataSetChanged();
-        FileUtilities.logResults(mContext, LOG_TAG, "Deleted all images");
-    }
-
-    /**
-     * Deletes the image from the internal database, deletes
-     * the file stored on the device, removes the image
-     * from the list of images, and updates the grid
-     * to reflect the deletion.
-     */
-    public void deletePostedImage(int position) {
-        if (position >= 0 && position < mImageList.size()) {
-            mImageList.get(position).getFile().delete();
-            mImageList.remove(position);
-            notifyDataSetChanged();
-        }
-    }
-
-    /**
-     * Updates the image likes and dislikes from the server
-     */
-    public void updateImageStatistics(int position) {
-        if (position >= 0 && position < mImageList.size())
-            mDatabaseHelper.updateImageStatisticsFromDatabase(mImageList.get(position));
     }
 
     /**
@@ -181,7 +121,6 @@ public class MeGridViewAdapter extends BaseAdapter {
                         image.getLikes()));
             new DeleteImageWarningDialog().show(((MainActivity) mContext).getFragmentManager(), LOG_TAG);
             notifyDataSetChanged();
-            FileUtilities.logResults(mContext, LOG_TAG, "Copied first image");
         } catch (Exception e) {
             FileUtilities.logResults(mContext, LOG_TAG, "No image to copy");
         }

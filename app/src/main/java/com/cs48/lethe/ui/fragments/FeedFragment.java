@@ -13,15 +13,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.Toast;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.ui.activities.FullPictureActivity;
 import com.cs48.lethe.ui.adapters.FeedGridViewAdapter;
 import com.cs48.lethe.ui.view_helpers.ExpandableHeightGridView;
-import com.cs48.lethe.utils.FileUtilities;
-import com.cs48.lethe.utils.Image;
 import com.cs48.lethe.ui.view_helpers.ScrollableSwipeRefreshLayout;
+import com.cs48.lethe.utils.Image;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -93,7 +91,6 @@ public class FeedFragment extends Fragment {
 
                 Image image = (Image) mGridAdapter.getItem(position);
                 showImageIntent.putExtra("uniqueId", image.getUniqueId());
-                showImageIntent.putExtra("position", position);
                 showImageIntent.setAction(FullPictureActivity.CACHED_IMAGE_INTERFACE);
 
                 startActivityForResult(showImageIntent, FullPictureActivity.FULL_PICTURE_REQUEST);
@@ -128,7 +125,6 @@ public class FeedFragment extends Fragment {
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                FileUtilities.logResults(getActivity(), LOG_TAG, "Refreshing...");
                 mGridAdapter.fetchFeedFromServer(mSwipeRefreshLayout);
             }
         });
@@ -139,7 +135,7 @@ public class FeedFragment extends Fragment {
      * Hides the delete all images and copy image button in the action bar.
      */
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        menu.findItem(R.id.action_delete_images).setVisible(true);
+        menu.findItem(R.id.action_clear_cache).setVisible(true);
     }
 
     /**
@@ -150,14 +146,8 @@ public class FeedFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == FullPictureActivity.FULL_PICTURE_REQUEST) {
-            if (resultCode == FullPictureActivity.HIDDEN) {
-                data.getIntExtra("position", -1);
-                mGridAdapter.hideImage(data.getIntExtra("position", -1));
-            } else {
-                mGridAdapter.updateImageStatistics(data.getIntExtra("position", -1));
-            }
-        }
+        if (requestCode == FullPictureActivity.FULL_PICTURE_REQUEST && resultCode == FullPictureActivity.HIDE_PICTURE)
+            fetchFeedFromServer();
     }
 
 
@@ -171,8 +161,7 @@ public class FeedFragment extends Fragment {
         /**
          * Clears the images in the cache and refreshes the grid.
          */
-        if (id == R.id.action_delete_images) {
-            Toast.makeText(getActivity(), "Cleared cache", Toast.LENGTH_SHORT).show();
+        if (id == R.id.action_clear_cache) {
             mGridAdapter.clearCache();
             return true;
         }
@@ -180,6 +169,9 @@ public class FeedFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Gets the list of images from the server.
+     */
     public void fetchFeedFromServer() {
         mGridAdapter.fetchFeedFromServer(null);
     }
@@ -187,7 +179,6 @@ public class FeedFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-
     }
 
     @Override

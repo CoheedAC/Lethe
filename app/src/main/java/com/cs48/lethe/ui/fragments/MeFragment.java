@@ -83,7 +83,6 @@ public class MeFragment extends Fragment {
 
                 Image image = (Image) mGridAdapter.getItem(position);
                 showImageIntent.putExtra("uniqueId", image.getUniqueId());
-                showImageIntent.putExtra("position", position);
                 showImageIntent.setAction(FullPictureActivity.POSTED_IMAGE_INTERFACE);
 
                 startActivityForResult(showImageIntent, FullPictureActivity.FULL_PICTURE_REQUEST);
@@ -97,7 +96,7 @@ public class MeFragment extends Fragment {
      * Hides the refresh and the clear cache buttons.
      */
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        menu.findItem(R.id.action_delete_images).setVisible(true);
+        menu.findItem(R.id.action_clear_cache).setVisible(true);
         menu.findItem(R.id.action_copy_images).setVisible(true);
     }
 
@@ -112,7 +111,7 @@ public class MeFragment extends Fragment {
          * Deletes all the images stored on the device for
          * testing purposes.
          */
-        if (id == R.id.action_delete_images) {
+        if (id == R.id.action_clear_cache) {
             mGridAdapter.deleteAllPostedImages();
             return true;
         }
@@ -135,23 +134,13 @@ public class MeFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == FullPictureActivity.FULL_PICTURE_REQUEST) {
-            if (resultCode == FullPictureActivity.DELETE_IMAGE) {
-                data.getIntExtra("position", -1);
-                mGridAdapter.deletePostedImage(data.getIntExtra("position", -1));
-            } else {
-                mGridAdapter.updateImageStatistics(data.getIntExtra("position", -1));
-            }
-        }
+        if (requestCode == FullPictureActivity.FULL_PICTURE_REQUEST && resultCode == FullPictureActivity.DELETE_PICTURE)
+            fetchPostedImagesFromDatabase();
 
-        // updates the grid if the user deletes the image in the full screen view
-        if (requestCode == FullPictureActivity.FULL_PICTURE_REQUEST && resultCode == FullPictureActivity.RESULT_OK) {
-            mGridAdapter.notifyDataSetChanged();
-        }
     }
 
-    public void fetchImagesFromDatabase() {
-        mGridAdapter.fetchImagesFromDatabase();
+    public void fetchPostedImagesFromDatabase() {
+        mGridAdapter.fetchPostedImagesFromDatabase();
     }
 
     // TODO: Rename method, update argument and hook method into UI event
