@@ -158,23 +158,28 @@ public class FileUtilities {
      * Returns the full sized bitmap of the image.
      */
     public static Bitmap getValidSizedBitmap(Bitmap bitmap) {
-        return getCustomSizedBitmap(bitmap, 2048, 2048);
+        return getCustomSizedBitmap(bitmap, 1024, 1024);
     }
 
     /**
      * Returns the thumbnail sized bitmap of the image.
      */
     public static Bitmap getThumbnailSizedBitmap(Bitmap bitmap) {
-        return getCustomSizedBitmap(bitmap, 150, 150);
+        return getCustomSizedBitmap(bitmap, 171, 171);
     }
 
     /**
      * Returns the custom sized bitmap of the image.
      */
-    public static Bitmap getCustomSizedBitmap(Bitmap bitmap, int width, int height) {
-        if (bitmap.getWidth() > width || bitmap.getHeight() > height)
-            return Bitmap.createScaledBitmap(bitmap, width, height, false);
-        return bitmap;
+    public static Bitmap getCustomSizedBitmap(Bitmap bitmap, int maxWidth, int maxHeight) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+
+        while (width > maxWidth && height > maxHeight) {
+            width *= .9;
+            height *= .9;
+        }
+        return Bitmap.createScaledBitmap(bitmap, width, height, false);
     }
 
 //    /**

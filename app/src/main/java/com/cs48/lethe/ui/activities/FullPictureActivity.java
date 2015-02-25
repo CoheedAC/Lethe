@@ -17,7 +17,7 @@ import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.server.HerokuClient;
 import com.cs48.lethe.ui.dialogs.AlreadyLikedImageDialog;
 import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
-import com.cs48.lethe.ui.view_helpers.OnSwipeTouchListener;
+import com.cs48.lethe.ui.view_helpers.OnHorizontalSwipeTouchListener;
 import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.Image;
 import com.loopj.android.http.AsyncHttpResponseHandler;
@@ -138,7 +138,9 @@ public class FullPictureActivity extends ActionBarActivity {
                 }
             };
             mImageView.setTag(thumbnailTarget);
-            Picasso.with(FullPictureActivity.this).load(mImage.getThumbnailUrl()).into(thumbnailTarget);
+            Picasso.with(FullPictureActivity.this)
+                    .load(mImage.getThumbnailUrl())
+                    .into(thumbnailTarget);
 
             final Target fullTarget = new Target() {
                 @Override
@@ -177,7 +179,7 @@ public class FullPictureActivity extends ActionBarActivity {
      * Handles the swipe / tap gestures.
      */
     private void setUpGestureListener() {
-        mImageView.setOnTouchListener(new OnSwipeTouchListener(this) {
+        mImageView.setOnTouchListener(new OnHorizontalSwipeTouchListener(this) {
 
             /**
              * Swiping left likes the photo then goes back to the feed.

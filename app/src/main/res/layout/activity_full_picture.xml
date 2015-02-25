@@ -42,7 +42,8 @@
         android:layout_below="@+id/statisticsLinearLayout"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_above="@+id/linearLayout"/>
+        android:layout_above="@+id/linearLayout"
+        android:scaleType="fitCenter"/>
 
     <LinearLayout
         android:orientation="horizontal"
