@@ -1,8 +1,10 @@
 package com.cs48.lethe.utils;
 
+import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
+import android.net.Uri;
 
 import java.io.IOException;
 
@@ -46,5 +48,23 @@ public class PictureUtilities {
             e.printStackTrace();
         }
         return rotate;
+    }
+
+    public static Bitmap getValidSizedBitmap(ContentResolver cr, Uri mImageUri){
+        return(getXYCompressedBitmap(cr, mImageUri,2048,2048));
+    }
+
+    public static Bitmap getThumbnailSizedBitmap(ContentResolver cr, Uri mImageUri){
+        return(getXYCompressedBitmap(cr, mImageUri,150,150));
+    }
+
+    public static Bitmap getXYCompressedBitmap(ContentResolver cr, Uri mImageUri, int x, int y){
+        try {
+            Bitmap bp = android.provider.MediaStore.Images.Media.getBitmap(cr, mImageUri);
+            return (Bitmap.createScaledBitmap(bp,x,y,false)); //low quality
+
+        }catch (Exception e){
+            return null;
+        }
     }
 }

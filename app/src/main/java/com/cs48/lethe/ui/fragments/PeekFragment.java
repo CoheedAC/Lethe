@@ -62,7 +62,9 @@ public class PeekFragment extends Fragment {
          * typed in or where they dropped the pin to get the latitude
          * and longitude. Once you get that information, just type in:
          *
-         * mPeekGridAdapter.fetchPeekFeedFromServer(null, mLatitude, mLongitude)
+         * mLatitude = // reverse geocoded latitude
+         * mLongitude = // reverse geocoded longitude
+         * mPeekGridAdapter.fetchPeekFeedFromServer(mLatitude, mLongitude)
          *
          * and it should show the feed of that area in the grid
          */
@@ -72,7 +74,7 @@ public class PeekFragment extends Fragment {
         mLatitude = coordinates[0];
         mLongitude = coordinates[1];
         // Tells the grid adapter to fetch the feed from the server with the given coords
-        mPeekGridAdapter.fetchPeekFeedFromServer(null, mLatitude, mLongitude);
+        mPeekGridAdapter.fetchPeekFeedFromServer(mLatitude, mLongitude);
 
         return rootView;
     }

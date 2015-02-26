@@ -108,6 +108,18 @@ public class PeekGridAdapter extends BaseAdapter {
      * grid with the new list of images from the
      * internal database.
      */
+    public void fetchPeekFeedFromServer(String latitude, String longitude) {
+        fetchPeekFeedFromServer(null, latitude, longitude);
+    }
+
+    /**
+     * Gets the list of images from the server and adds
+     * them to the internal database. Then updates the
+     * grid with the new list of images from the
+     * internal database. This also tells the pull-to-refresh
+     * to start the refresh animation before a server response
+     * and to stop on a server response.
+     */
     public void fetchPeekFeedFromServer(final PeekPullToRefreshLayout peekPullToRefreshLayout, String latitude, String longitude) {
         // check if there is internet
         if (NetworkUtilities.isNetworkAvailable(mContext)) {
