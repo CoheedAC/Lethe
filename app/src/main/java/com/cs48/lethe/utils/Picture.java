@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.Serializable;
 
 /**
- * Class that stores information about a full sized picture.
+ * Class that stores information about a picture.
  */
 public class Picture implements Serializable {
 
@@ -12,18 +12,17 @@ public class Picture implements Serializable {
     private String fullUrl;
     private String uniqueId;
     private String datePosted;
-
     private int views;
     private int likes;
     private File file;
 
-    // Posted image constructor
+    // Me picture constructor
     public Picture(String uniqueId, String datePosted, File imageFile, int views, int likes) {
         this(uniqueId, datePosted, null, null, views, likes);
         file = imageFile;
     }
 
-    // Cached image constructor
+    // Feed picture constructor
     public Picture(String uniqueId, String datePosted, String thumbnailUrl, String fullUrl, int views, int likes) {
         this.uniqueId = uniqueId;
         this.datePosted = datePosted;

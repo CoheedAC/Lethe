@@ -17,12 +17,17 @@ import com.cs48.lethe.ui.activities.MeFullPictureActivity;
 import com.cs48.lethe.ui.adapters.MeGridAdapter;
 import com.cs48.lethe.utils.ActionCodes;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+
 public class MeFragment extends Fragment {
 
     public static final String LOG_TAG = MeFragment.class.getSimpleName();
 
-    private MeGridAdapter mGridAdapter;
-    private GridView mGridView;
+    private MeGridAdapter mMeGridAdapter;
+
+    @InjectView(R.id.meGridView)
+    GridView mMeGridView;
 
     /**
      * Sets up the action bar menu.
@@ -40,26 +45,14 @@ public class MeFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_me, container, false);
-        mGridView = (GridView) rootView.findViewById(R.id.meGridView);
-        mGridAdapter = new MeGridAdapter(getActivity());
-        mGridView.setAdapter(mGridAdapter);
 
-        /**
-         * Starts the full-screen activity and sends the necessary data to
-         * that activity through a Bundle.
-         */
-        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent meFullPictureIntent = new Intent(getActivity(), MeFullPictureActivity.class);
+        ButterKnife.inject(this, rootView);
 
-                meFullPictureIntent.putExtra("position", position);
+        mMeGridAdapter = new MeGridAdapter(getActivity());
+        mMeGridView.setAdapter(mMeGridAdapter);
 
-                startActivityForResult(meFullPictureIntent, ActionCodes.ME_FULL_PICTURE_REQUEST);
-            }
-        });
+        setGridTapGesture();
 
         return rootView;
     }
@@ -67,6 +60,7 @@ public class MeFragment extends Fragment {
     /**
      * Hides the refresh and the clear cache buttons.
      */
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.findItem(R.id.action_clear_cache).setVisible(true);
         menu.findItem(R.id.action_copy_images).setVisible(true);
@@ -84,7 +78,7 @@ public class MeFragment extends Fragment {
          * testing purposes.
          */
         if (id == R.id.action_clear_cache) {
-            mGridAdapter.deleteAllPostedImages();
+            mMeGridAdapter.deleteAllPostedImages();
             return true;
         }
 
@@ -93,11 +87,10 @@ public class MeFragment extends Fragment {
          * a dummy grid for testing purposes.
          */
         if (id == R.id.action_copy_images) {
-            mGridAdapter.copyFirstImage();
+            mMeGridAdapter.copyFirstImage();
         }
         return super.onOptionsItemSelected(item);
     }
-
 
     /**
      * Handles actions when a requested activity is finished.
@@ -111,8 +104,28 @@ public class MeFragment extends Fragment {
 
     }
 
+    /**
+     * Starts the full-screen activity and sends the necessary data to
+     * that activity through a Bundle.
+     */
+    private void setGridTapGesture() {
+        mMeGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent meFullPictureIntent = new Intent(getActivity(), MeFullPictureActivity.class);
+
+                meFullPictureIntent.putExtra("position", position);
+
+                startActivityForResult(meFullPictureIntent, ActionCodes.ME_FULL_PICTURE_REQUEST);
+            }
+        });
+    }
+
+    /**
+     * Gets the list of posted pictures from the database.
+     */
     public void fetchMePicturesFromDatabase() {
-        mGridAdapter.fetchMePicturesFromDatabase();
+        mMeGridAdapter.fetchMePicturesFromDatabase();
     }
 
 }

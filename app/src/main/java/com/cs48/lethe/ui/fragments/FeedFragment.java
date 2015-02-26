@@ -66,6 +66,43 @@ public class FeedFragment extends Fragment {
     }
 
     /**
+     * Hides the delete all images and copy image button in the action bar.
+     */
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.findItem(R.id.action_clear_cache).setVisible(true);
+    }
+
+    /**
+     * Handles action bar menu button clicks.
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        /**
+         * Clears the images in the cache and refreshes the grid.
+         */
+        if (id == R.id.action_clear_cache) {
+            mFeedGridAdapter.clearCache();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Hides the image from the feed or updates the database with the new
+     * likes and views when returning from the full screen activity
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == ActionCodes.FEED_FULL_PICTURE_REQUEST && resultCode == ActionCodes.HIDE_PICTURE)
+            fetchFeedFromServer();
+    }
+
+    /**
      * Starts the full-screen activity and sends the necessary data to
      * that activity through a Bundle.
      */
@@ -74,10 +111,8 @@ public class FeedFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent feedFullPictureIntent = new Intent(getActivity(), FeedFullPictureActivity.class);
-
                 Picture picture = (Picture) mFeedGridAdapter.getItem(position);
-                feedFullPictureIntent.putExtra("uniqueId", picture.getUniqueId());
-
+                feedFullPictureIntent.putExtra(getString(R.string.data_uniqueId), picture.getUniqueId());
                 startActivityForResult(feedFullPictureIntent, ActionCodes.FEED_FULL_PICTURE_REQUEST);
             }
         });
@@ -112,42 +147,6 @@ public class FeedFragment extends Fragment {
             }
         });
 
-    }
-
-    /**
-     * Hides the delete all images and copy image button in the action bar.
-     */
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        menu.findItem(R.id.action_clear_cache).setVisible(true);
-    }
-
-    /**
-     * Handles action bar menu button clicks.
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        /**
-         * Clears the images in the cache and refreshes the grid.
-         */
-        if (id == R.id.action_clear_cache) {
-            mFeedGridAdapter.clearCache();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * Hides the image from the feed or updates the database with the new
-     * likes and views when returning from the full screen activity
-     */
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == ActionCodes.FEED_FULL_PICTURE_REQUEST && resultCode == ActionCodes.HIDE_PICTURE)
-            fetchFeedFromServer();
     }
 
     /**

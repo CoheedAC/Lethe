@@ -37,6 +37,9 @@ public class MeGridAdapter extends BaseAdapter {
         fetchMePicturesFromDatabase();
     }
 
+    /**
+     * Gets the list of posted pictures from the database.
+     */
     public void fetchMePicturesFromDatabase() {
         mPictureList = mDatabaseHelper.getMePictures();
         notifyDataSetChanged();

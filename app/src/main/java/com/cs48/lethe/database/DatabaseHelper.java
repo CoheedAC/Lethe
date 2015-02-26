@@ -24,8 +24,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Logcat tag
     private static final String LOG_TAG = "DatabaseHelper";
 
-    private static final int DATABASE_VERSION = 5;
-    private static final String DATABASE_NAME = "imageManager.db";
+    private static final int DATABASE_VERSION = 2;
+    private static final String DATABASE_NAME = "pictureManager.db";
 
     // Table types
     private static final String TEXT_TYPE = " TEXT";
@@ -46,7 +46,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Table Create Statements
     // Feed table create statement
-    private static final String CREATE_CACHED_IMAGES_TABLE =
+    private static final String CREATE_FEED_TABLE =
             "CREATE TABLE " + FeedTable.TABLE_NAME + " (" +
                     FeedTable._ID + INTEGER_PRIMARY_KEY_TYPE + COMMA_SEP +
                     FeedTable.COLUMN_NAME_PICTURE_ID + TEXT_TYPE + COMMA_SEP +
@@ -61,7 +61,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     ")";
 
     // Me table create statement
-    private static final String CREATE_POSTED_IMAGES_TABLE =
+    private static final String CREATE_ME_TABLE =
             "CREATE TABLE " + MeTable.TABLE_NAME + " (" +
                     MeTable._ID + INTEGER_PRIMARY_KEY_TYPE + COMMA_SEP +
                     MeTable.COLUMN_NAME_PICTURE_ID + TEXT_TYPE + COMMA_SEP +
@@ -88,8 +88,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(CREATE_CACHED_IMAGES_TABLE);
-        db.execSQL(CREATE_POSTED_IMAGES_TABLE);
+        db.execSQL(CREATE_FEED_TABLE);
+        db.execSQL(CREATE_ME_TABLE);
     }
 
     @Override
@@ -135,7 +135,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
                 db.insert(FeedTable.TABLE_NAME, null, values);
             } else
-                updateStatisticsFromImage(picture);
+                updateDatabaseFromPicture(picture);
         }
         db.close();
     }
@@ -152,16 +152,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    public void updateStatisticsFromImage(Picture updatedPicture) {
+    public void updateDatabaseFromPicture(Picture updatedPicture) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues feedValues = new ContentValues();
         feedValues.put(FeedTable.COLUMN_NAME_VIEWS, updatedPicture.getViews());
         feedValues.put(FeedTable.COLUMN_NAME_LIKES, updatedPicture.getLikes());
 
-        ContentValues postedValues = new ContentValues();
-        postedValues.put(MeTable.COLUMN_NAME_VIEWS, updatedPicture.getViews());
-        postedValues.put(MeTable.COLUMN_NAME_LIKES, updatedPicture.getLikes());
+        ContentValues meValues = new ContentValues();
+        meValues.put(MeTable.COLUMN_NAME_VIEWS, updatedPicture.getViews());
+        meValues.put(MeTable.COLUMN_NAME_LIKES, updatedPicture.getLikes());
 
         db.update(FeedTable.TABLE_NAME, feedValues, FeedTable.COLUMN_NAME_PICTURE_ID +
                 EQUALS_WILDCARD, new String[]{updatedPicture.getUniqueId()});
@@ -187,7 +187,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_LIKES)));
     }
 
-    public void insertMePicture(Picture postedPicture) {
+    public void insertPictureToMeTable(Picture postedPicture) {
         SQLiteDatabase db = getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -199,7 +199,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    public void deleteMePicture(Picture pictureToDelete) {
+    public void deletePictureFromMeTable(Picture pictureToDelete) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         pictureToDelete.getFile().delete();
@@ -218,12 +218,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         feedValues.put(FeedTable.COLUMN_NAME_VIEWS, picture.getViews());
         feedValues.put(FeedTable.COLUMN_NAME_IS_VIEWED, FeedTable.TRUE);
 
-        ContentValues postedValues = new ContentValues();
-        postedValues.put(MeTable.COLUMN_NAME_VIEWS, picture.getViews());
+        ContentValues meValues = new ContentValues();
+        meValues.put(MeTable.COLUMN_NAME_VIEWS, picture.getViews());
 
         db.update(FeedTable.TABLE_NAME, feedValues, FeedTable.COLUMN_NAME_PICTURE_ID +
                 EQUALS_WILDCARD, new String[]{picture.getUniqueId()});
-        db.update(MeTable.TABLE_NAME, postedValues, MeTable.COLUMN_NAME_PICTURE_ID +
+        db.update(MeTable.TABLE_NAME, meValues, MeTable.COLUMN_NAME_PICTURE_ID +
                 EQUALS_WILDCARD, new String[]{picture.getUniqueId()});
         db.close();
     }
@@ -303,7 +303,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_VIEWS)),
                         c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_LIKES)));
                 pictureList.add(picture);
-                updateStatisticsFromImage(picture);
+                updateDatabaseFromPicture(picture);
             } while (c.moveToNext());
         }
         c.close();

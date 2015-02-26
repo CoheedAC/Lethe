@@ -47,13 +47,15 @@ public class PeekFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         View rootView = inflater.inflate(R.layout.fragment_peek, container, false);
 
         ButterKnife.inject(this, rootView);
 
         mPeekGridAdapter = new PeekGridAdapter(getActivity());
         mPeekGridView.setAdapter(mPeekGridAdapter);
+
+        setGridPullToRefreshGesture();
+        setGridTapGesture();
 
         /**
          * Once you get the map set up, you need to reverse geocode what the user
@@ -66,16 +68,38 @@ public class PeekFragment extends Fragment {
          */
 
         // Gets current location just to test the grid (defaults to IV lat and long)
-        String[] coordinates = NetworkUtilities.getLocationCoordinates(getActivity());
+        String[] coordinates = NetworkUtilities.getCurrentLocation(getActivity());
         mLatitude = coordinates[0];
         mLongitude = coordinates[1];
         // Tells the grid adapter to fetch the feed from the server with the given coords
         mPeekGridAdapter.fetchPeekFeedFromServer(null, mLatitude, mLongitude);
 
-        setGridPullToRefreshGesture();
-        setGridTapGesture();
-
         return rootView;
+    }
+
+    /**
+     * Hides the delete all images and copy image button in the action bar.
+     */
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.findItem(R.id.action_clear_cache).setVisible(true);
+    }
+
+    /**
+     * Handles action bar menu button clicks.
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        /**
+         * Clears the images in the cache and refreshes the grid.
+         */
+        if (id == R.id.action_clear_cache) {
+            mPeekGridAdapter.clearCache();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     /**
@@ -123,30 +147,6 @@ public class PeekFragment extends Fragment {
             }
         });
 
-    }
-
-    /**
-     * Hides the delete all images and copy image button in the action bar.
-     */
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        menu.findItem(R.id.action_clear_cache).setVisible(true);
-    }
-
-    /**
-     * Handles action bar menu button clicks.
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        /**
-         * Clears the images in the cache and refreshes the grid.
-         */
-        if (id == R.id.action_clear_cache) {
-            mPeekGridAdapter.clearCache();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
 }

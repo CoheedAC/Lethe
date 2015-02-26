@@ -173,7 +173,7 @@ public class FeedFullPictureActivity extends ActionBarActivity {
                     JSONObject jsonObject = new JSONObject(jsonData);
                     mPicture.setLikes(jsonObject.getInt(getString(R.string.json_likes)));
                     mPicture.setViews(jsonObject.getInt(getString(R.string.json_views)));
-                    mDatabaseHelper.updateStatisticsFromImage(mPicture);
+                    mDatabaseHelper.updateDatabaseFromPicture(mPicture);
                 } catch (JSONException e) {
                     Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                 }
@@ -200,7 +200,7 @@ public class FeedFullPictureActivity extends ActionBarActivity {
                     JSONObject jsonObject = new JSONObject(jsonData);
                     mPicture.setLikes(jsonObject.getInt(getString(R.string.json_likes)));
                     mPicture.setViews(jsonObject.getInt(getString(R.string.json_views)));
-                    mDatabaseHelper.updateStatisticsFromImage(mPicture);
+                    mDatabaseHelper.updateDatabaseFromPicture(mPicture);
                 } catch (JSONException e) {
                     Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                 }
@@ -229,7 +229,7 @@ public class FeedFullPictureActivity extends ActionBarActivity {
 //                    mImage.setViews(jsonObject.getInt(getString(R.string.json_views)));
                     mPicture.setLikes(jsonObject.getInt(getString(R.string.json_likes)));
 
-                    mDatabaseHelper.updateStatisticsFromImage(mPicture);
+                    mDatabaseHelper.updateDatabaseFromPicture(mPicture);
 
                     mLikesTextView.setText("Likes: " + mPicture.getLikes());
                     mViewsTextView.setText("Views: " + mPicture.getViews());

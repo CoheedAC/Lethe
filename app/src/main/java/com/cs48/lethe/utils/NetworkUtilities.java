@@ -27,7 +27,7 @@ public class NetworkUtilities {
     /**
      * Returns the current latitude[0] and longitude[1]
      */
-    public static String[] getLocationCoordinates(Context context) {
+    public static String[] getCurrentLocation(Context context) {
         String[] coordinates = new String[2];
         LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         Location location = lm.getLastKnownLocation(lm.getBestProvider(new Criteria(), true));

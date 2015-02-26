@@ -77,7 +77,7 @@ public class PostPicture extends AsyncTask<String, String, String> {
 
             requestBody = connection.getOutputStream();
 
-            String[] coordinates = NetworkUtilities.getLocationCoordinates(mPostPictureActivity);
+            String[] coordinates = NetworkUtilities.getCurrentLocation(mPostPictureActivity);
             String latitude = generateForSimpleText("latitude", coordinates[0]);
             String longitude = generateForSimpleText("longitude", coordinates[1]);
             String combined = latitude + longitude;
@@ -150,7 +150,7 @@ public class PostPicture extends AsyncTask<String, String, String> {
             try {
                 JSONObject jsonObject = new JSONObject(result);
                 DatabaseHelper databaseHelper = DatabaseHelper.getInstance(mPostPictureActivity);
-                databaseHelper.insertMePicture(
+                databaseHelper.insertPictureToMeTable(
                         new Picture(jsonObject.getString(mPostPictureActivity.getString(R.string.json_id)),
                                 jsonObject.getString(mPostPictureActivity.getString(R.string.json_date_posted)),
                                 mImageFile, 0, 0));

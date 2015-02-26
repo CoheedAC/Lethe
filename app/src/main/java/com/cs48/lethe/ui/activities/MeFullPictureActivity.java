@@ -119,7 +119,7 @@ public class MeFullPictureActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 setResult(ActionCodes.DELETE_PICTURE, getIntent());
-                mDatabaseHelper.deleteMePicture(mPictureList.get(mCurrentPosition));
+                mDatabaseHelper.deletePictureFromMeTable(mPictureList.get(mCurrentPosition));
                 Toast.makeText(MeFullPictureActivity.this, "Deleted image", Toast.LENGTH_SHORT).show();
                 finish();
             }
@@ -160,7 +160,7 @@ public class MeFullPictureActivity extends ActionBarActivity {
 //                    mImageList.get(mCurrentPosition).setViews(jsonObject.getInt(getString(R.string.json_views)));
                     mPictureList.get(mCurrentPosition).setLikes(jsonObject.getInt(getString(R.string.json_likes)));
 
-                    mDatabaseHelper.updateStatisticsFromImage(mPictureList.get(mCurrentPosition));
+                    mDatabaseHelper.updateDatabaseFromPicture(mPictureList.get(mCurrentPosition));
 
                     mLikesTextView.setText("Likes: " + mPictureList.get(mCurrentPosition).getLikes());
                     mViewsTextView.setText("Views: " + mPictureList.get(mCurrentPosition).getViews());

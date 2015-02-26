@@ -110,7 +110,7 @@ public class FeedGridAdapter extends BaseAdapter {
                 feedPullToRefreshLayout.setRefreshing(true);
 
             // get current location
-            String[] coordinates = NetworkUtilities.getLocationCoordinates(mContext);
+            String[] coordinates = NetworkUtilities.getCurrentLocation(mContext);
             String url = mContext.getString(R.string.server_recent) +
                     coordinates[1].replace(".", "a") + "," +    // latitude
                     coordinates[0].replace(".", "a");           // longitude

@@ -36,7 +36,6 @@ public class MoreFragment extends Fragment {
     @InjectView(R.id.ppButton)
     Button mPPButton;
 
-
     /**
      * onCreate() is used for normal static setup of the activity
      *
@@ -57,7 +56,7 @@ public class MoreFragment extends Fragment {
 
         // Listener for facebook, opens to facebook URL
         View.OnClickListener facebookHandler = new View.OnClickListener() {
-           @Override
+            @Override
             public void onClick(View v) {
                 startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://www.facebook.com/I5555")));
             }
@@ -73,7 +72,7 @@ public class MoreFragment extends Fragment {
 
         // Listener for Contact Us button, prompts user to pick email app, sends email with mailto field already filled in
         View.OnClickListener contactUsHandler = new View.OnClickListener() {
-           @Override
+            @Override
             public void onClick(View v) {
                 Intent intent = new Intent(Intent.ACTION_SEND);
                 intent.setType("message/rfc822");

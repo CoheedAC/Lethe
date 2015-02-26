@@ -160,7 +160,7 @@ public class PostPictureActivity extends ActionBarActivity {
             Log.d(LOG_TAG, "size: " + mImageFile.length() + " bytes");
 
 
-            String[] coordinates = NetworkUtilities.getLocationCoordinates(this);
+            String[] coordinates = NetworkUtilities.getCurrentLocation(this);
             RequestParams params = new RequestParams();
             params.put("avatar", mImageFile, "image/jpeg");
             params.put("latitude", coordinates[0]);
@@ -177,7 +177,7 @@ public class PostPictureActivity extends ActionBarActivity {
                         String jsonData = new String(responseBody);
                         JSONObject jsonObject = new JSONObject(jsonData);
 
-                        mDatabaseHelper.insertMePicture(
+                        mDatabaseHelper.insertPictureToMeTable(
                                 new Picture(jsonObject.getString(getString(R.string.json_id)),
                                         jsonObject.getString(getString(R.string.json_date_posted)),
                                         mImageFile, 0, 0));
