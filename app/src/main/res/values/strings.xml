@@ -35,5 +35,6 @@
 
     <string name="data_uniqueId">uniqueId</string>
     <string name="data_picture">picture</string>
+    <string name="data_position">position</string>
 
 </resources>

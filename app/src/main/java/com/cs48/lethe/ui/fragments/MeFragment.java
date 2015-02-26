@@ -114,7 +114,7 @@ public class MeFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent meFullPictureIntent = new Intent(getActivity(), MeFullPictureActivity.class);
 
-                meFullPictureIntent.putExtra("position", position);
+                meFullPictureIntent.putExtra(getString(R.string.data_position), position);
 
                 startActivityForResult(meFullPictureIntent, ActionCodes.ME_FULL_PICTURE_REQUEST);
             }

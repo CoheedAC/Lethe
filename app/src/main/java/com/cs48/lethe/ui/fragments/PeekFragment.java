@@ -142,7 +142,7 @@ public class PeekFragment extends Fragment {
         mPeekPullToRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if (mLongitude != null && mLongitude != null)
+                if (mLatitude != null && mLongitude != null)
                     mPeekGridAdapter.fetchPeekFeedFromServer(mPeekPullToRefreshLayout, mLatitude, mLongitude);
             }
         });

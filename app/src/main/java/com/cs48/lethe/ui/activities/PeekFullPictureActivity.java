@@ -32,9 +32,7 @@ public class PeekFullPictureActivity extends ActionBarActivity {
 
     public static final String LOG_TAG = FeedFullPictureActivity.class.getSimpleName();
 
-//    private List<Picture> mPictureList;
     private Picture mPicture;
-//    private int mPosition;
 
     @InjectView(R.id.imageView)
     ImageView mImageView;

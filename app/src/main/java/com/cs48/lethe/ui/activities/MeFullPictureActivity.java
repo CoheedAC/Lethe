@@ -72,7 +72,7 @@ public class MeFullPictureActivity extends ActionBarActivity {
         getSupportActionBar().hide();
         mProgressBar.setVisibility(View.GONE);
 
-        mCurrentPosition = getIntent().getIntExtra("position", 0);
+        mCurrentPosition = getIntent().getIntExtra(getString(R.string.data_position), 0);
 
         // Set up list from the database
         mDatabaseHelper = DatabaseHelper.getInstance(this);

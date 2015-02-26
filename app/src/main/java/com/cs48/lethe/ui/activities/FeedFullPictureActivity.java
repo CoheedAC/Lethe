@@ -66,7 +66,7 @@ public class FeedFullPictureActivity extends ActionBarActivity {
         mProgressBar.setVisibility(View.GONE);
 
         // Get photo id from intent
-        String uniqueId = getIntent().getStringExtra("uniqueId");
+        String uniqueId = getIntent().getStringExtra(getString(R.string.data_uniqueId));
 
         // Show the loading progress bar
         mProgressBar.setVisibility(View.VISIBLE);
