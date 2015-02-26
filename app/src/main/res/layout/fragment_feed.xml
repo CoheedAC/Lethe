@@ -1,18 +1,25 @@
-<com.cs48.lethe.ui.view_helpers.ScrollableSwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              xmlns:tools="http://schemas.android.com/tools"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
-             android:id="@+id/swipeRefreshLayout"
+             android:id="@+id/frameLayout"
              tools:context="com.cs48.lethe.ui.fragments.FeedFragment">
 
-    <com.cs48.lethe.ui.view_helpers.ExpandableHeightGridView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/feedGridView"
-        android:layout_gravity="left|top"
-        android:numColumns="3"
-        android:stretchMode="columnWidth"
-        android:horizontalSpacing="4dp"
-        android:verticalSpacing="2dp"/>
+    <com.cs48.lethe.ui.view_helpers.FeedPullToRefreshLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/swipeRefreshLayout">
 
-</com.cs48.lethe.ui.view_helpers.ScrollableSwipeRefreshLayout>
+        <com.cs48.lethe.ui.view_helpers.PullToRefreshGridView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/feedGridView"
+            android:layout_gravity="left|top"
+            android:numColumns="3"
+            android:stretchMode="columnWidth"
+            android:scrollbars="none"
+            android:horizontalSpacing="4dp"
+            android:verticalSpacing="2dp"/>
+    </com.cs48.lethe.ui.view_helpers.FeedPullToRefreshLayout>
+
+</FrameLayout>

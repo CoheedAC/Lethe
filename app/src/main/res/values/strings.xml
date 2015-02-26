@@ -3,10 +3,10 @@
 
     <string name="app_name">Project Lethe</string>
 
-    <string name="title_section1">Home</string>
-    <string name="title_section2">Peek</string>
-    <string name="title_section3">Me</string>
-    <string name="title_section4">More</string>
+    <string name="title_tab1">Home</string>
+    <string name="title_tab2">Peek</string>
+    <string name="title_tab3">Me</string>
+    <string name="title_tab4">More</string>
 
     <string name="action_camera">Camera</string>
     <string name="action_copy">Copy</string>
@@ -15,8 +15,9 @@
     <string name="action_post">Post</string>
 
     <string name="title_activity_post_picture">Post a Picture</string>
-    <string name="title_activity_full_cached_picture">FullPictureActivity</string>
-    <string name="title_activity_full_posted_image">FullPostedImageActivity</string>
+    <string name="title_activity_feed_full_picture">FullPictureActivity</string>
+    <string name="title_activity_me_full_image">FullPostedImageActivity</string>
+    <string name="title_activity_peek_full_picture">FullPeekPictureActivity</string>
 
     <string name="server">https://frozen-sea-8879.herokuapp.com/</string>
     <string name="server_dislike">dislike/</string>
@@ -31,5 +32,8 @@
     <string name="json_url_full">full</string>
     <string name="json_views">views</string>
     <string name="json_likes">likes</string>
+
+    <string name="data_uniqueId">uniqueId</string>
+    <string name="data_picture">picture</string>
 
 </resources>

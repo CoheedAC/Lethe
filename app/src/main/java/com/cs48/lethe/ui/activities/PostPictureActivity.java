@@ -11,12 +11,14 @@ import android.widget.ProgressBar;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
-import com.cs48.lethe.server.HerokuClient;
-import com.cs48.lethe.server.PostPicture;
+import com.cs48.lethe.networking.HerokuRestClient;
+import com.cs48.lethe.networking.PostPicture;
 import com.cs48.lethe.ui.dialogs.NetworkUnavailableDialog;
 import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
-import com.cs48.lethe.utils.FileUtilities;
-import com.cs48.lethe.utils.Image;
+import com.cs48.lethe.utils.ActionCodes;
+import com.cs48.lethe.utils.Picture;
+import com.cs48.lethe.utils.PictureUtilities;
+import com.cs48.lethe.utils.NetworkUtilities;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.squareup.picasso.Picasso;
@@ -38,10 +40,6 @@ import butterknife.InjectView;
 public class PostPictureActivity extends ActionBarActivity {
 
     public static final String LOG_TAG = PostPictureActivity.class.getSimpleName();
-    public static final int POST_IMAGE_REQUEST = 10;
-    public static final int POST_SUCCESS = 1;
-    public static final int POST_CANCELLED = -1;
-    public static final int POST_FAILED = 0;
 
     private File mImageFile;
     private MenuItem mPostButton;
@@ -73,7 +71,7 @@ public class PostPictureActivity extends ActionBarActivity {
 
         mImageFile = new File(getIntent().getData().getPath());
 
-        int rotationDegrees = FileUtilities.getImageOrientation(mImageFile.getAbsolutePath());
+        int rotationDegrees = PictureUtilities.getImageOrientation(mImageFile.getAbsolutePath());
         Picasso.with(this)
                 .load(mImageFile)
                 .resize(1024,0)
@@ -87,7 +85,7 @@ public class PostPictureActivity extends ActionBarActivity {
      * camera intent.
      */
     private void goBack() {
-        setResult(POST_CANCELLED);
+        setResult(ActionCodes.POST_CANCELLED);
         mImageFile.delete();
         finish();
     }
@@ -134,7 +132,7 @@ public class PostPictureActivity extends ActionBarActivity {
 
         // Returns to main screen and prints out image location if user presses post button
         if (id == R.id.action_post) {
-            if (FileUtilities.isNetworkAvailable(this)) {
+            if (NetworkUtilities.isNetworkAvailable(this)) {
                 onPostPictureStart();
 //                postPicture();
                 new PostPicture(this, mImageFile).execute();
@@ -162,25 +160,25 @@ public class PostPictureActivity extends ActionBarActivity {
             Log.d(LOG_TAG, "size: " + mImageFile.length() + " bytes");
 
 
-            String[] coordinates = FileUtilities.getLocationCoordinates(this);
+            String[] coordinates = NetworkUtilities.getLocationCoordinates(this);
             RequestParams params = new RequestParams();
             params.put("avatar", mImageFile, "image/jpeg");
             params.put("latitude", coordinates[0]);
             params.put("longitude", coordinates[1]);
 
 
-            HerokuClient.post(getString(R.string.server_post), params, new AsyncHttpResponseHandler() {
+            HerokuRestClient.post(getString(R.string.server_post), params, new AsyncHttpResponseHandler() {
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                     onPostPictureEnd();
-                    setResult(POST_SUCCESS);
+                    setResult(ActionCodes.POST_SUCCESS);
 
                     try {
                         String jsonData = new String(responseBody);
                         JSONObject jsonObject = new JSONObject(jsonData);
 
-                        mDatabaseHelper.insertPostedImage(
-                                new Image(jsonObject.getString(getString(R.string.json_id)),
+                        mDatabaseHelper.insertMePicture(
+                                new Picture(jsonObject.getString(getString(R.string.json_id)),
                                         jsonObject.getString(getString(R.string.json_date_posted)),
                                         mImageFile, 0, 0));
 
@@ -195,7 +193,7 @@ public class PostPictureActivity extends ActionBarActivity {
                 public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
                     onPostPictureEnd();
                     mCurrentlyPosting = false;
-                    setResult(POST_FAILED);
+                    setResult(ActionCodes.POST_FAILED);
 
                     Log.d(LOG_TAG, "Error : " + error.getLocalizedMessage());
                     Log.d(LOG_TAG, "Status code : " + statusCode);

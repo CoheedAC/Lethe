@@ -1,9 +1,25 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
              xmlns:tools="http://schemas.android.com/tools"
+             android:orientation="vertical"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
              tools:context="com.cs48.lethe.ui.fragments.PeekFragment">
 
-    <!-- TODO: Update blank fragment layout -->
+    <com.cs48.lethe.ui.view_helpers.PeekPullToRefreshLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/swipeRefreshLayout">
 
-</FrameLayout>
+        <com.cs48.lethe.ui.view_helpers.PullToRefreshGridView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/peekGridView"
+            android:layout_gravity="left|top"
+            android:numColumns="3"
+            android:stretchMode="columnWidth"
+            android:scrollbars="none"
+            android:horizontalSpacing="4dp"
+            android:verticalSpacing="2dp"/>
+    </com.cs48.lethe.ui.view_helpers.PeekPullToRefreshLayout>
+
+</LinearLayout>

@@ -10,6 +10,7 @@
         android:id="@+id/meGridView"
         android:layout_gravity="left|top"
         android:numColumns="3"
+        android:scrollbars="none"
         android:horizontalSpacing="4dp"
         android:verticalSpacing="2dp"
         android:stretchMode="columnWidth"

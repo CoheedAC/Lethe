@@ -14,11 +14,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.cs48.lethe.R;
-import com.cs48.lethe.ui.adapters.TabsPagerAdapter;
+import com.cs48.lethe.ui.adapters.TabPagerAdapter;
 import com.cs48.lethe.ui.fragments.FeedFragment;
 import com.cs48.lethe.ui.fragments.MeFragment;
-import com.cs48.lethe.ui.fragments.MoreFragment;
-import com.cs48.lethe.ui.fragments.PeekFragment;
+import com.cs48.lethe.utils.ActionCodes;
 import com.cs48.lethe.utils.FileUtilities;
 
 import java.io.File;
@@ -27,14 +26,11 @@ import java.io.File;
  * The main activity where the app launches. It handles all of the tab fragments
  * and action bar button presses.
  */
-public class MainActivity extends ActionBarActivity implements ActionBar.TabListener,
-        FeedFragment.OnFragmentInteractionListener, PeekFragment.OnFragmentInteractionListener,
-        MeFragment.OnFragmentInteractionListener, MoreFragment.OnFragmentInteractionListener {
+public class MainActivity extends ActionBarActivity implements ActionBar.TabListener {
 
     public static final String LOG_TAG = MainActivity.class.getSimpleName();
-    public static final int CAMERA_CAPTURE = 100;
 
-    private TabsPagerAdapter mTabsPagerAdapter;
+    private TabPagerAdapter mTabPagerAdapter;
     private ViewPager mViewPager;
 
     private Uri mImageUri;
@@ -66,11 +62,11 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         // Create the adapter that will return a fragment for each of the four
         // primary sections of the activity.
-        mTabsPagerAdapter = new TabsPagerAdapter(getSupportFragmentManager(), this);
+        mTabPagerAdapter = new TabPagerAdapter(getSupportFragmentManager(), this);
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
-        mViewPager.setAdapter(mTabsPagerAdapter);
+        mViewPager.setAdapter(mTabPagerAdapter);
         mViewPager.setOffscreenPageLimit(3);
 
         // When swiping between different sections, select the corresponding
@@ -91,7 +87,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         };
 
         // For each of the sections in the app, add a tab to the action bar.
-        for (int i = 0; i < mTabsPagerAdapter.getCount(); i++) {
+        for (int i = 0; i < mTabPagerAdapter.getCount(); i++) {
             // Create a tab with text corresponding to the page title defined by
             // the adapter. Also specify this Activity object, which implements
             // the TabListener interface, as the callback (listener) for when
@@ -143,7 +139,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             imageCaptureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mImageUri); // set the image file name
 
             // start the image capture Intent
-            startActivityForResult(imageCaptureIntent, CAMERA_CAPTURE);
+            startActivityForResult(imageCaptureIntent, ActionCodes.CAMERA_CAPTURE_REQUEST);
         } catch (ActivityNotFoundException e) {
             FileUtilities.logResults(this, LOG_TAG, "Whoops - your device doesn't support capturing images!");
         }
@@ -157,14 +153,14 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         super.onActivityResult(requestCode, resultCode, data);
 
         // Camera activity result
-        if (requestCode == CAMERA_CAPTURE) {
+        if (requestCode == ActionCodes.CAMERA_CAPTURE_REQUEST) {
             if (resultCode == RESULT_OK) {
                 Intent postImageIntent = new Intent(this, PostPictureActivity.class);
                 if (data != null && data.getData() != null)
                     postImageIntent.setData(data.getData());
                 else
                     postImageIntent.setData(mImageUri);
-                startActivityForResult(postImageIntent, PostPictureActivity.POST_IMAGE_REQUEST);
+                startActivityForResult(postImageIntent, ActionCodes.POST_PICTURE_REQUEST);
             } else if (resultCode == RESULT_CANCELED) {
                 File imageFile;
                 if (data != null && data.getData() != null)
@@ -176,14 +172,18 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         }
 
         // PostPicture activity result
-        if (requestCode == PostPictureActivity.POST_IMAGE_REQUEST) {
-            if (resultCode == PostPictureActivity.POST_SUCCESS) {
+        if (requestCode == ActionCodes.POST_PICTURE_REQUEST) {
+            if (resultCode == ActionCodes.POST_SUCCESS) {
                 FeedFragment feedFragment = (FeedFragment) findFragmentByPosition(0);
-                feedFragment.fetchFeedFromServer();
+//                FeedFragment feedFragment = (FeedFragment) mTabsPagerAdapter.getItem(0);
+                if (feedFragment != null)
+                    feedFragment.fetchFeedFromServer();
 
+//                MeFragment meFragment = (MeFragment) mTabsPagerAdapter.getItem(2);
                 MeFragment meFragment = (MeFragment) findFragmentByPosition(2);
-                meFragment.fetchPostedImagesFromDatabase();
-            } else if (resultCode == PostPictureActivity.POST_CANCELLED) {
+                if (meFragment != null)
+                    meFragment.fetchMePicturesFromDatabase();
+            } else if (resultCode == ActionCodes.POST_CANCELLED) {
                 startCamera();
             }
         }
@@ -192,7 +192,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     private Fragment findFragmentByPosition(int position) {
         return getSupportFragmentManager().findFragmentByTag(
                 "android:switcher:" + mViewPager.getId() + ":"
-                        + mTabsPagerAdapter.getItemId(position));
+                        + mTabPagerAdapter.getItemId(position));
     }
 
     /**
@@ -209,16 +209,16 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         // Changes title based upon which tab is selected
         switch (position) {
             case 0:
-                setTitle(R.string.title_section1);
+                setTitle(R.string.title_tab1);
                 break;
             case 1:
-                setTitle(R.string.title_section2);
+                setTitle(R.string.title_tab2);
                 break;
             case 2:
-                setTitle(R.string.title_section3);
+                setTitle(R.string.title_tab3);
                 break;
             case 3:
-                setTitle(R.string.title_section4);
+                setTitle(R.string.title_tab4);
                 break;
         }
     }
@@ -231,17 +231,5 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
     }
 
-    @Override
-    public void onGridItemSelected(int position) {
-        // The user selected the headline of an article from the HeadlinesFragment
-        // Do something here to display that article
-        Fragment fragment = mTabsPagerAdapter.getItem(position);
 
-
-    }
-
-    @Override
-    public void onFragmentInteraction(Uri uri) {
-
-    }
 }

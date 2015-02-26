@@ -1,14 +1,6 @@
 package com.cs48.lethe.utils;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Matrix;
-import android.location.Criteria;
-import android.location.Location;
-import android.location.LocationManager;
-import android.media.ExifInterface;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
@@ -75,35 +67,6 @@ public class FileUtilities {
     }
 
     /**
-     * Returns whether there is internet connectivity or not.
-     */
-    public static boolean isNetworkAvailable(Context context) {
-        ConnectivityManager manager = (ConnectivityManager)
-                context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = manager.getActiveNetworkInfo();
-        return networkInfo != null && networkInfo.isConnected();
-    }
-
-    /**
-     * Returns the current latitude[0] and longitude[1]
-     */
-    public static String[] getLocationCoordinates(Context context) {
-        String[] coordinates = new String[2];
-        LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        Location location = lm.getLastKnownLocation(lm.getBestProvider(new Criteria(), true));
-
-        if (location != null) {
-            coordinates[0] = String.valueOf(location.getLatitude());
-            coordinates[1] = String.valueOf(location.getLongitude());
-        } else {
-            // default to isla vista coordinates
-            coordinates[0] = "34.4133"; // latitude
-            coordinates[1] = "-119.861"; // longitude
-        }
-        return coordinates;
-    }
-
-    /**
      * Returns true if external storage is mounted. False otherwise.
      */
     public static boolean isExternalStorageAvailable() {
@@ -150,42 +113,4 @@ public class FileUtilities {
         return new File(fileDirectory.getAbsolutePath(),
                 "IMG_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".jpg");
     }
-
-    /**
-     * Rotates a bitmap by the specified degrees
-     */
-    public static Bitmap rotateBitmap(Bitmap source, float angle) {
-        Matrix matrix = new Matrix();
-        matrix.postRotate(angle);
-        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
-    }
-
-    /**
-     * Returns the orientation of the image taken by the camera
-     */
-    public static int getImageOrientation(String imagePath){
-        int rotate = 0;
-        try {
-            ExifInterface exif = new ExifInterface(imagePath);
-            int orientation = exif.getAttributeInt(
-                    ExifInterface.TAG_ORIENTATION,
-                    ExifInterface.ORIENTATION_NORMAL);
-
-            switch (orientation) {
-                case ExifInterface.ORIENTATION_ROTATE_270:
-                    rotate = 270;
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_180:
-                    rotate = 180;
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_90:
-                    rotate = 90;
-                    break;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return rotate;
-    }
-
 }

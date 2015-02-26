@@ -31,7 +31,6 @@
             android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -40,18 +39,27 @@
             android:label="@string/title_activity_post_picture"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".ui.activities.FullPostedPictureActivity"
-            android:label="@string/title_activity_full_cached_picture" >
+            android:name=".ui.activities.FeedFullPictureActivity"
+            android:label="@string/title_activity_feed_full_picture"
+            android:screenOrientation="portrait">
+        </activity>
+
+        <activity
+            android:name=".ui.activities.PeekFullPictureActivity"
+            android:label="@string/title_activity_peek_full_picture"
+            android:screenOrientation="portrait">
+        </activity>
+
+        <activity
+            android:name=".ui.activities.MeFullPictureActivity"
+            android:label="@string/title_activity_me_full_image"
+            android:screenOrientation="portrait">
         </activity>
 
         <meta-data
             android:name="com.google.android.maps.v2.AIzaSyD2Bm0ISoNhNqDC7xVOyhPS8oc5pYfEYvs"
             android:value="AIzaSyD2Bm0ISoNhNqDC7xVOyhPS8oc5pYfEYvs" />
 
-        <activity
-            android:name=".ui.activities.FullCachedPictureActivity"
-            android:label="@string/title_activity_full_posted_image" >
-        </activity>
     </application>
 
 </manifest>
