@@ -18,8 +18,8 @@ import com.cs48.lethe.ui.dialogs.NetworkUnavailableDialog;
 import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
 import com.cs48.lethe.ui.view_helpers.FeedPullToRefreshLayout;
 import com.cs48.lethe.utils.FileUtilities;
-import com.cs48.lethe.utils.Picture;
 import com.cs48.lethe.utils.NetworkUtilities;
+import com.cs48.lethe.utils.Picture;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.squareup.picasso.Picasso;
 
@@ -36,15 +36,15 @@ import java.util.List;
 /**
  * A BaseAdapter that handles the grid for the feed tab.
  */
-public class FeedGridAdapter extends BaseAdapter {
+public class FeedGridViewAdapter extends BaseAdapter {
 
-    public static final String LOG_TAG = FeedGridAdapter.class.getSimpleName();
+    public static final String LOG_TAG = FeedGridViewAdapter.class.getSimpleName();
 
     private Context mContext;
     private List<Picture> mPictureList;
     private DatabaseHelper mDatabaseHelper;
 
-    public FeedGridAdapter(Context context) {
+    public FeedGridViewAdapter(Context context) {
         mContext = context;
         mDatabaseHelper = DatabaseHelper.getInstance(mContext);
         fetchFeedFromDatabase();
@@ -77,17 +77,19 @@ public class FeedGridAdapter extends BaseAdapter {
      * Creates a new ImageView for each item referenced by the Adapter
      */
     public View getView(int position, View convertView, ViewGroup parent) {
+
         // if it's not recycled, initialize some attributes
         ImageView imageView = (ImageView) convertView;
         if (imageView == null) {
             imageView = new ImageView(mContext);
             GridView gridView = (GridView) parent;
             DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
-
             int imageDimension = metrics.widthPixels / gridView.getNumColumns();
             imageView.setLayoutParams(new GridView.LayoutParams(imageDimension, imageDimension));
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             imageView.setBackgroundColor(mContext.getResources().getColor(R.color.empty_image));
+
+//            imageView.setOnClickListener(new OnPictureClickListener(position));
         }
         Picasso.with(mContext)
                 .load(mPictureList.get(position).getThumbnailUrl())

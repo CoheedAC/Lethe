@@ -14,7 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.cs48.lethe.R;
-import com.cs48.lethe.ui.adapters.TabPagerAdapter;
+import com.cs48.lethe.ui.adapters.TabsPagerAdapter;
 import com.cs48.lethe.ui.fragments.FeedFragment;
 import com.cs48.lethe.ui.fragments.MeFragment;
 import com.cs48.lethe.utils.ActionCodes;
@@ -30,9 +30,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
     public static final String LOG_TAG = MainActivity.class.getSimpleName();
 
-    private TabPagerAdapter mTabPagerAdapter;
+    private TabsPagerAdapter mTabsPagerAdapter;
     private ViewPager mViewPager;
-
     private Uri mImageUri;
 
     /**
@@ -42,6 +41,10 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Create the adapter that will return a fragment for each of the four
+        // primary sections of the activity.
+        mTabsPagerAdapter = new TabsPagerAdapter(getSupportFragmentManager(), this);
 
         setTitle("Home");
         setUpActionBar();
@@ -60,14 +63,10 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         actionBar.setDisplayShowHomeEnabled(true);
         actionBar.setIcon(R.drawable.ic_launcher);
 
-        // Create the adapter that will return a fragment for each of the four
-        // primary sections of the activity.
-        mTabPagerAdapter = new TabPagerAdapter(getSupportFragmentManager(), this);
-
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
-        mViewPager.setAdapter(mTabPagerAdapter);
-        mViewPager.setOffscreenPageLimit(3);
+        mViewPager.setAdapter(mTabsPagerAdapter);
+        mViewPager.setOffscreenPageLimit(1);
 
         // When swiping between different sections, select the corresponding
         // tab. We can also use ActionBar.Tab#select() to do this if we have
@@ -87,7 +86,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         };
 
         // For each of the sections in the app, add a tab to the action bar.
-        for (int i = 0; i < mTabPagerAdapter.getCount(); i++) {
+        for (int i = 0; i < mTabsPagerAdapter.getCount(); i++) {
             // Create a tab with text corresponding to the page title defined by
             // the adapter. Also specify this Activity object, which implements
             // the TabListener interface, as the callback (listener) for when
@@ -175,11 +174,9 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         if (requestCode == ActionCodes.POST_PICTURE_REQUEST) {
             if (resultCode == ActionCodes.POST_SUCCESS) {
                 FeedFragment feedFragment = (FeedFragment) findFragmentByPosition(0);
-//                FeedFragment feedFragment = (FeedFragment) mTabsPagerAdapter.getItem(0);
                 if (feedFragment != null)
                     feedFragment.fetchFeedFromServer();
 
-//                MeFragment meFragment = (MeFragment) mTabsPagerAdapter.getItem(2);
                 MeFragment meFragment = (MeFragment) findFragmentByPosition(2);
                 if (meFragment != null)
                     meFragment.fetchMePicturesFromDatabase();
@@ -189,10 +186,12 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         }
     }
 
+    /**
+     * Returns the fragment at the given position
+     */
     private Fragment findFragmentByPosition(int position) {
-        return getSupportFragmentManager().findFragmentByTag(
-                "android:switcher:" + mViewPager.getId() + ":"
-                        + mTabPagerAdapter.getItemId(position));
+        return getSupportFragmentManager()
+                .findFragmentByTag(TabsPagerAdapter.getFragmentTag(mViewPager.getId(), position));
     }
 
     /**

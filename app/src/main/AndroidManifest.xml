@@ -39,21 +39,19 @@
             android:label="@string/title_activity_post_picture"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".ui.activities.FeedFullPictureActivity"
-            android:label="@string/title_activity_feed_full_picture"
-            android:screenOrientation="portrait">
+            android:name=".ui.activities.FeedFullScreenActivity"
+            android:label="@string/title_activity_feed_fullscreen"
+            android:screenOrientation="portrait" >
         </activity>
-
         <activity
-            android:name=".ui.activities.PeekFullPictureActivity"
-            android:label="@string/title_activity_peek_full_picture"
-            android:screenOrientation="portrait">
+            android:name=".ui.activities.PeekFullScreenActivity"
+            android:label="@string/title_activity_peek_fullscreen"
+            android:screenOrientation="portrait" >
         </activity>
-
         <activity
-            android:name=".ui.activities.MeFullPictureActivity"
-            android:label="@string/title_activity_me_full_image"
-            android:screenOrientation="portrait">
+            android:name=".ui.activities.MeFullScreenActivity"
+            android:label="@string/title_activity_me_fullscreen"
+            android:screenOrientation="portrait" >
         </activity>
 
         <meta-data

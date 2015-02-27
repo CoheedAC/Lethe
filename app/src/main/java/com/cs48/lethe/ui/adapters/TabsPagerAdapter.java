@@ -17,17 +17,17 @@ import java.util.Vector;
  * A {@link android.support.v4.app.FragmentPagerAdapter} that returns a fragment corresponding to
  * one of the sections/tabs/pages.
  */
-public class TabPagerAdapter extends FragmentPagerAdapter {
+public class TabsPagerAdapter extends FragmentPagerAdapter {
 
     private List<String> fragments;
-    private Context context;
+    private Context mContext;
 
     /**
-     * Addes all of the fragments into the List.
+     * Adds all of the fragments into the List.
      */
-    public TabPagerAdapter(FragmentManager fm, Context context) {
-        super(fm);
-        this.context = context;
+    public TabsPagerAdapter(FragmentManager fragmentManager, Context context) {
+        super(fragmentManager);
+        mContext = context;
 
         fragments = new Vector<>();
         fragments.add(FeedFragment.class.getName());
@@ -41,7 +41,7 @@ public class TabPagerAdapter extends FragmentPagerAdapter {
      */
     @Override
     public Fragment getItem(int position) {
-        return Fragment.instantiate(context, fragments.get(position));
+        return Fragment.instantiate(mContext, fragments.get(position));
     }
 
     /**
@@ -52,7 +52,10 @@ public class TabPagerAdapter extends FragmentPagerAdapter {
         return fragments.size();
     }
 
-    private static String makeFragmentName(int viewPagerId, int position) {
+    /**
+     * Gets the tag of the fragment
+     */
+    public static String getFragmentTag(int viewPagerId, int position) {
         return "android:switcher:" + viewPagerId + ":" + position;
     }
 

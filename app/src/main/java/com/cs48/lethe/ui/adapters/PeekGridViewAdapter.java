@@ -11,6 +11,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.cs48.lethe.R;
+import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.networking.HerokuRestClient;
 import com.cs48.lethe.ui.activities.MainActivity;
 import com.cs48.lethe.ui.dialogs.NetworkUnavailableDialog;
@@ -35,16 +36,18 @@ import java.util.List;
 /**
  * Created by maxkohne on 2/26/15.
  */
-public class PeekGridAdapter extends BaseAdapter {
+public class PeekGridViewAdapter extends BaseAdapter {
 
-    public static final String LOG_TAG = PeekGridAdapter.class.getSimpleName();
+    public static final String LOG_TAG = PeekGridViewAdapter.class.getSimpleName();
 
     private Context mContext;
     private List<Picture> mPictureList;
+    private DatabaseHelper mDatabaseHelper;
 
-    public PeekGridAdapter(Context context) {
+    public PeekGridViewAdapter(Context context) {
         mContext = context;
-        mPictureList = new ArrayList<>();
+        mDatabaseHelper = DatabaseHelper.getInstance(mContext);
+        clearPeekFeed();
     }
 
     /**
@@ -97,8 +100,9 @@ public class PeekGridAdapter extends BaseAdapter {
      * Clears the database of posted images and clears
      * the list of images
      */
-    public void clearCache() {
+    public void clearPeekFeed() {
         mPictureList = new ArrayList<>();
+        mDatabaseHelper.clearPeekTable();
         notifyDataSetChanged();
     }
 
@@ -158,6 +162,8 @@ public class PeekGridAdapter extends BaseAdapter {
 
                         if (peekPullToRefreshLayout != null)
                             peekPullToRefreshLayout.setRefreshing(false);
+
+                        mDatabaseHelper.updatePeekFeed(mPictureList);
 
                         // updates the grid to reflect the new data in the image list
                         notifyDataSetChanged();

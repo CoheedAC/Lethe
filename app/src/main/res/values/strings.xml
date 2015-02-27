@@ -15,9 +15,9 @@
     <string name="action_post">Post</string>
 
     <string name="title_activity_post_picture">Post a Picture</string>
-    <string name="title_activity_feed_full_picture">FullPictureActivity</string>
-    <string name="title_activity_me_full_image">FullPostedImageActivity</string>
-    <string name="title_activity_peek_full_picture">FullPeekPictureActivity</string>
+    <string name="title_activity_feed_fullscreen">FeedFullScreenActivity</string>
+    <string name="title_activity_me_fullscreen">MeFullScreenActivity</string>
+    <string name="title_activity_peek_fullscreen">PeekFullScreenActivity</string>
 
     <string name="server">https://frozen-sea-8879.herokuapp.com/</string>
     <string name="server_dislike">dislike/</string>

@@ -14,8 +14,8 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 
 import com.cs48.lethe.R;
-import com.cs48.lethe.ui.activities.FeedFullPictureActivity;
-import com.cs48.lethe.ui.adapters.FeedGridAdapter;
+import com.cs48.lethe.ui.activities.FeedFullScreenActivity;
+import com.cs48.lethe.ui.adapters.FeedGridViewAdapter;
 import com.cs48.lethe.ui.view_helpers.FeedPullToRefreshLayout;
 import com.cs48.lethe.ui.view_helpers.PullToRefreshGridView;
 import com.cs48.lethe.utils.ActionCodes;
@@ -28,7 +28,7 @@ public class FeedFragment extends Fragment {
 
     public static final String LOG_TAG = FeedFragment.class.getSimpleName();
 
-    private FeedGridAdapter mFeedGridAdapter;
+    private FeedGridViewAdapter mFeedGridViewAdapter;
 
     @InjectView(R.id.feedGridView)
     PullToRefreshGridView mFeedGridView;
@@ -42,6 +42,8 @@ public class FeedFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
+        mFeedGridViewAdapter = new FeedGridViewAdapter(getActivity());
     }
 
     /**
@@ -55,12 +57,11 @@ public class FeedFragment extends Fragment {
 
         ButterKnife.inject(this, rootView);
 
-        mFeedGridAdapter = new FeedGridAdapter(getActivity());
-        mFeedGridView.setAdapter(mFeedGridAdapter);
+        mFeedGridView.setAdapter(mFeedGridViewAdapter);
         mFeedGridView.setExpanded(true);
-
-        setGridPullToRefreshGesture();
-        setGridTapGesture();
+        mFeedGridView.setOnItemClickListener(new OnPictureClickListener());
+        mFeedGridView.setOnScrollListener(new OnScrollListener());
+        mFeedPullToRefreshLayout.setOnRefreshListener(new OnRefreshListener());
 
         return rootView;
     }
@@ -84,7 +85,7 @@ public class FeedFragment extends Fragment {
          * Clears the images in the cache and refreshes the grid.
          */
         if (id == R.id.action_clear_cache) {
-            mFeedGridAdapter.clearCache();
+            mFeedGridViewAdapter.clearCache();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -98,61 +99,57 @@ public class FeedFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == ActionCodes.FEED_FULL_PICTURE_REQUEST && resultCode == ActionCodes.HIDE_PICTURE)
+        if (requestCode == ActionCodes.FEED_FULLSCREEN_REQUEST && resultCode == ActionCodes.HIDE_PICTURE)
             fetchFeedFromServer();
-    }
-
-    /**
-     * Starts the full-screen activity and sends the necessary data to
-     * that activity through a Bundle.
-     */
-    private void setGridTapGesture() {
-        mFeedGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent feedFullPictureIntent = new Intent(getActivity(), FeedFullPictureActivity.class);
-                Picture picture = (Picture) mFeedGridAdapter.getItem(position);
-                feedFullPictureIntent.putExtra(getString(R.string.data_uniqueId), picture.getUniqueId());
-                startActivityForResult(feedFullPictureIntent, ActionCodes.FEED_FULL_PICTURE_REQUEST);
-            }
-        });
-    }
-
-    /**
-     * Sets up the listeners for pull-to-refresh on the grid
-     */
-    private void setGridPullToRefreshGesture() {
-
-        mFeedGridView.setOnScrollListener(new AbsListView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-                if (scrollState == SCROLL_STATE_IDLE && view.getChildAt(0).getTop() >= 0)
-                    mFeedPullToRefreshLayout.setEnabled(true);
-                else
-                    mFeedPullToRefreshLayout.setEnabled(false);
-            }
-
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                if (totalItemCount == 0)
-                    mFeedPullToRefreshLayout.setEnabled(true);
-            }
-
-        });
-
-        mFeedPullToRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                mFeedGridAdapter.fetchFeedFromServer(mFeedPullToRefreshLayout);
-            }
-        });
-
     }
 
     /**
      * Gets the list of images from the server.
      */
     public void fetchFeedFromServer() {
-        mFeedGridAdapter.fetchFeedFromServer(null);
+        mFeedGridViewAdapter.fetchFeedFromServer(null);
+    }
+
+    /**
+     * Starts the full-screen activity and sends the necessary data to
+     * that activity through a Bundle.
+     */
+    class OnPictureClickListener implements AdapterView.OnItemClickListener {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            Intent feedFullPictureIntent = new Intent(getActivity(), FeedFullScreenActivity.class);
+            Picture picture = (Picture) mFeedGridViewAdapter.getItem(position);
+            feedFullPictureIntent.putExtra(getString(R.string.data_uniqueId), picture.getUniqueId());
+            startActivityForResult(feedFullPictureIntent, ActionCodes.FEED_FULLSCREEN_REQUEST);
+        }
+    }
+
+    /**
+     * Sets up the scroll listeners for pull-to-refresh on the grid
+     */
+    class OnScrollListener implements AbsListView.OnScrollListener {
+        @Override
+        public void onScrollStateChanged(AbsListView view, int scrollState) {
+            if (scrollState == SCROLL_STATE_IDLE && view.getChildAt(0).getTop() >= 0)
+                mFeedPullToRefreshLayout.setEnabled(true);
+            else
+                mFeedPullToRefreshLayout.setEnabled(false);
+        }
+
+        @Override
+        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+            if (totalItemCount == 0)
+                mFeedPullToRefreshLayout.setEnabled(true);
+        }
+    }
+
+    /**
+     * Sets up the refresh listeners for pull-to-refresh feature
+     */
+    class OnRefreshListener implements SwipeRefreshLayout.OnRefreshListener {
+        @Override
+        public void onRefresh() {
+            mFeedGridViewAdapter.fetchFeedFromServer(mFeedPullToRefreshLayout);
+        }
     }
 }

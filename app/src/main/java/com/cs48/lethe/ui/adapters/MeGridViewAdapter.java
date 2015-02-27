@@ -23,15 +23,15 @@ import java.util.List;
 /**
  * A BaseAdapter that handles the grid for the me tab.
  */
-public class MeGridAdapter extends BaseAdapter {
+public class MeGridViewAdapter extends BaseAdapter {
 
-    public static final String LOG_TAG = MeGridAdapter.class.getSimpleName();
+    public static final String LOG_TAG = MeGridViewAdapter.class.getSimpleName();
 
     private Context mContext;
     private List<Picture> mPictureList;
     private DatabaseHelper mDatabaseHelper;
 
-    public MeGridAdapter(Context context) {
+    public MeGridViewAdapter(Context context) {
         mContext = context;
         mDatabaseHelper = DatabaseHelper.getInstance(mContext);
         fetchMePicturesFromDatabase();

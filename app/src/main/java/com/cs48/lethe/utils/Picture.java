@@ -1,20 +1,19 @@
 package com.cs48.lethe.utils;
 
 import java.io.File;
-import java.io.Serializable;
 
 /**
  * Class that stores information about a picture.
  */
-public class Picture implements Serializable {
+public class Picture {
 
-    private String thumbnailUrl;
-    private String fullUrl;
     private String uniqueId;
     private String datePosted;
+    private String thumbnailUrl;
+    private String fullUrl;
+    private File file;
     private int views;
     private int likes;
-    private File file;
 
     // Me picture constructor
     public Picture(String uniqueId, String datePosted, File imageFile, int views, int likes) {

@@ -16,9 +16,9 @@ import com.cs48.lethe.networking.PostPicture;
 import com.cs48.lethe.ui.dialogs.NetworkUnavailableDialog;
 import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
 import com.cs48.lethe.utils.ActionCodes;
+import com.cs48.lethe.utils.NetworkUtilities;
 import com.cs48.lethe.utils.Picture;
 import com.cs48.lethe.utils.PictureUtilities;
-import com.cs48.lethe.utils.NetworkUtilities;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.squareup.picasso.Picasso;
@@ -29,6 +29,8 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -74,7 +76,7 @@ public class PostPictureActivity extends ActionBarActivity {
         int rotationDegrees = PictureUtilities.getImageOrientation(mImageFile.getAbsolutePath());
         Picasso.with(this)
                 .load(mImageFile)
-                .resize(1024,0)
+                .resize(1024, 0)
                 .rotate(rotationDegrees)
                 .onlyScaleDown()
                 .into(mImageView);
@@ -133,8 +135,7 @@ public class PostPictureActivity extends ActionBarActivity {
         // Returns to main screen and prints out image location if user presses post button
         if (id == R.id.action_post) {
             if (NetworkUtilities.isNetworkAvailable(this)) {
-                onPostPictureStart();
-//                postPicture();
+//                fakePostPicture();
                 new PostPicture(this, mImageFile).execute();
                 return true;
             } else {
@@ -143,6 +144,23 @@ public class PostPictureActivity extends ActionBarActivity {
             }
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Adds the picture taken by the camera to the database.
+     * This does not post to the server.
+     *
+     * TESTING PURPOSES ONLY
+     */
+    private void fakePostPicture() {
+        onPostPictureStart();
+        Date date = new Date();
+        mDatabaseHelper.insertPictureToMeTable(
+                new Picture(date.getTime() + "", new SimpleDateFormat("yyyyMMdd_HHmmss").
+                        format(date), mImageFile, 0, 0));
+        setResult(ActionCodes.POST_SUCCESS);
+        onPostPictureEnd();
+        finish();
     }
 
     /**

@@ -33,6 +33,14 @@ public final class DatabaseContract {
     }
 
     /* Inner class that defines the table contents */
+    public static abstract class PeekTable extends Table implements BaseColumns {
+        public static final String TABLE_NAME = "peek_table";
+
+        public static final String COLUMN_NAME_THUMBNAIL_URL = "thumbnail_url";
+        public static final String COLUMN_NAME_FULL_URL = "full_url";
+    }
+
+    /* Inner class that defines the table contents */
     public static abstract class MeTable extends Table implements BaseColumns {
         public static final String TABLE_NAME = "me_table";
         public static final String COLUMN_NAME_FILE = "file";

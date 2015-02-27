@@ -7,8 +7,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.cs48.lethe.database.DatabaseContract.FeedTable;
+import com.cs48.lethe.database.DatabaseContract.MeTable;
+import com.cs48.lethe.database.DatabaseContract.PeekTable;
 import com.cs48.lethe.utils.Picture;
-import com.cs48.lethe.database.DatabaseContract.*;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -24,7 +26,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Logcat tag
     private static final String LOG_TAG = "DatabaseHelper";
 
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "pictureManager.db";
 
     // Table types
@@ -60,6 +62,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     FeedTable.COLUMN_NAME_VISIBILITY + INTEGER_DEFAULT_TYPE + FeedTable.VISIBLE +
                     ")";
 
+    // Peak table create statement
+    private static final String CREATE_PEEK_TABLE =
+            "CREATE TABLE " + PeekTable.TABLE_NAME + " (" +
+                    PeekTable._ID + INTEGER_PRIMARY_KEY_TYPE + COMMA_SEP +
+                    PeekTable.COLUMN_NAME_PICTURE_ID + TEXT_TYPE + COMMA_SEP +
+                    PeekTable.COLUMN_NAME_DATE_POSTED + TEXT_TYPE + COMMA_SEP +
+                    PeekTable.COLUMN_NAME_THUMBNAIL_URL + TEXT_TYPE + COMMA_SEP +
+                    PeekTable.COLUMN_NAME_FULL_URL + TEXT_TYPE + COMMA_SEP +
+                    PeekTable.COLUMN_NAME_VIEWS + INT_TYPE + COMMA_SEP +
+                    PeekTable.COLUMN_NAME_LIKES + INT_TYPE +
+                    ")";
+
     // Me table create statement
     private static final String CREATE_ME_TABLE =
             "CREATE TABLE " + MeTable.TABLE_NAME + " (" +
@@ -89,6 +103,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_FEED_TABLE);
+        db.execSQL(CREATE_PEEK_TABLE);
         db.execSQL(CREATE_ME_TABLE);
     }
 
@@ -96,6 +111,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // on upgrade drop older tables
         db.execSQL(DELETE_TABLE + FeedTable.TABLE_NAME);
+        db.execSQL(DELETE_TABLE + PeekTable.TABLE_NAME);
         db.execSQL(DELETE_TABLE + MeTable.TABLE_NAME);
 
         // create new tables
@@ -140,9 +156,32 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    public void updatePeekFeed(List<Picture> pictureList) {
+        SQLiteDatabase db = getWritableDatabase();
+
+        for (Picture picture : pictureList) {
+            ContentValues values = new ContentValues();
+            values.put(PeekTable.COLUMN_NAME_PICTURE_ID, picture.getUniqueId());
+            values.put(PeekTable.COLUMN_NAME_DATE_POSTED, picture.getDatePosted());
+            values.put(PeekTable.COLUMN_NAME_THUMBNAIL_URL, picture.getThumbnailUrl());
+            values.put(PeekTable.COLUMN_NAME_FULL_URL, picture.getFullUrl());
+            values.put(PeekTable.COLUMN_NAME_VIEWS, picture.getViews());
+            values.put(PeekTable.COLUMN_NAME_LIKES, picture.getLikes());
+
+            db.insert(PeekTable.TABLE_NAME, null, values);
+        }
+        db.close();
+    }
+
     public void clearFeedTable() {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(FeedTable.TABLE_NAME, null, null);
+        db.close();
+    }
+
+    public void clearPeekTable() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(PeekTable.TABLE_NAME, null, null);
         db.close();
     }
 
@@ -304,6 +343,30 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_LIKES)));
                 pictureList.add(picture);
                 updateDatabaseFromPicture(picture);
+            } while (c.moveToNext());
+        }
+        c.close();
+        db.close();
+        return pictureList;
+    }
+
+    public List<Picture> getPeekPictures() {
+        List<Picture> pictureList = new ArrayList<>();
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String selectQuery = SELECT_ALL_FROM + PeekTable.TABLE_NAME + ORDER_BY + PeekTable.COLUMN_NAME_DATE_POSTED + ASCENDING;
+
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        if (c.moveToFirst()) {
+            do {
+                Picture picture = new Picture(c.getString(c.getColumnIndex(PeekTable.COLUMN_NAME_PICTURE_ID)),
+                        c.getString(c.getColumnIndex(PeekTable.COLUMN_NAME_DATE_POSTED)),
+                        c.getString(c.getColumnIndex(PeekTable.COLUMN_NAME_THUMBNAIL_URL)),
+                        c.getString(c.getColumnIndex(PeekTable.COLUMN_NAME_FULL_URL)),
+                        c.getInt(c.getColumnIndex(PeekTable.COLUMN_NAME_VIEWS)),
+                        c.getInt(c.getColumnIndex(PeekTable.COLUMN_NAME_LIKES)));
+                pictureList.add(picture);
             } while (c.moveToNext());
         }
         c.close();

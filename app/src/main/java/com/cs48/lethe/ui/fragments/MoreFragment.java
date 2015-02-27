@@ -54,55 +54,67 @@ public class MoreFragment extends Fragment {
 
         ButterKnife.inject(this, rootView);
 
-        // Listener for facebook, opens to facebook URL
-        View.OnClickListener facebookHandler = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://www.facebook.com/I5555")));
-            }
-        };
-        // Listener for Instagram, opens Instagram URL
-        View.OnClickListener instagramHandler = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://instagram.com/lynchifer/")));
-
-            }
-        };
-
-        // Listener for Contact Us button, prompts user to pick email app, sends email with mailto field already filled in
-        View.OnClickListener contactUsHandler = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.setType("message/rfc822");
-                intent.putExtra(Intent.EXTRA_EMAIL, "dlynch305@gmail.com");
-
-                startActivity(Intent.createChooser(intent, "Send Email"));
-            }
-        };
-
-        // Listener for showing the Terms of Service when clicked
-        View.OnClickListener tosHandler = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //TODO Open Terms of Service Text
-            }
-        };
-
-        // Listener for showing the Privacy Policy when clicked
-        View.OnClickListener ppHandler = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //TODO Open Privacy Policy text
-            }
-        };
-
-        mFacebookButton.setOnClickListener(facebookHandler);
-        mInstagramButton.setOnClickListener(instagramHandler);
-        mContactButton.setOnClickListener(contactUsHandler);
+        mFacebookButton.setOnClickListener(new OnFacebookClickListener());
+        mInstagramButton.setOnClickListener(new OnInstagramClickListener());
+        mContactButton.setOnClickListener(new OnContactUsClickListener());
 
         return rootView;
+    }
+
+    /**
+     * Listener for facebook, opens to facebook URL
+     */
+    class OnFacebookClickListener implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://www.facebook.com/I5555")));
+        }
+    }
+
+    /**
+     * Listener for Instagram, opens Instagram URL
+     */
+    class OnInstagramClickListener implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://instagram.com/lynchifer/")));
+
+        }
+    }
+
+    /**
+     * Listener for Contact Us button, prompts user to pick email app,
+     * sends email with mailto field already filled in
+     */
+    class OnContactUsClickListener implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("message/rfc822");
+            intent.putExtra(Intent.EXTRA_EMAIL, "dlynch305@gmail.com");
+
+            startActivity(Intent.createChooser(intent, "Send Email"));
+        }
+    }
+
+    /**
+     * Listener for showing the Privacy Policy when clicked
+     */
+    class OnPrivacyPolicyClickListener implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            //TODO Open Privacy Policy text
+        }
+    }
+
+    /**
+     * Listener for showing the Terms of Service when clicked
+     */
+    class OnTermsOfServiceClickListener implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            //TODO Open Terms of Service Text
+        }
     }
 
 }

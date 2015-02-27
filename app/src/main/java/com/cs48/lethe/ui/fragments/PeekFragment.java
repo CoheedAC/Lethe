@@ -14,13 +14,12 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 
 import com.cs48.lethe.R;
-import com.cs48.lethe.ui.activities.PeekFullPictureActivity;
-import com.cs48.lethe.ui.adapters.PeekGridAdapter;
+import com.cs48.lethe.ui.activities.PeekFullScreenActivity;
+import com.cs48.lethe.ui.adapters.PeekGridViewAdapter;
 import com.cs48.lethe.ui.view_helpers.PeekPullToRefreshLayout;
 import com.cs48.lethe.ui.view_helpers.PullToRefreshGridView;
 import com.cs48.lethe.utils.ActionCodes;
 import com.cs48.lethe.utils.NetworkUtilities;
-import com.cs48.lethe.utils.Picture;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -29,7 +28,7 @@ public class PeekFragment extends Fragment {
 
     public static final String LOG_TAG = PeekFragment.class.getSimpleName();
 
-    private PeekGridAdapter mPeekGridAdapter;
+    private PeekGridViewAdapter mPeekGridViewAdapter;
     private String mLatitude;
     private String mLongitude;
 
@@ -42,6 +41,8 @@ public class PeekFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
+        mPeekGridViewAdapter = new PeekGridViewAdapter(getActivity());
     }
 
     @Override
@@ -51,11 +52,10 @@ public class PeekFragment extends Fragment {
 
         ButterKnife.inject(this, rootView);
 
-        mPeekGridAdapter = new PeekGridAdapter(getActivity());
-        mPeekGridView.setAdapter(mPeekGridAdapter);
-
-        setGridPullToRefreshGesture();
-        setGridTapGesture();
+        mPeekGridView.setAdapter(mPeekGridViewAdapter);
+        mPeekGridView.setOnItemClickListener(new OnPictureClickListener());
+        mPeekGridView.setOnScrollListener(new OnScrollListener());
+        mPeekPullToRefreshLayout.setOnRefreshListener(new OnRefreshListener());
 
         /**
          * Once you get the map set up, you need to reverse geocode what the user
@@ -74,7 +74,7 @@ public class PeekFragment extends Fragment {
         mLatitude = coordinates[0];
         mLongitude = coordinates[1];
         // Tells the grid adapter to fetch the feed from the server with the given coords
-        mPeekGridAdapter.fetchPeekFeedFromServer(mLatitude, mLongitude);
+//        mPeekGridViewAdapter.fetchPeekFeedFromServer(mLatitude, mLongitude);
 
         return rootView;
     }
@@ -98,7 +98,7 @@ public class PeekFragment extends Fragment {
          * Clears the images in the cache and refreshes the grid.
          */
         if (id == R.id.action_clear_cache) {
-            mPeekGridAdapter.clearCache();
+            mPeekGridViewAdapter.clearPeekFeed();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -108,47 +108,43 @@ public class PeekFragment extends Fragment {
      * Starts the full-screen activity and sends the necessary data to
      * that activity through a Bundle.
      */
-    private void setGridTapGesture() {
-        mPeekGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent peekFullPictureIntent = new Intent(getActivity(), PeekFullPictureActivity.class);
-                peekFullPictureIntent.putExtra(getString(R.string.data_picture), (Picture) mPeekGridAdapter.getItem(position));
-                startActivityForResult(peekFullPictureIntent, ActionCodes.PEEK_FULL_PICTURE_REQUEST);
-            }
-        });
+    class OnPictureClickListener implements AdapterView.OnItemClickListener {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            Intent peekFullScreenIntent = new Intent(getActivity(), PeekFullScreenActivity.class);
+            peekFullScreenIntent.putExtra(getString(R.string.data_position), position);
+            startActivityForResult(peekFullScreenIntent, ActionCodes.PEEK_FULLSCREEN_REQUEST);
+        }
     }
 
     /**
-     * Sets up the listeners for pull-to-refresh on the grid
+     * Sets up the scroll listeners for pull-to-refresh on the grid
      */
-    private void setGridPullToRefreshGesture() {
+    class OnScrollListener implements AbsListView.OnScrollListener {
+        @Override
+        public void onScrollStateChanged(AbsListView view, int scrollState) {
+            if (scrollState == SCROLL_STATE_IDLE && view.getChildAt(0).getTop() >= 0)
+                mPeekPullToRefreshLayout.setEnabled(true);
+            else
+                mPeekPullToRefreshLayout.setEnabled(false);
+        }
 
-        mPeekGridView.setOnScrollListener(new AbsListView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-                if (scrollState == SCROLL_STATE_IDLE && view.getChildAt(0).getTop() >= 0)
-                    mPeekPullToRefreshLayout.setEnabled(true);
-                else
-                    mPeekPullToRefreshLayout.setEnabled(false);
-            }
+        @Override
+        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+            if (totalItemCount == 0)
+                mPeekPullToRefreshLayout.setEnabled(true);
+        }
+    }
 
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                if (totalItemCount == 0)
-                    mPeekPullToRefreshLayout.setEnabled(true);
-            }
-
-        });
-
-        mPeekPullToRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                if (mLatitude != null && mLongitude != null)
-                    mPeekGridAdapter.fetchPeekFeedFromServer(mPeekPullToRefreshLayout, mLatitude, mLongitude);
-            }
-        });
-
+    /**
+     * Sets up the refresh listeners for pull-to-refresh feature
+     */
+    class OnRefreshListener implements SwipeRefreshLayout.OnRefreshListener {
+        @Override
+        public void onRefresh() {
+            if (mLatitude != null && mLongitude != null)
+                mPeekGridViewAdapter.fetchPeekFeedFromServer(mPeekPullToRefreshLayout, mLatitude, mLongitude);
+        }
     }
 
 }
