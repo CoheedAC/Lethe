@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -12,6 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.ui.activities.PeekFullScreenActivity;
@@ -20,14 +23,20 @@ import com.cs48.lethe.ui.view_helpers.PeekPullToRefreshLayout;
 import com.cs48.lethe.ui.view_helpers.PullToRefreshGridView;
 import com.cs48.lethe.utils.ActionCodes;
 import com.cs48.lethe.utils.NetworkUtilities;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
-public class PeekFragment extends Fragment {
+public class PeekFragment extends Fragment implements OnMapReadyCallback {
 
     public static final String LOG_TAG = PeekFragment.class.getSimpleName();
 
+    private GoogleMap mMap;
     private PeekGridViewAdapter mPeekGridViewAdapter;
     private String mLatitude;
     private String mLongitude;
@@ -36,6 +45,8 @@ public class PeekFragment extends Fragment {
     PullToRefreshGridView mPeekGridView;
     @InjectView(R.id.swipeRefreshLayout)
     PeekPullToRefreshLayout mPeekPullToRefreshLayout;
+    @InjectView(R.id.addressEditText)
+    EditText mAddressEditText;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -51,6 +62,16 @@ public class PeekFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_peek, container, false);
 
         ButterKnife.inject(this, rootView);
+
+        // Gets current location just to test the grid (defaults to IV lat and long)
+        String[] coordinates = NetworkUtilities.getCurrentLocation(getActivity());
+        mLatitude = coordinates[0];
+        mLongitude = coordinates[1];
+
+        // asyncronously sets up the maps object. the onMapReady will be automatically called
+        // below when it is done loading
+        SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+        supportMapFragment.getMapAsync(this);
 
         mPeekGridView.setAdapter(mPeekGridViewAdapter);
         mPeekGridView.setOnItemClickListener(new OnPictureClickListener());
@@ -69,12 +90,11 @@ public class PeekFragment extends Fragment {
          * and it should show the feed of that area in the grid
          */
 
-        // Gets current location just to test the grid (defaults to IV lat and long)
-        String[] coordinates = NetworkUtilities.getCurrentLocation(getActivity());
-        mLatitude = coordinates[0];
-        mLongitude = coordinates[1];
-        // Tells the grid adapter to fetch the feed from the server with the given coords
+        //  Tells the grid adapter to fetch the feed from the server with the given coords
 //        mPeekGridViewAdapter.fetchPeekFeedFromServer(mLatitude, mLongitude);
+
+        // Listens for user input on the text box
+        mAddressEditText.setOnEditorActionListener(new OnTextEditListener());
 
         return rootView;
     }
@@ -102,6 +122,15 @@ public class PeekFragment extends Fragment {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        double latitude = Double.parseDouble(mLatitude);
+        double longitude = Double.parseDouble(mLongitude);
+        mMap = googleMap;
+        mMap.setMyLocationEnabled(true);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 15));
     }
 
     /**
@@ -144,6 +173,18 @@ public class PeekFragment extends Fragment {
         public void onRefresh() {
             if (mLatitude != null && mLongitude != null)
                 mPeekGridViewAdapter.fetchPeekFeedFromServer(mPeekPullToRefreshLayout, mLatitude, mLongitude);
+        }
+    }
+
+    /**
+     * Sets up the input listener for the edit textview
+     */
+    class OnTextEditListener implements TextView.OnEditorActionListener {
+        @Override
+        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            if (event.getAction() == KeyEvent.ACTION_DOWN)
+                mPeekGridViewAdapter.fetchPeekFeedFromServer(mLatitude, mLongitude);
+            return false;
         }
     }
 

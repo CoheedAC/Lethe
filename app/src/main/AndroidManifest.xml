@@ -24,6 +24,9 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+        <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="AIzaSyD12-qreAzVKZbImb5uMnVhhBSMhzZfzyM" />
 
         <activity
             android:name=".ui.activities.MainActivity"
@@ -53,10 +56,6 @@
             android:label="@string/title_activity_me_fullscreen"
             android:screenOrientation="portrait" >
         </activity>
-
-        <meta-data
-            android:name="com.google.android.maps.v2.AIzaSyD2Bm0ISoNhNqDC7xVOyhPS8oc5pYfEYvs"
-            android:value="AIzaSyD2Bm0ISoNhNqDC7xVOyhPS8oc5pYfEYvs" />
 
     </application>
 
