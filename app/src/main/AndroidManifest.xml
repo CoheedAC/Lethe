@@ -29,7 +29,7 @@
             android:value="@integer/google_play_services_version" />
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyD12-qreAzVKZbImb5uMnVhhBSMhzZfzyM" />
+            android:value="AIzaSyCF6PG5_C5CtXKGLOxYy-YV_y6g6CSmxqo" />
 
         <activity
             android:name=".ui.activities.MainActivity"
@@ -65,6 +65,7 @@
             android:label="@string/title_activity_camera"
             android:screenOrientation="portrait" >
         </activity>
+
     </application>
 
 </manifest>

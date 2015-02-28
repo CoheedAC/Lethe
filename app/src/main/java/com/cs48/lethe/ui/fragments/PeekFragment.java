@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -185,10 +186,17 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
     class OnTextEditListener implements TextView.OnEditorActionListener {
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-            if (event.getAction() == KeyEvent.ACTION_DOWN)
+            Log.d("Okay","One");
+            if (event == null){
+                //do the same thing, keeps thing from crashing (good for test)
                 mPeekGridViewAdapter.fetchPeekFeedFromServer(mLatitude, mLongitude);
+            }
+            else if (event.getAction() == KeyEvent.ACTION_DOWN)
+                mPeekGridViewAdapter.fetchPeekFeedFromServer(mLatitude, mLongitude);
+
             return false;
         }
+
     }
     @Override
     public void onDestroyView(){
