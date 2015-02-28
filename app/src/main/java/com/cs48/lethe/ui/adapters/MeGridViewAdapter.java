@@ -15,6 +15,7 @@ import com.cs48.lethe.ui.activities.MainActivity;
 import com.cs48.lethe.ui.dialogs.DeleteImageWarningDialog;
 import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.Picture;
+import com.cs48.lethe.utils.PictureUtilities;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -86,7 +87,7 @@ public class MeGridViewAdapter extends BaseAdapter {
         }
         Picasso.with(mContext)
                 .load(mPictureList.get(position).getFile())
-                .resize(200, 0)
+                .resize(PictureUtilities.MAX_THUMBNAIL_WIDTH, 0)
                 .onlyScaleDown()
                 .into(imageView);
         return imageView;

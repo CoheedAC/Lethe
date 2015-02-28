@@ -45,4 +45,8 @@
     <string name="capturing_image">Taking New Picture</string>
     <string name="done">Done</string>
 
+    <string name="grid_no_internet_connection">No Internet Connection</string>
+    <string name="grid_area_empty">No Pictures In Your Area</string>
+    <string name="grid_no_posted_pictures">You Have Not Posted Any Pictures</string>
+
 </resources>

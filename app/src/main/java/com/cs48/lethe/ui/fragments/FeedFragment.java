@@ -12,13 +12,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.TextView;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.ui.activities.FeedFullScreenActivity;
 import com.cs48.lethe.ui.adapters.FeedGridViewAdapter;
+import com.cs48.lethe.ui.dialogs.NetworkUnavailableDialog;
 import com.cs48.lethe.ui.view_helpers.FeedPullToRefreshLayout;
 import com.cs48.lethe.ui.view_helpers.PullToRefreshGridView;
 import com.cs48.lethe.utils.ActionCodes;
+import com.cs48.lethe.utils.NetworkUtilities;
 import com.cs48.lethe.utils.Picture;
 
 import butterknife.ButterKnife;
@@ -34,6 +37,8 @@ public class FeedFragment extends Fragment {
     PullToRefreshGridView mFeedGridView;
     @InjectView(R.id.swipeRefreshLayout)
     FeedPullToRefreshLayout mFeedPullToRefreshLayout;
+    @InjectView(R.id.emptyGridTextView)
+    TextView mEmptyGridTextView;
 
     /**
      * Sets up the action bar menu.
@@ -59,11 +64,28 @@ public class FeedFragment extends Fragment {
 
         mFeedGridView.setAdapter(mFeedGridViewAdapter);
         mFeedGridView.setExpanded(true);
+
+        if (!NetworkUtilities.isNetworkAvailable(getActivity())) {
+            setEmptyGridMessage(getString(R.string.grid_no_internet_connection));
+        }else {
+            setEmptyGridMessage(getString(R.string.grid_area_empty));
+            mFeedGridViewAdapter.fetchFeedFromServer(this);
+        }
+
         mFeedGridView.setOnItemClickListener(new OnPictureClickListener());
         mFeedGridView.setOnScrollListener(new OnScrollListener());
         mFeedPullToRefreshLayout.setOnRefreshListener(new OnRefreshListener());
 
         return rootView;
+    }
+
+    public void setEmptyGridMessage(String errorMessage) {
+        if (mFeedGridViewAdapter.getCount() == 0) {
+            mEmptyGridTextView.setVisibility(View.VISIBLE);
+            mEmptyGridTextView.setText(errorMessage);
+        } else {
+            mEmptyGridTextView.setVisibility(View.GONE);
+        }
     }
 
     /**
@@ -86,6 +108,7 @@ public class FeedFragment extends Fragment {
          */
         if (id == R.id.action_clear_cache) {
             mFeedGridViewAdapter.clearCache();
+            setEmptyGridMessage(getString(R.string.grid_area_empty));
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -108,6 +131,10 @@ public class FeedFragment extends Fragment {
      */
     public void fetchFeedFromServer() {
         mFeedGridViewAdapter.fetchFeedFromServer(null);
+    }
+
+    public void stopRefreshAnimation() {
+        mFeedPullToRefreshLayout.setRefreshing(false);
     }
 
     /**
@@ -149,7 +176,10 @@ public class FeedFragment extends Fragment {
     class OnRefreshListener implements SwipeRefreshLayout.OnRefreshListener {
         @Override
         public void onRefresh() {
-            mFeedGridViewAdapter.fetchFeedFromServer(mFeedPullToRefreshLayout);
+            if (NetworkUtilities.isNetworkAvailable(getActivity()))
+                mFeedGridViewAdapter.fetchFeedFromServer(FeedFragment.this);
+            else
+                new NetworkUnavailableDialog().show(getActivity().getFragmentManager(), LOG_TAG);
         }
     }
 }

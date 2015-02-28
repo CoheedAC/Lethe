@@ -22,22 +22,38 @@
         android:id="@+id/map"
         />
 
-    <com.cs48.lethe.ui.view_helpers.PeekPullToRefreshLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/swipeRefreshLayout"
-        >
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
 
-        <com.cs48.lethe.ui.view_helpers.PullToRefreshGridView
+        <com.cs48.lethe.ui.view_helpers.PeekPullToRefreshLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/swipeRefreshLayout"
+            >
+
+            <com.cs48.lethe.ui.view_helpers.PullToRefreshGridView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/peekGridView"
+                android:layout_gravity="left|top"
+                android:numColumns="3"
+                android:stretchMode="columnWidth"
+                android:scrollbars="none"
+                android:horizontalSpacing="4dp"
+                android:verticalSpacing="2dp"/>
+        </com.cs48.lethe.ui.view_helpers.PeekPullToRefreshLayout>
+
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/peekGridView"
-            android:layout_gravity="left|top"
-            android:numColumns="3"
-            android:stretchMode="columnWidth"
-            android:scrollbars="none"
-            android:horizontalSpacing="4dp"
-            android:verticalSpacing="2dp"/>
-    </com.cs48.lethe.ui.view_helpers.PeekPullToRefreshLayout>
+            android:id="@+id/emptyGridTextView"
+            android:layout_gravity="center"
+            android:singleLine="true"
+            android:textColor="#ffb7b7b7"
+            android:textSize="20sp"
+            android:layout_alignParentTop="false"
+            android:layout_centerInParent="true"/>
+    </RelativeLayout>
 
 </LinearLayout>

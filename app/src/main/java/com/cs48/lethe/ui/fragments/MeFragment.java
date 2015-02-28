@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.TextView;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.ui.activities.MeFullScreenActivity;
@@ -28,6 +29,8 @@ public class MeFragment extends Fragment {
 
     @InjectView(R.id.meGridView)
     GridView mMeGridView;
+    @InjectView(R.id.emptyGridTextView)
+    TextView mEmptyGridTextView;
 
     /**
      * Sets up the action bar menu.
@@ -52,6 +55,8 @@ public class MeFragment extends Fragment {
 
         mMeGridView.setAdapter(mMeGridViewAdapter);
         mMeGridView.setOnItemClickListener(new OnPictureClickListener());
+
+        setEmptyGridMessage(getString(R.string.grid_no_posted_pictures));
 
         return rootView;
     }
@@ -78,6 +83,7 @@ public class MeFragment extends Fragment {
          */
         if (id == R.id.action_clear_cache) {
             mMeGridViewAdapter.deleteAllPostedImages();
+            setEmptyGridMessage(getString(R.string.grid_no_posted_pictures));
             return true;
         }
 
@@ -103,11 +109,21 @@ public class MeFragment extends Fragment {
 
     }
 
+    public void setEmptyGridMessage(String errorMessage) {
+        if (mMeGridViewAdapter.getCount() == 0) {
+            mEmptyGridTextView.setVisibility(View.VISIBLE);
+            mEmptyGridTextView.setText(errorMessage);
+        } else {
+            mEmptyGridTextView.setVisibility(View.GONE);
+        }
+    }
+
     /**
      * Gets the list of posted pictures from the database.
      */
     public void fetchMePicturesFromDatabase() {
         mMeGridViewAdapter.fetchMePicturesFromDatabase();
+        setEmptyGridMessage(getString(R.string.grid_no_posted_pictures));
     }
 
     class OnPictureClickListener implements AdapterView.OnItemClickListener {

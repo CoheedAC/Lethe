@@ -18,12 +18,12 @@ import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.networking.HerokuRestClient;
 import com.cs48.lethe.ui.activities.MeFullScreenActivity;
-import com.cs48.lethe.ui.activities.PeekFullScreenActivity;
 import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
 import com.cs48.lethe.ui.view_helpers.TouchImageView;
 import com.cs48.lethe.utils.ActionCodes;
 import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.Picture;
+import com.cs48.lethe.utils.PictureUtilities;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
@@ -105,7 +105,11 @@ public class MePagerAdapter extends PagerAdapter {
             @Override
             public void onBitmapFailed(Drawable errorDrawable) {
                 progressBar.setVisibility(View.GONE);
-                new OperationFailedDialog().show(((PeekFullScreenActivity) mContext).getFragmentManager(), LOG_TAG);
+                try {
+                    new OperationFailedDialog().show(((MeFullScreenActivity) mContext).getFragmentManager(), LOG_TAG);
+                } catch (IllegalStateException e) {
+                    Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                }
             }
 
             @Override
@@ -117,7 +121,7 @@ public class MePagerAdapter extends PagerAdapter {
 
         Picasso.with(mContext)
                 .load(mPictureList.get(position).getFile())
-                .resize(1024, 0)
+                .resize(PictureUtilities.MAX_FULL_WIDTH, 0)
                 .onlyScaleDown()
                 .into(target);
 

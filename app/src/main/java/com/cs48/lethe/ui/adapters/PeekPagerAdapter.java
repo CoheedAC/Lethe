@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.support.v4.view.PagerAdapter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import com.cs48.lethe.ui.activities.PeekFullScreenActivity;
 import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
 import com.cs48.lethe.ui.view_helpers.TouchImageView;
 import com.cs48.lethe.utils.Picture;
+import com.cs48.lethe.utils.PictureUtilities;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -88,7 +90,11 @@ public class PeekPagerAdapter extends PagerAdapter {
             @Override
             public void onBitmapFailed(Drawable errorDrawable) {
                 progressBar.setVisibility(View.GONE);
-                new OperationFailedDialog().show(((PeekFullScreenActivity) mContext).getFragmentManager(), LOG_TAG);
+                try {
+                    new OperationFailedDialog().show(((PeekFullScreenActivity) mContext).getFragmentManager(), LOG_TAG);
+                } catch (IllegalStateException e) {
+                    Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                }
             }
 
             @Override
@@ -103,7 +109,7 @@ public class PeekPagerAdapter extends PagerAdapter {
 
         Picasso.with(mContext)
                 .load(mPictureList.get(position).getFullUrl())
-                .resize(1024, 0)
+                .resize(PictureUtilities.MAX_FULL_WIDTH, 0)
                 .onlyScaleDown()
                 .into(target);
 

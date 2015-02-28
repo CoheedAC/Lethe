@@ -1,5 +1,8 @@
 package com.cs48.lethe.ui.activities;
 
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -9,6 +12,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
@@ -19,6 +23,7 @@ import com.cs48.lethe.utils.ActionCodes;
 import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.NetworkUtilities;
 import com.cs48.lethe.utils.Picture;
+import com.cs48.lethe.utils.PictureUtilities;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -48,14 +53,16 @@ public class CameraActivity extends ActionBarActivity {
     ProgressBar mProgressBar;
     @InjectView(R.id.cancelButton)
     ImageButton mCancelButton;
-    @InjectView(R.id.switchCameraImageButton)
-    ImageButton mSwitchCameraButton;
+    @InjectView(R.id.cameraSwitchButton)
+    ImageButton mCameraSwitchButton;
+    @InjectView(R.id.flashButton)
+    ImageButton mFlashButton;
 
     private Camera mCamera;
     private CameraPreview mCameraPreview;
     private File mPictureFile;
-    private boolean cameraFront;
-    private boolean mCurrentlyPosting;
+    private boolean isFrontCameraOn;
+    private boolean isCurrentlyPosting;
     private int mCurrentCamera;
 
     @Override
@@ -65,46 +72,62 @@ public class CameraActivity extends ActionBarActivity {
 
         ButterKnife.inject(this);
 
-        // Create an instance of Camera
-        mCamera = getCameraInstance();
+        try {
+            // Create an instance of Camera
+            mCamera = Camera.open();
+            mCurrentCamera = 0;
 
-        /**
-         * COMMENT THIS LINE IF YOU ARE HAVING ORIENTATION ISSUES
-         * AS WELL AS THE SAME METHOD CALL IN THE switchCamera()
-         * METHOD
-         */
-        setCameraDisplayOrientation(mCurrentCamera);
+            /**
+             * COMMENT THIS LINE IF YOU ARE HAVING ORIENTATION ISSUES
+             * AS WELL AS THE SAME METHOD CALLS IN THE switchCamera()
+             * METHOD
+             */
+            setCameraDisplayOrientation(mCurrentCamera);
 
-        // Hides the action bar
-        getSupportActionBar().hide();
+            // Hides the action bar
+            getSupportActionBar().hide();
 
-        // Create our Preview view and set it as the content of our activity.
-        mCameraPreview = new CameraPreview(this, mCamera);
-        mFrameLayout.addView(mCameraPreview);
+            // Create our Camera Preview view and set it as the content of our activity.
+            mCameraPreview = new CameraPreview(this, mCamera);
+            mFrameLayout.addView(mCameraPreview);
 
-        if (Camera.getNumberOfCameras() > 1)
-            mSwitchCameraButton.setVisibility(View.VISIBLE);
-        else
-            mSwitchCameraButton.setVisibility(View.GONE);
+            // Shows the camera switch button if the devices has more than one camera
+            showSupportedCameraSwitchButton();
 
-        cameraFront = false;
-        mCurrentlyPosting = false;
-        mPostButton.setVisibility(View.GONE);
-        mProgressBar.setVisibility(View.GONE);
-        mCancelButton.setVisibility(View.GONE);
+            // Show flash button if phone supports flash
+            showSupportedFlashButton();
 
-        // Add a listener to the Capture button
-        mCaptureButton.setOnClickListener(new CaptureButtonOnClickListener());
-        mBackButton.setOnClickListener(new BackButtonOnClickListener());
-        mPostButton.setOnClickListener(new PostButtonOnClickListener());
-        mCancelButton.setOnClickListener(new CancelButtonOnClickListener());
-        mSwitchCameraButton.setOnClickListener(new SwitchCameraButtonOnClickListener());
+            // Initially hides the post button, the progress bar,
+            // and the cancel button.
+            mPostButton.setVisibility(View.GONE);
+            mProgressBar.setVisibility(View.GONE);
+            mCancelButton.setVisibility(View.GONE);
+
+            // front camera to false because android
+            // defaults to back camera
+            isFrontCameraOn = false;
+            isCurrentlyPosting = false;
+
+            // Add a listeners to the all of the button
+            mCaptureButton.setOnClickListener(new CaptureButtonOnClickListener());
+            mBackButton.setOnClickListener(new BackButtonOnClickListener());
+            mPostButton.setOnClickListener(new PostButtonOnClickListener());
+            mCancelButton.setOnClickListener(new CancelButtonOnClickListener());
+            mCameraSwitchButton.setOnClickListener(new SwitchCameraButtonOnClickListener());
+            mFlashButton.setOnClickListener(new FlashButtonOnClickListener());
+        }catch (Exception e) {
+            Toast.makeText(this,"Camera not working. Trying retarting emulator AND enable camera before oping app", Toast.LENGTH_LONG).show();
+            finish();
+        }
     }
 
+    /**
+     * release the camera immediately on pause event
+     */
     @Override
     protected void onPause() {
         super.onPause();
-        releaseCamera();              // release the camera immediately on pause event
+        releaseCamera();
     }
 
     @Override
@@ -115,7 +138,7 @@ public class CameraActivity extends ActionBarActivity {
 
     @Override
     public void onBackPressed() {
-        if (!mCurrentlyPosting) {
+        if (!isCurrentlyPosting) {
             if (mPictureFile != null && mPictureFile.exists())
                 mPictureFile.delete();
             super.onBackPressed();
@@ -161,7 +184,7 @@ public class CameraActivity extends ActionBarActivity {
      * to the server.
      */
     public void onPostPictureStart() {
-        mCurrentlyPosting = true;
+        isCurrentlyPosting = true;
         mCancelButton.setVisibility(View.INVISIBLE);
         mProgressBar.setVisibility(View.VISIBLE);
         mPostButton.setVisibility(View.INVISIBLE);
@@ -175,12 +198,24 @@ public class CameraActivity extends ActionBarActivity {
      * normal title.
      */
     public void onPostPictureEnd() {
-        mCurrentlyPosting = false;
+        isCurrentlyPosting = false;
         mCancelButton.setVisibility(View.VISIBLE);
         mProgressBar.setVisibility(View.GONE);
         mPostButton.setVisibility(View.VISIBLE);
-        mCaptureButton.setVisibility(View.VISIBLE);
-        mBackButton.setVisibility(View.VISIBLE);
+    }
+
+    private void showSupportedCameraSwitchButton() {
+        if (Camera.getNumberOfCameras() > 1)
+            mCameraSwitchButton.setVisibility(View.VISIBLE);
+        else
+            mCameraSwitchButton.setVisibility(View.GONE);
+    }
+
+    private void showSupportedFlashButton() {
+        if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
+            mFlashButton.setVisibility(View.VISIBLE);
+        } else
+            mFlashButton.setVisibility(View.GONE);
     }
 
     public void setCameraDisplayOrientation(int cameraId) {
@@ -223,7 +258,7 @@ public class CameraActivity extends ActionBarActivity {
     public void switchCamera() {
         //if the camera preview is the front
         int cameraId;
-        if (cameraFront) {
+        if (isFrontCameraOn) {
             cameraId = findBackFacingCamera();
             if (cameraId >= 0) {
                 //open the backFacingCamera
@@ -259,7 +294,7 @@ public class CameraActivity extends ActionBarActivity {
             Camera.getCameraInfo(i, info);
             if (info.facing == CameraInfo.CAMERA_FACING_FRONT) {
                 cameraId = i;
-                cameraFront = true;
+                isFrontCameraOn = true;
                 break;
             }
         }
@@ -277,27 +312,38 @@ public class CameraActivity extends ActionBarActivity {
             Camera.getCameraInfo(i, info);
             if (info.facing == CameraInfo.CAMERA_FACING_BACK) {
                 cameraId = i;
-                cameraFront = false;
+                isFrontCameraOn = false;
                 break;
             }
         }
         return cameraId;
     }
 
-    class PictureCallBack implements Camera.PictureCallback {
+    class PictureTakenCallBack implements Camera.PictureCallback {
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
-            mPictureFile = FileUtilities.getOutputMediaFile(CameraActivity.this);
+            Bitmap picture = BitmapFactory.decodeByteArray(data, 0, data.length);
+            int width = picture.getWidth();
+            int height = picture.getHeight();
 
+            double widthScale = (double) PictureUtilities.MAX_FULL_WIDTH / width;
+            double heightScale = (double) PictureUtilities.MAX_FULL_HEIGHT / height;
+            double scale = Math.min(widthScale, heightScale);
+            width *= scale;
+            height *= scale;
+
+            Bitmap resizedPicture = Bitmap.createScaledBitmap(picture, width, height, true);
+            mPictureFile = FileUtilities.getOutputMediaFile(CameraActivity.this);
             try {
                 FileOutputStream fos = new FileOutputStream(mPictureFile);
-                fos.write(data);
+                resizedPicture.compress(Bitmap.CompressFormat.JPEG, 100, fos);
                 fos.close();
             } catch (FileNotFoundException e) {
                 Log.d(TAG, "File not found: " + e.getMessage());
             } catch (IOException e) {
                 Log.d(TAG, "Error accessing file: " + e.getMessage());
             }
+
         }
     }
 
@@ -306,11 +352,12 @@ public class CameraActivity extends ActionBarActivity {
         public void onClick(View v) {
             // get an image from the camera
             mPostButton.setVisibility(View.VISIBLE);
-            mCaptureButton.setVisibility(View.GONE);
             mCancelButton.setVisibility(View.VISIBLE);
+            mCaptureButton.setVisibility(View.GONE);
             mBackButton.setVisibility(View.GONE);
-            mSwitchCameraButton.setVisibility(View.GONE);
-            mCamera.takePicture(null, null, new PictureCallBack());
+            mCameraSwitchButton.setVisibility(View.GONE);
+            mFlashButton.setVisibility(View.GONE);
+            mCamera.takePicture(null, null, new PictureTakenCallBack());
         }
     }
 
@@ -329,12 +376,10 @@ public class CameraActivity extends ActionBarActivity {
         public void onClick(View v) {
             if (NetworkUtilities.isNetworkAvailable(CameraActivity.this)) {
 //                fakePostPicture();
-                    new PostPicture(CameraActivity.this, mPictureFile).execute();
+                new PostPicture(CameraActivity.this, mPictureFile).execute();
             } else {
                 new NetworkUnavailableDialog().show(getFragmentManager(), TAG);
             }
-
-            finish();
         }
     }
 
@@ -345,7 +390,8 @@ public class CameraActivity extends ActionBarActivity {
             mPostButton.setVisibility(View.INVISIBLE);
             mCaptureButton.setVisibility(View.VISIBLE);
             mBackButton.setVisibility(View.VISIBLE);
-            mSwitchCameraButton.setVisibility(View.VISIBLE);
+            showSupportedFlashButton();
+            showSupportedCameraSwitchButton();
             if (mPictureFile != null && mPictureFile.exists())
                 mPictureFile.delete();
             mCamera.startPreview();
@@ -357,6 +403,28 @@ public class CameraActivity extends ActionBarActivity {
         @Override
         public void onClick(View v) {
             switchCamera();
+        }
+    }
+
+    class FlashButtonOnClickListener implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            try {
+                Camera.Parameters parameters = mCamera.getParameters();
+                if (parameters.getFlashMode().equals(Camera.Parameters.FLASH_MODE_OFF)) {
+                    mFlashButton.setImageResource(R.drawable.ic_action_flash_on);
+                    parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+                    mCamera.setParameters(parameters);
+                    mCamera.startPreview();
+                } else if (parameters.getFlashMode().equals(Camera.Parameters.FLASH_MODE_TORCH)) {
+                    mFlashButton.setImageResource(R.drawable.ic_action_flash_off);
+                    parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+                    mCamera.setParameters(parameters);
+                    mCamera.startPreview();
+                }
+            }catch (Exception e) {
+                FileUtilities.logResults(CameraActivity.this, TAG, "Flash button not functional");
+            }
         }
     }
 

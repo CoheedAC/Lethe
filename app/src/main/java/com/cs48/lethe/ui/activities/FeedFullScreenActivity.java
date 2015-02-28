@@ -21,6 +21,7 @@ import com.cs48.lethe.ui.view_helpers.TouchImageView;
 import com.cs48.lethe.utils.ActionCodes;
 import com.cs48.lethe.utils.NetworkUtilities;
 import com.cs48.lethe.utils.Picture;
+import com.cs48.lethe.utils.PictureUtilities;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
@@ -90,7 +91,11 @@ public class FeedFullScreenActivity extends ActionBarActivity {
             @Override
             public void onBitmapFailed(Drawable errorDrawable) {
                 mProgressBar.setVisibility(View.GONE);
-                new OperationFailedDialog().show(getFragmentManager(), LOG_TAG);
+                try {
+                    new OperationFailedDialog().show(getFragmentManager(), LOG_TAG);
+                } catch (IllegalStateException e) {
+                    Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                }
             }
 
             @Override
@@ -100,7 +105,7 @@ public class FeedFullScreenActivity extends ActionBarActivity {
         mImageView.setTag(target);
         Picasso.with(this)
                 .load(mPicture.getFullUrl())
-                .resize(1024, 0)
+                .resize(PictureUtilities.MAX_FULL_WIDTH, 0)
                 .onlyScaleDown()
                 .into(target);
 

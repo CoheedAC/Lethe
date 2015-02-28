@@ -164,7 +164,12 @@ public class PostPicture extends AsyncTask<String, String, String> {
             mCameraActivity.finish();
         } else {
             mCameraActivity.setResult(ActionCodes.POST_FAILED);
-            new OperationFailedDialog().show(mCameraActivity.getFragmentManager(), LOG_TAG);
+            mCameraActivity.onPostPictureEnd();
+            try {
+                new OperationFailedDialog().show(mCameraActivity.getFragmentManager(), LOG_TAG);
+            }catch (IllegalStateException e) {
+                Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+            }
         }
     }
 

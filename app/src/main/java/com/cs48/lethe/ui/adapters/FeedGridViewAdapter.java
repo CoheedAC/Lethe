@@ -1,6 +1,5 @@
 package com.cs48.lethe.ui.adapters;
 
-import android.app.Activity;
 import android.content.Context;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -15,12 +14,12 @@ import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.networking.HerokuRestClient;
 import com.cs48.lethe.ui.activities.MainActivity;
 import com.cs48.lethe.ui.dialogs.NetworkUnavailableDialog;
-import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
-import com.cs48.lethe.ui.view_helpers.FeedPullToRefreshLayout;
-import com.cs48.lethe.utils.FileUtilities;
+import com.cs48.lethe.ui.fragments.FeedFragment;
 import com.cs48.lethe.utils.NetworkUtilities;
 import com.cs48.lethe.utils.Picture;
+import com.cs48.lethe.utils.PictureUtilities;
 import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import org.apache.http.Header;
@@ -48,7 +47,6 @@ public class FeedGridViewAdapter extends BaseAdapter {
         mContext = context;
         mDatabaseHelper = DatabaseHelper.getInstance(mContext);
         fetchFeedFromDatabase();
-        fetchFeedFromServer(null);
     }
 
     /**
@@ -88,14 +86,22 @@ public class FeedGridViewAdapter extends BaseAdapter {
             imageView.setLayoutParams(new GridView.LayoutParams(imageDimension, imageDimension));
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             imageView.setBackgroundColor(mContext.getResources().getColor(R.color.empty_image));
-
-//            imageView.setOnClickListener(new OnPictureClickListener(position));
         }
         Picasso.with(mContext)
                 .load(mPictureList.get(position).getThumbnailUrl())
-                .resize(200, 0)
+                .resize(PictureUtilities.MAX_THUMBNAIL_WIDTH, 0)
                 .onlyScaleDown()
-                .into(imageView);
+                .into(imageView, new Callback() {
+                    @Override
+                    public void onSuccess() {
+
+                    }
+
+                    @Override
+                    public void onError() {
+
+                    }
+                });
         return imageView;
     }
 
@@ -105,76 +111,89 @@ public class FeedGridViewAdapter extends BaseAdapter {
      * grid with the new list of images from the
      * internal database.
      */
-    public void fetchFeedFromServer(final FeedPullToRefreshLayout feedPullToRefreshLayout) {
-        // check if there is internet
-        if (NetworkUtilities.isNetworkAvailable(mContext)) {
-            if (feedPullToRefreshLayout != null)
-                feedPullToRefreshLayout.setRefreshing(true);
+    public void fetchFeedFromServer(final FeedFragment feedFragment) {
+        // get current location
+        String[] coordinates = NetworkUtilities.getCurrentLocation(mContext);
+        String url = mContext.getString(R.string.server_recent) +
+                coordinates[1].replace(".", "a") + "," +    // latitude
+                coordinates[0].replace(".", "a");           // longitude
 
-            // get current location
-            String[] coordinates = NetworkUtilities.getCurrentLocation(mContext);
-            String url = mContext.getString(R.string.server_recent) +
-                    coordinates[1].replace(".", "a") + "," +    // latitude
-                    coordinates[0].replace(".", "a");           // longitude
+        HerokuRestClient.get(url, null, new AsyncHttpResponseHandler() {
 
-            HerokuRestClient.get(url, null, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                try {
+                    // temporary list to store list of images
+                    List<Picture> serverPictureList = new ArrayList<>();
 
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                    try {
-                        // temporary list to store list of images
-                        List<Picture> tmpPictureList = new ArrayList<>();
+                    // parses the data received from the server
+                    String jsonData = new String(responseBody);
+                    JSONArray jsonArray = new JSONArray(jsonData);
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
 
-                        // parses the data received from the server
-                        String jsonData = new String(responseBody);
-                        JSONArray jsonArray = new JSONArray(jsonData);
-                        for (int i = 0; i < jsonArray.length(); i++) {
-                            JSONObject jsonObject = jsonArray.getJSONObject(i);
-
-                            // adds a new image to the list with the info from the server
-                            tmpPictureList.add(new Picture(
-                                    jsonObject.getString(mContext.getString(R.string.json_id)),
-                                    new SimpleDateFormat("yyyyMMdd_HHmmssSS").format(new Date()),
+                        // adds a new image to the list with the info from the server
+                        serverPictureList.add(new Picture(
+                                jsonObject.getString(mContext.getString(R.string.json_id)),
+                                new SimpleDateFormat("yyyyMMdd_HHmmssSS").format(new Date()),
 //                                jsonObject.getString(mContext.getString(R.string.json_date_posted)),
-                                    jsonObject.getString(mContext.getString(R.string.json_url_thumbnail)),
-                                    jsonObject.getString(mContext.getString(R.string.json_url_full)),
-                                    jsonObject.getInt(mContext.getString(R.string.json_views)),
-                                    jsonObject.getInt(mContext.getString(R.string.json_likes))));
-                        }
-
-                        // updates the database with the new image list
-                        // (while keeping the integrity of mImageList)
-                        mDatabaseHelper.updateFeed(tmpPictureList);
-
-
-
-                        // gets an updated list of images from the database
-                        mPictureList = mDatabaseHelper.getFeedPictures();
-
-                        for (int i = 0; i < mPictureList.size(); i++)
-                            Log.d(LOG_TAG, mPictureList.get(i).getUniqueId() + " : " + i);
-
-                        if (feedPullToRefreshLayout != null)
-                            feedPullToRefreshLayout.setRefreshing(false);
-
-                        // updates the grid to reflect the new data in the image list
-                        notifyDataSetChanged();
-                    } catch (JSONException e) {
-                        Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                                jsonObject.getString(mContext.getString(R.string.json_url_thumbnail)),
+                                jsonObject.getString(mContext.getString(R.string.json_url_full)),
+                                jsonObject.getInt(mContext.getString(R.string.json_views)),
+                                jsonObject.getInt(mContext.getString(R.string.json_likes))));
                     }
-                }
 
-                @Override
-                public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                    new OperationFailedDialog().show(((MainActivity) mContext).getFragmentManager(), LOG_TAG);
-                    if (feedPullToRefreshLayout != null)
-                        feedPullToRefreshLayout.setRefreshing(false);
-                    FileUtilities.logResults(mContext, LOG_TAG, "Failed to get feed");
+                    // Deletes pictures in the database that
+                    // are not in the list of pictures retrieved
+                    // from the server
+                    boolean isValidDatabasePicture;
+                    for (Picture pictureInFeedTable : mPictureList) {
+                        isValidDatabasePicture = false;
+                        for (Picture pictureFromServer : serverPictureList) {
+                            if (pictureInFeedTable.getUniqueId().equals(pictureFromServer.getUniqueId())) {
+                                isValidDatabasePicture = true;
+                                break;
+                            }
+                        }
+                        if (!isValidDatabasePicture)
+                            mDatabaseHelper.deletePictureFromFeedTable(pictureInFeedTable);
+                    }
+
+                    // updates the database with the new image list
+                    // (while keeping the integrity of mImageList)
+                    mDatabaseHelper.updateFeed(serverPictureList);
+
+                    // gets an updated list of images from the database
+                    mPictureList = mDatabaseHelper.getFeedPictures();
+
+                    for (int i = 0; i < mPictureList.size(); i++)
+                        Log.d(LOG_TAG, mPictureList.get(i).getUniqueId() + " : " + i);
+
+                    if (feedFragment != null) {
+                        feedFragment.stopRefreshAnimation();
+                        feedFragment.setEmptyGridMessage(mContext.getString(R.string.grid_area_empty));
+                    }
+
+                    // updates the grid to reflect the new data in the image list
+                    notifyDataSetChanged();
+                } catch (JSONException e) {
+                    Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                 }
-            });
-        } else {
-            new NetworkUnavailableDialog().show(((Activity) mContext).getFragmentManager(), LOG_TAG);
-        }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                if (feedFragment != null) {
+                    feedFragment.stopRefreshAnimation();
+                    feedFragment.setEmptyGridMessage(mContext.getString(R.string.grid_no_internet_connection));
+                }
+                try {
+                    new NetworkUnavailableDialog().show(((MainActivity) mContext).getFragmentManager(), LOG_TAG);
+                }catch (IllegalStateException e) {
+                    Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                }
+            }
+        });
     }
 
     /**

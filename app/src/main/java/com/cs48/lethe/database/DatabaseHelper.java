@@ -136,6 +136,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return (count != 0);
     }
 
+    public boolean pictureExistInPeekFeed(Picture picture) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String selectQuery = SELECT_ALL_FROM + PeekTable.TABLE_NAME + WHERE
+                + PeekTable.COLUMN_NAME_PICTURE_ID + EQUALS + picture.getUniqueId();
+
+        Cursor c = db.rawQuery(selectQuery, null);
+        int count = c.getCount();
+
+        c.close();
+        return (count != 0);
+    }
+
     public void updateFeed(List<Picture> pictureList) {
         SQLiteDatabase db = getWritableDatabase();
 
@@ -160,15 +173,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
 
         for (Picture picture : pictureList) {
-            ContentValues values = new ContentValues();
-            values.put(PeekTable.COLUMN_NAME_PICTURE_ID, picture.getUniqueId());
-            values.put(PeekTable.COLUMN_NAME_DATE_POSTED, picture.getDatePosted());
-            values.put(PeekTable.COLUMN_NAME_THUMBNAIL_URL, picture.getThumbnailUrl());
-            values.put(PeekTable.COLUMN_NAME_FULL_URL, picture.getFullUrl());
-            values.put(PeekTable.COLUMN_NAME_VIEWS, picture.getViews());
-            values.put(PeekTable.COLUMN_NAME_LIKES, picture.getLikes());
+            if (!pictureExistInPeekFeed(picture)) {
+                ContentValues values = new ContentValues();
+                values.put(PeekTable.COLUMN_NAME_PICTURE_ID, picture.getUniqueId());
+                values.put(PeekTable.COLUMN_NAME_DATE_POSTED, picture.getDatePosted());
+                values.put(PeekTable.COLUMN_NAME_THUMBNAIL_URL, picture.getThumbnailUrl());
+                values.put(PeekTable.COLUMN_NAME_FULL_URL, picture.getFullUrl());
+                values.put(PeekTable.COLUMN_NAME_VIEWS, picture.getViews());
+                values.put(PeekTable.COLUMN_NAME_LIKES, picture.getLikes());
 
-            db.insert(PeekTable.TABLE_NAME, null, values);
+                db.insert(PeekTable.TABLE_NAME, null, values);
+            }
         }
         db.close();
     }
@@ -202,9 +217,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         meValues.put(MeTable.COLUMN_NAME_VIEWS, updatedPicture.getViews());
         meValues.put(MeTable.COLUMN_NAME_LIKES, updatedPicture.getLikes());
 
+        ContentValues peekValues = new ContentValues();
+        peekValues.put(PeekTable.COLUMN_NAME_VIEWS, updatedPicture.getViews());
+        peekValues.put(PeekTable.COLUMN_NAME_LIKES, updatedPicture.getLikes());
+
         db.update(FeedTable.TABLE_NAME, feedValues, FeedTable.COLUMN_NAME_PICTURE_ID +
                 EQUALS_WILDCARD, new String[]{updatedPicture.getUniqueId()});
         db.update(MeTable.TABLE_NAME, feedValues, MeTable.COLUMN_NAME_PICTURE_ID +
+                EQUALS_WILDCARD, new String[]{updatedPicture.getUniqueId()});
+        db.update(PeekTable.TABLE_NAME, peekValues, PeekTable.COLUMN_NAME_PICTURE_ID +
                 EQUALS_WILDCARD, new String[]{updatedPicture.getUniqueId()});
     }
 
@@ -245,6 +266,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         String whereClause = MeTable.COLUMN_NAME_PICTURE_ID + EQUALS + pictureToDelete.getUniqueId();
         db.delete(MeTable.TABLE_NAME, whereClause, null);
+
+        db.close();
+    }
+
+    public void deletePictureFromFeedTable(Picture pictureToDelete) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String whereClause = FeedTable.COLUMN_NAME_PICTURE_ID + EQUALS + pictureToDelete.getUniqueId();
+        db.delete(FeedTable.TABLE_NAME, whereClause, null);
 
         db.close();
     }
@@ -398,5 +428,4 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return pictureList;
     }
-
 }

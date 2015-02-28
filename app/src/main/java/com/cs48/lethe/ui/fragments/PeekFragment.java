@@ -19,6 +19,7 @@ import android.widget.TextView;
 import com.cs48.lethe.R;
 import com.cs48.lethe.ui.activities.PeekFullScreenActivity;
 import com.cs48.lethe.ui.adapters.PeekGridViewAdapter;
+import com.cs48.lethe.ui.dialogs.NetworkUnavailableDialog;
 import com.cs48.lethe.ui.view_helpers.PeekPullToRefreshLayout;
 import com.cs48.lethe.ui.view_helpers.PullToRefreshGridView;
 import com.cs48.lethe.utils.ActionCodes;
@@ -47,6 +48,8 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
     PeekPullToRefreshLayout mPeekPullToRefreshLayout;
     @InjectView(R.id.addressEditText)
     EditText mAddressEditText;
+    @InjectView(R.id.emptyGridTextView)
+    TextView mEmptyGridTextView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -65,6 +68,10 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
 
         ButterKnife.inject(this, rootView);
 
+        // Unable to add address or pull-to-refresh until map loads
+        mAddressEditText.setEnabled(false);
+        mPeekPullToRefreshLayout.setEnabled(false);
+
         // Gets current location just to test the grid (defaults to IV lat and long)
         String[] coordinates = NetworkUtilities.getCurrentLocation(getActivity());
         mLatitude = coordinates[0];
@@ -72,9 +79,14 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
 
         // asyncronously sets up the maps object. the onMapReady will be automatically called
         // below when it is done loading
-
         SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         supportMapFragment.getMapAsync(this);
+
+        if (!NetworkUtilities.isNetworkAvailable(getActivity())) {
+            setEmptyGridMessage(getString(R.string.grid_no_internet_connection));
+        }else {
+            mEmptyGridTextView.setVisibility(View.GONE);
+        }
 
         mPeekGridView.setAdapter(mPeekGridViewAdapter);
         mPeekGridView.setOnItemClickListener(new OnPictureClickListener());
@@ -88,7 +100,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
          *
          * mLatitude = // reverse geocoded latitude
          * mLongitude = // reverse geocoded longitude
-         * mPeekGridAdapter.fetchPeekFeedFromServer(mLatitude, mLongitude)
+         * fetchPeekFeedFromServer();
          *
          * and it should show the feed of that area in the grid
          */
@@ -129,11 +141,28 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        mAddressEditText.setEnabled(true);
+        mPeekPullToRefreshLayout.setEnabled(true);
+
         double latitude = Double.parseDouble(mLatitude);
         double longitude = Double.parseDouble(mLongitude);
+
         mMap = googleMap;
         mMap.setMyLocationEnabled(true);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 15));
+    }
+
+    public void setEmptyGridMessage(String errorMessage) {
+        if (mPeekGridViewAdapter.getCount() == 0) {
+            mEmptyGridTextView.setVisibility(View.VISIBLE);
+            mEmptyGridTextView.setText(errorMessage);
+        } else {
+            mEmptyGridTextView.setVisibility(View.GONE);
+        }
+    }
+
+    public void stopRefreshAnimation() {
+        mPeekPullToRefreshLayout.setRefreshing(false);
     }
 
     /**
@@ -174,9 +203,28 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
     class OnRefreshListener implements SwipeRefreshLayout.OnRefreshListener {
         @Override
         public void onRefresh() {
-            if (mLatitude != null && mLongitude != null)
-                mPeekGridViewAdapter.fetchPeekFeedFromServer(mPeekPullToRefreshLayout, mLatitude, mLongitude);
+            String[] coordinates = NetworkUtilities.getCurrentLocation(getActivity());
+            mLatitude = coordinates[0];
+            mLongitude = coordinates[1];
+
+            /*
+            // You need to enable GPS on emulator for this feature to work
+            Location location = mMap.getMyLocation();
+            mLatitude = location.getLatitude() + "";
+            mLongitude = location.getLongitude() + "";
+            */
+
+            fetchPeekFeedFromServer();
         }
+    }
+
+    private void fetchPeekFeedFromServer() {
+        if (NetworkUtilities.isNetworkAvailable(getActivity())) {
+
+            if (mLatitude != null && mLongitude != null)
+                mPeekGridViewAdapter.fetchPeekFeedFromServer(this, mLatitude, mLongitude);
+        }else
+            new NetworkUnavailableDialog().show(getActivity().getFragmentManager(), LOG_TAG);
     }
 
     /**
@@ -186,7 +234,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
             if (event.getAction() == KeyEvent.ACTION_DOWN)
-                mPeekGridViewAdapter.fetchPeekFeedFromServer(mLatitude, mLongitude);
+                fetchPeekFeedFromServer();
             return false;
         }
     }
