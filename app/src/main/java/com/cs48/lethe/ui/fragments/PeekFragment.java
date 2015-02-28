@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -50,8 +51,10 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        setRetainInstance(true);
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
 
         mPeekGridViewAdapter = new PeekGridViewAdapter(getActivity());
     }
@@ -70,6 +73,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
 
         // asyncronously sets up the maps object. the onMapReady will be automatically called
         // below when it is done loading
+        Log.d("Maps","error not here");
         SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         supportMapFragment.getMapAsync(this);
 
@@ -186,6 +190,17 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
                 mPeekGridViewAdapter.fetchPeekFeedFromServer(mLatitude, mLongitude);
             return false;
         }
+    }
+    @Override
+    public void onDestroyView(){
+        android.support.v4.app.FragmentManager fm = getChildFragmentManager();
+        Log.d("Destroy","Happened");
+        SupportMapFragment frag = (SupportMapFragment)fm.findFragmentById(R.id.map);
+        if(frag != null){
+            fm.beginTransaction().remove(frag).commitAllowingStateLoss();
+        }
+        super.onDestroyView();
+
     }
 
 }
