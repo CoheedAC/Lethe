@@ -2,9 +2,7 @@ package com.cs48.lethe.ui.activities;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
@@ -20,8 +18,6 @@ import com.cs48.lethe.ui.fragments.MeFragment;
 import com.cs48.lethe.utils.ActionCodes;
 import com.cs48.lethe.utils.FileUtilities;
 
-import java.io.File;
-
 /**
  * The main activity where the app launches. It handles all of the tab fragments
  * and action bar button presses.
@@ -32,7 +28,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
     private TabsPagerAdapter mTabsPagerAdapter;
     private ViewPager mViewPager;
-    private Uri mImageUri;
 
     /**
      * Creates the action bar and title.
@@ -47,14 +42,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         mTabsPagerAdapter = new TabsPagerAdapter(getSupportFragmentManager(), this);
 
         setTitle("Home");
-        setUpActionBar();
-    }
 
-    /**
-     * Sets up the custom action bar with the tabs (and the respective
-     * tab listeners/handlers).
-     */
-    private void setUpActionBar() {
         // Set up the action bar.
         final ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
@@ -126,72 +114,22 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     }
 
     /**
-     * Starts built-in camera functionality and sets path to store file
-     */
-    private void startCamera() {
-        try {
-            // create Intent to take a picture and return control to the calling application
-            Intent imageCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-            File imageFile = FileUtilities.savePostedImage(this); // create a file to save the image
-            mImageUri = Uri.fromFile(imageFile);
-            imageCaptureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mImageUri); // set the image file name
-
-            // start the image capture Intent
-            startActivityForResult(imageCaptureIntent, ActionCodes.CAMERA_CAPTURE_REQUEST);
-        } catch (ActivityNotFoundException e) {
-            FileUtilities.logResults(this, LOG_TAG, "Whoops - your device doesn't support capturing images!");
-        }
-    }
-
-    /**
      * Handles responses when activities are done / destroyed
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        // Camera activity result
-        if (requestCode == ActionCodes.CAMERA_CAPTURE_REQUEST) {
-            if (resultCode == RESULT_OK) {
-                Intent postImageIntent = new Intent(this, PostPictureActivity.class);
-                if (data != null && data.getData() != null)
-                    postImageIntent.setData(data.getData());
-                else
-                    postImageIntent.setData(mImageUri);
-                startActivityForResult(postImageIntent, ActionCodes.POST_PICTURE_REQUEST);
-            } else if (resultCode == RESULT_CANCELED) {
-                File imageFile;
-                if (data != null && data.getData() != null)
-                    imageFile = new File(data.getData().getPath());
-                else
-                    imageFile = new File(mImageUri.getPath());
-                imageFile.delete();
-            }
-        }
-
         // PostPicture activity result
-        if (requestCode == ActionCodes.POST_PICTURE_REQUEST) {
-            if (resultCode == ActionCodes.POST_SUCCESS) {
-                FeedFragment feedFragment = (FeedFragment) findFragmentByPosition(0);
-                if (feedFragment != null)
-                    feedFragment.fetchFeedFromServer();
+        if (requestCode == ActionCodes.CAMERA_CAPTURE_REQUEST && resultCode == ActionCodes.POST_SUCCESS) {
+            FeedFragment feedFragment = (FeedFragment) findFragmentByPosition(0);
+            if (feedFragment != null)
+                feedFragment.fetchFeedFromServer();
 
-                MeFragment meFragment = (MeFragment) findFragmentByPosition(2);
-                if (meFragment != null)
-                    meFragment.fetchMePicturesFromDatabase();
-            } else if (resultCode == ActionCodes.POST_CANCELLED) {
-                startCamera();
-            }
+            MeFragment meFragment = (MeFragment) findFragmentByPosition(2);
+            if (meFragment != null)
+                meFragment.fetchMePicturesFromDatabase();
         }
-    }
-
-    /**
-     * Returns the fragment at the given position
-     */
-    private Fragment findFragmentByPosition(int position) {
-        return getSupportFragmentManager()
-                .findFragmentByTag(TabsPagerAdapter.getFragmentTag(mViewPager.getId(), position));
     }
 
     /**
@@ -228,6 +166,26 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
     @Override
     public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+    }
+
+    /**
+     * Starts built-in camera functionality and sets path to store file
+     */
+    private void startCamera() {
+        try {
+            Intent cameraCaptureIntent = new Intent(this, CameraActivity.class);
+            startActivityForResult(cameraCaptureIntent, ActionCodes.CAMERA_CAPTURE_REQUEST);
+        } catch (ActivityNotFoundException e) {
+            FileUtilities.logResults(this, LOG_TAG, "Whoops - your device doesn't support capturing images!");
+        }
+    }
+
+    /**
+     * Returns the fragment at the given position
+     */
+    private Fragment findFragmentByPosition(int position) {
+        return getSupportFragmentManager()
+                .findFragmentByTag(TabsPagerAdapter.getFragmentTag(mViewPager.getId(), position));
     }
 
 

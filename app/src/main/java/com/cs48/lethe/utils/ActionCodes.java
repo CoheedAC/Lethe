@@ -18,4 +18,6 @@ public class ActionCodes {
     public static final int POST_SUCCESS = 202;
     public static final int POST_CANCELLED = 203;
     public static final int POST_FAILED = 204;
+    public static final int CAMERA_CAPTURE_SUCCESS = 205;
+    public static final int CAMERA_CAPTURE_CANCELLED = 206;
 }

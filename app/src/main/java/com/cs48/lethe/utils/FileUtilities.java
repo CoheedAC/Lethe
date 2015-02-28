@@ -1,6 +1,7 @@
 package com.cs48.lethe.utils;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
@@ -108,9 +109,30 @@ public class FileUtilities {
     /**
      * Create a File for saving an image or video
      */
+    public static File getOutputMediaFile(Context context) {
+        File mediaStorageDir = getFileDirectory(context);
+
+        // Create a media file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        File mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+                "IMG_" + timeStamp + ".jpg");
+
+        return mediaFile;
+    }
+
+    /**
+     * Create a File for saving an image or video
+     */
     public static File savePostedImage(Context context) {
         File fileDirectory = getFileDirectory(context);
         return new File(fileDirectory.getAbsolutePath(),
                 "IMG_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".jpg");
+    }
+
+    /**
+     * Create a file Uri for saving an image or video
+     */
+    public static Uri getOutputMediaFileUri(Context context) {
+        return Uri.fromFile(getOutputMediaFile(context));
     }
 }

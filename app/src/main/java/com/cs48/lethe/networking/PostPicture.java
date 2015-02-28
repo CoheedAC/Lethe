@@ -7,11 +7,11 @@ import android.util.Log;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
-import com.cs48.lethe.ui.activities.PostPictureActivity;
+import com.cs48.lethe.ui.activities.CameraActivity;
 import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
 import com.cs48.lethe.utils.ActionCodes;
-import com.cs48.lethe.utils.Picture;
 import com.cs48.lethe.utils.NetworkUtilities;
+import com.cs48.lethe.utils.Picture;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,18 +36,18 @@ public class PostPicture extends AsyncTask<String, String, String> {
 
     private final String BOUNDARY = "---------------------Boundary";
 
-    private PostPictureActivity mPostPictureActivity;
+    private CameraActivity mCameraActivity;
     private File mImageFile;
 
     public PostPicture(Context context, File imageFile) {
-        mPostPictureActivity = (PostPictureActivity) context;
+        mCameraActivity = (CameraActivity) context;
         mImageFile = imageFile;
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        mPostPictureActivity.onPostPictureStart();
+        mCameraActivity.onPostPictureStart();
     }
 
     /**
@@ -60,7 +60,7 @@ public class PostPicture extends AsyncTask<String, String, String> {
         OutputStream requestBody = null;
         FileInputStream imageAsStream = null;
         try {
-            URL url = new URL(mPostPictureActivity.getString(R.string.server) + mPostPictureActivity.getString(R.string.server_post));
+            URL url = new URL(mCameraActivity.getString(R.string.server) + mCameraActivity.getString(R.string.server_post));
             connection = (HttpURLConnection) (url.openConnection());
 
             // Allow inputs and outputs.
@@ -77,7 +77,7 @@ public class PostPicture extends AsyncTask<String, String, String> {
 
             requestBody = connection.getOutputStream();
 
-            String[] coordinates = NetworkUtilities.getCurrentLocation(mPostPictureActivity);
+            String[] coordinates = NetworkUtilities.getCurrentLocation(mCameraActivity);
             String latitude = generateForSimpleText("latitude", coordinates[0]);
             String longitude = generateForSimpleText("longitude", coordinates[1]);
             String combined = latitude + longitude;
@@ -145,24 +145,27 @@ public class PostPicture extends AsyncTask<String, String, String> {
     @Override
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
-        mPostPictureActivity.onPostPictureEnd();
+
         if (result != null && !result.isEmpty()) {
             try {
                 JSONObject jsonObject = new JSONObject(result);
-                DatabaseHelper databaseHelper = DatabaseHelper.getInstance(mPostPictureActivity);
+                DatabaseHelper databaseHelper = DatabaseHelper.getInstance(mCameraActivity);
                 databaseHelper.insertPictureToMeTable(
-                        new Picture(jsonObject.getString(mPostPictureActivity.getString(R.string.json_id)),
-                                jsonObject.getString(mPostPictureActivity.getString(R.string.json_date_posted)),
+                        new Picture(jsonObject.getString(mCameraActivity.getString(R.string.json_id)),
+                                jsonObject.getString(mCameraActivity.getString(R.string.json_date_posted)),
                                 mImageFile, 0, 0));
 
             } catch (JSONException e) {
                 Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             }
 
-            mPostPictureActivity.setResult(ActionCodes.POST_SUCCESS);
-            mPostPictureActivity.finish();
-        } else
-            new OperationFailedDialog().show(mPostPictureActivity.getFragmentManager(), LOG_TAG);
+            mCameraActivity.onPostPictureEnd();
+            mCameraActivity.setResult(ActionCodes.POST_SUCCESS);
+            mCameraActivity.finish();
+        } else {
+            mCameraActivity.setResult(ActionCodes.POST_FAILED);
+            new OperationFailedDialog().show(mCameraActivity.getFragmentManager(), LOG_TAG);
+        }
     }
 
     private String generateForSimpleText(String name, String value) {
