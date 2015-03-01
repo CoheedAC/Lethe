@@ -233,11 +233,10 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
             Log.d("Okay", "One");
-            if (event == null) {
-                //do the same thing, keeps thing from crashing (good for test)
+            if (event == null || event.getAction() == KeyEvent.ACTION_DOWN) {
+                mPeekPullToRefreshLayout.setRefreshing(true);
                 fetchPeekFeedFromServer(mLatitude, mLongitude);
-            } else if (event.getAction() == KeyEvent.ACTION_DOWN)
-                fetchPeekFeedFromServer(mLatitude, mLongitude);
+            }
 
             return false;
         }

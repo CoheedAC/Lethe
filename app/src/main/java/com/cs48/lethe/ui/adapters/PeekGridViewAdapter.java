@@ -106,21 +106,13 @@ public class PeekGridViewAdapter extends BaseAdapter {
      * Gets the list of images from the server and adds
      * them to the internal database. Then updates the
      * grid with the new list of images from the
-     * internal database.
-     */
-    public void fetchPeekFeedFromServer(String latitude, String longitude) {
-        fetchPeekFeedFromServer(null, latitude, longitude);
-    }
-
-    /**
-     * Gets the list of images from the server and adds
-     * them to the internal database. Then updates the
-     * grid with the new list of images from the
      * internal database. This also tells the pull-to-refresh
      * to start the refresh animation before a server response
      * and to stop on a server response.
      */
     public void fetchPeekFeedFromServer(final PeekFragment peekFragment, String latitude, String longitude) {
+        clearPeekFeed();
+        peekFragment.setEmptyGridMessage("");
         // url with specified latitude and longitude
         String url = mContext.getString(R.string.server_recent) +
                 longitude.replace(".", "a") + "," +    // latitude
@@ -130,10 +122,8 @@ public class PeekGridViewAdapter extends BaseAdapter {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                peekFragment.stopRefreshAnimation();
                 try {
-                    // temporary list to store list of images
-                    mPictureList = new ArrayList<>();
-
                     // parses the data received from the server
                     String jsonData = new String(responseBody);
                     JSONArray jsonArray = new JSONArray(jsonData);
@@ -150,8 +140,6 @@ public class PeekGridViewAdapter extends BaseAdapter {
                                 jsonObject.getInt(mContext.getString(R.string.json_views)),
                                 jsonObject.getInt(mContext.getString(R.string.json_likes))));
                     }
-
-                    peekFragment.stopRefreshAnimation();
                     peekFragment.setEmptyGridMessage(mContext.getString(R.string.grid_area_empty));
 
                     mDatabaseHelper.updatePeekFeed(mPictureList);

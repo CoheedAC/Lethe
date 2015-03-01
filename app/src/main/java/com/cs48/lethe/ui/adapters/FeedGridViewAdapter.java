@@ -112,6 +112,7 @@ public class FeedGridViewAdapter extends BaseAdapter {
      * internal database.
      */
     public void fetchFeedFromServer(final FeedFragment feedFragment) {
+        feedFragment.setEmptyGridMessage("");
         // get current location
         String[] coordinates = NetworkUtilities.getCurrentLocation(mContext);
         String url = mContext.getString(R.string.server_recent) +
