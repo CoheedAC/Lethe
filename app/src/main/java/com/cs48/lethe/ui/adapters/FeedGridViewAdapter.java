@@ -19,7 +19,6 @@ import com.cs48.lethe.utils.NetworkUtilities;
 import com.cs48.lethe.utils.Picture;
 import com.cs48.lethe.utils.PictureUtilities;
 import com.loopj.android.http.AsyncHttpResponseHandler;
-import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import org.apache.http.Header;
@@ -30,6 +29,7 @@ import org.json.JSONObject;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -87,21 +87,19 @@ public class FeedGridViewAdapter extends BaseAdapter {
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             imageView.setBackgroundColor(mContext.getResources().getColor(R.color.empty_image));
         }
-        Picasso.with(mContext)
-                .load(mPictureList.get(position).getThumbnailUrl())
-                .resize(PictureUtilities.MAX_THUMBNAIL_WIDTH, 0)
-                .onlyScaleDown()
-                .into(imageView, new Callback() {
-                    @Override
-                    public void onSuccess() {
-
-                    }
-
-                    @Override
-                    public void onError() {
-
-                    }
-                });
+        if (mPictureList.get(position).getFile() == null) {
+            Picasso.with(mContext)
+                    .load(mPictureList.get(position).getThumbnailUrl())
+                    .resize(PictureUtilities.MAX_THUMBNAIL_WIDTH, 0)
+                    .onlyScaleDown()
+                    .into(imageView);
+        }else {
+            Picasso.with(mContext)
+                    .load(mPictureList.get(position).getFile())
+                    .resize(PictureUtilities.MAX_THUMBNAIL_WIDTH, 0)
+                    .onlyScaleDown()
+                    .into(imageView);
+        }
         return imageView;
     }
 
@@ -124,7 +122,7 @@ public class FeedGridViewAdapter extends BaseAdapter {
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 try {
                     // temporary list to store list of images
-                    List<Picture> serverPictureList = new ArrayList<>();
+                    HashMap<String, Picture> serverPictureMap = new HashMap<>();
 
                     // parses the data received from the server
                     String jsonData = new String(responseBody);
@@ -132,36 +130,33 @@ public class FeedGridViewAdapter extends BaseAdapter {
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject jsonObject = jsonArray.getJSONObject(i);
 
-                        // adds a new image to the list with the info from the server
-                        serverPictureList.add(new Picture(
+                        Picture picture = new Picture(
                                 jsonObject.getString(mContext.getString(R.string.json_id)),
                                 new SimpleDateFormat("yyyyMMdd_HHmmssSS").format(new Date()),
+                                null,
 //                                jsonObject.getString(mContext.getString(R.string.json_date_posted)),
                                 jsonObject.getString(mContext.getString(R.string.json_url_thumbnail)),
                                 jsonObject.getString(mContext.getString(R.string.json_url_full)),
                                 jsonObject.getInt(mContext.getString(R.string.json_views)),
-                                jsonObject.getInt(mContext.getString(R.string.json_likes))));
+                                jsonObject.getInt(mContext.getString(R.string.json_likes)));
+
+                        serverPictureMap.put(picture.getUniqueId(), picture);
                     }
 
                     // Deletes pictures in the database that
                     // are not in the list of pictures retrieved
                     // from the server
-                    boolean isValidDatabasePicture;
-                    for (Picture pictureInFeedTable : mPictureList) {
-                        isValidDatabasePicture = false;
-                        for (Picture pictureFromServer : serverPictureList) {
-                            if (pictureInFeedTable.getUniqueId().equals(pictureFromServer.getUniqueId())) {
-                                isValidDatabasePicture = true;
-                                break;
-                            }
-                        }
-                        if (!isValidDatabasePicture)
-                            mDatabaseHelper.deletePictureFromFeedTable(pictureInFeedTable);
+                    for (Picture feedPicture : mPictureList) {
+                        Picture serverPicture = serverPictureMap.get(feedPicture.getUniqueId());
+
+                        // if the feed picture was not found in the server list, then delete it
+                        if (serverPicture == null)
+                            mDatabaseHelper.deletePictureFromFeedTable(feedPicture);
                     }
 
                     // updates the database with the new image list
                     // (while keeping the integrity of mImageList)
-                    mDatabaseHelper.updateFeed(serverPictureList);
+                    mDatabaseHelper.updateFeed(serverPictureMap);
 
                     // gets an updated list of images from the database
                     mPictureList = mDatabaseHelper.getFeedPictures();
@@ -189,7 +184,7 @@ public class FeedGridViewAdapter extends BaseAdapter {
                 }
                 try {
                     new NetworkUnavailableDialog().show(((MainActivity) mContext).getFragmentManager(), LOG_TAG);
-                }catch (IllegalStateException e) {
+                } catch (IllegalStateException e) {
                     Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                 }
             }

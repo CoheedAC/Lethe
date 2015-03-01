@@ -14,7 +14,10 @@ import com.cs48.lethe.utils.Picture;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by maxkohne on 2/22/15.
@@ -26,7 +29,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Logcat tag
     private static final String LOG_TAG = "DatabaseHelper";
 
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 3;
     private static final String DATABASE_NAME = "pictureManager.db";
 
     // Table types
@@ -53,6 +56,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     FeedTable._ID + INTEGER_PRIMARY_KEY_TYPE + COMMA_SEP +
                     FeedTable.COLUMN_NAME_PICTURE_ID + TEXT_TYPE + COMMA_SEP +
                     FeedTable.COLUMN_NAME_DATE_POSTED + DATE_TYPE + COMMA_SEP +
+                    FeedTable.COLUMN_NAME_FILE_PATH + DATE_TYPE + COMMA_SEP +
                     FeedTable.COLUMN_NAME_THUMBNAIL_URL + TEXT_TYPE + COMMA_SEP +
                     FeedTable.COLUMN_NAME_FULL_URL + TEXT_TYPE + COMMA_SEP +
                     FeedTable.COLUMN_NAME_VIEWS + INT_TYPE + COMMA_SEP +
@@ -80,7 +84,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     MeTable._ID + INTEGER_PRIMARY_KEY_TYPE + COMMA_SEP +
                     MeTable.COLUMN_NAME_PICTURE_ID + TEXT_TYPE + COMMA_SEP +
                     MeTable.COLUMN_NAME_DATE_POSTED + TEXT_TYPE + COMMA_SEP +
-                    MeTable.COLUMN_NAME_FILE + TEXT_TYPE + COMMA_SEP +
+                    MeTable.COLUMN_NAME_FILE_PATH + TEXT_TYPE + COMMA_SEP +
                     MeTable.COLUMN_NAME_VIEWS + INT_TYPE + COMMA_SEP +
                     MeTable.COLUMN_NAME_LIKES + INT_TYPE +
                     ")";
@@ -149,10 +153,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return (count != 0);
     }
 
-    public void updateFeed(List<Picture> pictureList) {
+    public void updateFeed(HashMap<String, Picture> pictureHashMap) {
         SQLiteDatabase db = getWritableDatabase();
 
-        for (Picture picture : pictureList) {
+        Iterator iterator = pictureHashMap.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry pair = (Map.Entry) iterator.next();
+            Picture picture = (Picture) pair.getValue();
             if (!pictureExistInFeed(picture)) {
                 ContentValues values = new ContentValues();
                 values.put(FeedTable.COLUMN_NAME_PICTURE_ID, picture.getUniqueId());
@@ -239,8 +246,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         c.moveToFirst();
 
         db.close();
+
+        String pictureFilePath = c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_FILE_PATH));
+        File pictureFile = (pictureFilePath == null) ? null : new File(pictureFilePath);
+
         return new Picture(c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_PICTURE_ID)),
                 c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_DATE_POSTED)),
+                pictureFile,
                 c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_THUMBNAIL_URL)),
                 c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_FULL_URL)),
                 c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_VIEWS)),
@@ -252,17 +264,30 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
         values.put(MeTable.COLUMN_NAME_PICTURE_ID, postedPicture.getUniqueId());
-        values.put(MeTable.COLUMN_NAME_FILE, postedPicture.getFile().getAbsolutePath());
+        values.put(MeTable.COLUMN_NAME_FILE_PATH, postedPicture.getFile().getAbsolutePath());
         values.put(MeTable.COLUMN_NAME_DATE_POSTED, postedPicture.getDatePosted());
 
         db.insert(MeTable.TABLE_NAME, null, values);
         db.close();
     }
 
+    public void insertPictureToFeedTable(Picture postedPicture) {
+        SQLiteDatabase db = getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(FeedTable.COLUMN_NAME_PICTURE_ID, postedPicture.getUniqueId());
+        values.put(FeedTable.COLUMN_NAME_FILE_PATH, postedPicture.getFile().getAbsolutePath());
+        values.put(FeedTable.COLUMN_NAME_DATE_POSTED, postedPicture.getDatePosted());
+
+        db.insert(FeedTable.TABLE_NAME, null, values);
+        db.close();
+    }
+
     public void deletePictureFromMeTable(Picture pictureToDelete) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        pictureToDelete.getFile().delete();
+        if (pictureToDelete.getFile() != null && pictureToDelete.getFile().exists())
+            pictureToDelete.getFile().delete();
 
         String whereClause = MeTable.COLUMN_NAME_PICTURE_ID + EQUALS + pictureToDelete.getUniqueId();
         db.delete(MeTable.TABLE_NAME, whereClause, null);
@@ -272,6 +297,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public void deletePictureFromFeedTable(Picture pictureToDelete) {
         SQLiteDatabase db = this.getWritableDatabase();
+
+        if (pictureToDelete.getFile() != null && pictureToDelete.getFile().exists())
+            pictureToDelete.getFile().delete();
 
         String whereClause = FeedTable.COLUMN_NAME_PICTURE_ID + EQUALS + pictureToDelete.getUniqueId();
         db.delete(FeedTable.TABLE_NAME, whereClause, null);
@@ -365,14 +393,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         if (c.moveToFirst()) {
             do {
+                String pictureFilePath = c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_FILE_PATH));
+                File pictureFile = (pictureFilePath == null) ? null : new File(pictureFilePath);
+
                 Picture picture = new Picture(c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_PICTURE_ID)),
                         c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_DATE_POSTED)),
+                        pictureFile,
                         c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_THUMBNAIL_URL)),
                         c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_FULL_URL)),
                         c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_VIEWS)),
                         c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_LIKES)));
                 pictureList.add(picture);
-                updateDatabaseFromPicture(picture);
+//                updateDatabaseFromPicture(picture);
             } while (c.moveToNext());
         }
         c.close();
@@ -392,6 +424,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             do {
                 Picture picture = new Picture(c.getString(c.getColumnIndex(PeekTable.COLUMN_NAME_PICTURE_ID)),
                         c.getString(c.getColumnIndex(PeekTable.COLUMN_NAME_DATE_POSTED)),
+                        null,
                         c.getString(c.getColumnIndex(PeekTable.COLUMN_NAME_THUMBNAIL_URL)),
                         c.getString(c.getColumnIndex(PeekTable.COLUMN_NAME_FULL_URL)),
                         c.getInt(c.getColumnIndex(PeekTable.COLUMN_NAME_VIEWS)),
@@ -415,11 +448,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         if (c.moveToFirst()) {
             do {
-                Log.d(LOG_TAG, c.getString(c.getColumnIndex(MeTable.COLUMN_NAME_FILE)));
+                Log.d(LOG_TAG, c.getString(c.getColumnIndex(MeTable.COLUMN_NAME_FILE_PATH)));
                 pictureList.add(
                         new Picture(c.getString(c.getColumnIndex(MeTable.COLUMN_NAME_PICTURE_ID)),
                                 c.getString(c.getColumnIndex(MeTable.COLUMN_NAME_DATE_POSTED)),
-                                new File(c.getString(c.getColumnIndex(MeTable.COLUMN_NAME_FILE))),
+                                new File(c.getString(c.getColumnIndex(MeTable.COLUMN_NAME_FILE_PATH))),
                                 c.getInt(c.getColumnIndex(MeTable.COLUMN_NAME_VIEWS)),
                                 c.getInt(c.getColumnIndex(MeTable.COLUMN_NAME_LIKES))));
             } while (c.moveToNext());

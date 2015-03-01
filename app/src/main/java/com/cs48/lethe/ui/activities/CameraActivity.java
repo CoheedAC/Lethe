@@ -12,7 +12,6 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
@@ -72,53 +71,43 @@ public class CameraActivity extends ActionBarActivity {
 
         ButterKnife.inject(this);
 
-        try {
-            // Create an instance of Camera
-            mCamera = Camera.open();
-            mCurrentCamera = 0;
+        // Create an instance of Camera
+        mCamera = getCameraInstance();
 
-            /**
-             * COMMENT THIS LINE IF YOU ARE HAVING ORIENTATION ISSUES
-             * AS WELL AS THE SAME METHOD CALLS IN THE switchCamera()
-             * METHOD
-             */
-            setCameraDisplayOrientation(mCurrentCamera);
+        // Forces the orientation of the current camera to match
+        // the orientation of the activity (portrait)
+        setCameraDisplayOrientation(mCurrentCamera);
 
-            // Hides the action bar
-            getSupportActionBar().hide();
+        // Hides the action bar
+        getSupportActionBar().hide();
 
-            // Create our Camera Preview view and set it as the content of our activity.
-            mCameraPreview = new CameraPreview(this, mCamera);
-            mFrameLayout.addView(mCameraPreview);
+        // Create our Camera Preview view and set it as the content of our activity.
+        mCameraPreview = new CameraPreview(this, mCamera);
+        mFrameLayout.addView(mCameraPreview);
 
-            // Shows the camera switch button if the devices has more than one camera
-            showSupportedCameraSwitchButton();
+        // Shows the camera switch button if the devices has more than one camera
+        showSupportedCameraSwitchButton();
 
-            // Show flash button if phone supports flash
-            showSupportedFlashButton();
+        // Show flash button if phone supports flash
+        showSupportedFlashButton();
 
-            // Initially hides the post button, the progress bar,
-            // and the cancel button.
-            mPostButton.setVisibility(View.GONE);
-            mProgressBar.setVisibility(View.GONE);
-            mCancelButton.setVisibility(View.GONE);
+        // Initially hides the post button, the progress bar,
+        // and the cancel button.
+        mPostButton.setVisibility(View.GONE);
+        mProgressBar.setVisibility(View.GONE);
+        mCancelButton.setVisibility(View.GONE);
 
-            // front camera to false because android
-            // defaults to back camera
-            isFrontCameraOn = false;
-            isCurrentlyPosting = false;
+        // Front camera set to false because android defaults to back-facing camera
+        isFrontCameraOn = false;
+        isCurrentlyPosting = false;
 
-            // Add a listeners to the all of the button
-            mCaptureButton.setOnClickListener(new CaptureButtonOnClickListener());
-            mBackButton.setOnClickListener(new BackButtonOnClickListener());
-            mPostButton.setOnClickListener(new PostButtonOnClickListener());
-            mCancelButton.setOnClickListener(new CancelButtonOnClickListener());
-            mCameraSwitchButton.setOnClickListener(new SwitchCameraButtonOnClickListener());
-            mFlashButton.setOnClickListener(new FlashButtonOnClickListener());
-        }catch (Exception e) {
-            Toast.makeText(this,"Camera not working. Trying retarting emulator AND enable camera before oping app", Toast.LENGTH_LONG).show();
-            finish();
-        }
+        // Add a listeners to the all of the button
+        mCaptureButton.setOnClickListener(new CaptureButtonOnClickListener());
+        mBackButton.setOnClickListener(new BackButtonOnClickListener());
+        mPostButton.setOnClickListener(new PostButtonOnClickListener());
+        mCancelButton.setOnClickListener(new CancelButtonOnClickListener());
+        mCameraSwitchButton.setOnClickListener(new SwitchCameraButtonOnClickListener());
+        mFlashButton.setOnClickListener(new FlashButtonOnClickListener());
     }
 
     /**
@@ -148,6 +137,7 @@ public class CameraActivity extends ActionBarActivity {
     /**
      * A safe way to get an instance of the Camera object.
      */
+
     public Camera getCameraInstance() {
         Camera c = null;
         try {
@@ -157,6 +147,7 @@ public class CameraActivity extends ActionBarActivity {
             // Camera is not available (in use or does not exist)
             Log.d(TAG, "Camera is not available (in use or does not exist)");
             mCurrentCamera = -1;
+            finish();
         }
         return c; // returns null if camera is unavailable
     }
@@ -170,9 +161,10 @@ public class CameraActivity extends ActionBarActivity {
         onPostPictureStart();
         Date date = new Date();
         DatabaseHelper databaseHelper = DatabaseHelper.getInstance(this);
-        databaseHelper.insertPictureToMeTable(
-                new Picture(date.getTime() + "", new SimpleDateFormat("yyyyMMdd_HHmmss").
-                        format(date), mPictureFile, 0, 0));
+        Picture picture = new Picture(date.getTime() + "", new SimpleDateFormat("yyyyMMdd_HHmmss").
+                format(date), mPictureFile, 0, 0);
+        databaseHelper.insertPictureToMeTable(picture);
+        databaseHelper.insertPictureToFeedTable(picture);
         setResult(ActionCodes.POST_SUCCESS);
         finish();
     }
@@ -422,7 +414,7 @@ public class CameraActivity extends ActionBarActivity {
                     mCamera.setParameters(parameters);
                     mCamera.startPreview();
                 }
-            }catch (Exception e) {
+            } catch (Exception e) {
                 FileUtilities.logResults(CameraActivity.this, TAG, "Flash button not functional");
             }
         }

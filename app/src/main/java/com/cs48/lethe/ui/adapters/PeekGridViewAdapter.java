@@ -87,7 +87,7 @@ public class PeekGridViewAdapter extends BaseAdapter {
         }
         Picasso.with(mContext)
                 .load(mPictureList.get(position).getThumbnailUrl())
-                .resize(PictureUtilities.MAX_THUMBNAIL_HEIGHT, 0)
+                .resize(PictureUtilities.MAX_THUMBNAIL_WIDTH, 0)
                 .onlyScaleDown()
                 .into(imageView);
         return imageView;
@@ -145,6 +145,7 @@ public class PeekGridViewAdapter extends BaseAdapter {
                         mPictureList.add(new Picture(
                                 jsonObject.getString(mContext.getString(R.string.json_id)),
                                 new SimpleDateFormat("yyyyMMdd_HHmmssSS").format(new Date()),
+                                null,
 //                                jsonObject.getString(mContext.getString(R.string.json_date_posted)),
                                 jsonObject.getString(mContext.getString(R.string.json_url_thumbnail)),
                                 jsonObject.getString(mContext.getString(R.string.json_url_full)),

@@ -3,7 +3,6 @@ package com.cs48.lethe.ui.activities;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
@@ -13,8 +12,6 @@ import android.view.MenuItem;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.ui.adapters.TabsPagerAdapter;
-import com.cs48.lethe.ui.fragments.FeedFragment;
-import com.cs48.lethe.ui.fragments.MeFragment;
 import com.cs48.lethe.utils.ActionCodes;
 import com.cs48.lethe.utils.FileUtilities;
 
@@ -114,25 +111,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     }
 
     /**
-     * Handles responses when activities are done / destroyed
-     */
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        // PostPicture activity result
-        if (requestCode == ActionCodes.CAMERA_CAPTURE_REQUEST && resultCode == ActionCodes.POST_SUCCESS) {
-            FeedFragment feedFragment = (FeedFragment) findFragmentByPosition(0);
-            if (feedFragment != null)
-                feedFragment.fetchFeedFromServer();
-
-            MeFragment meFragment = (MeFragment) findFragmentByPosition(2);
-            if (meFragment != null)
-                meFragment.fetchMePicturesFromDatabase();
-        }
-    }
-
-    /**
      * Changes the title on the action bar when a new tab is selected.
      */
     @Override
@@ -179,14 +157,5 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             FileUtilities.logResults(this, LOG_TAG, "Whoops - your device doesn't support capturing images!");
         }
     }
-
-    /**
-     * Returns the fragment at the given position
-     */
-    private Fragment findFragmentByPosition(int position) {
-        return getSupportFragmentManager()
-                .findFragmentByTag(TabsPagerAdapter.getFragmentTag(mViewPager.getId(), position));
-    }
-
 
 }

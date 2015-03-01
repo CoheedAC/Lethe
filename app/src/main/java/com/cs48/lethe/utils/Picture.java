@@ -16,21 +16,31 @@ public class Picture {
     private int likes;
 
     // Me picture constructor
-    public Picture(String uniqueId, String datePosted, File imageFile, int views, int likes) {
-        this(uniqueId, datePosted, null, null, views, likes);
-        file = imageFile;
+    public Picture(String uniqueId, String datePosted, File pictureFile, int views, int likes) {
+        this(uniqueId, datePosted, pictureFile, null, null, views, likes);
     }
 
     // Feed picture constructor
-    public Picture(String uniqueId, String datePosted, String thumbnailUrl, String fullUrl, int views, int likes) {
+    public Picture(String uniqueId, String datePosted, File pictureFile, String thumbnailUrl, String fullUrl, int views, int likes) {
         this.uniqueId = uniqueId;
         this.datePosted = datePosted;
         this.thumbnailUrl = thumbnailUrl;
         this.fullUrl = fullUrl;
         this.views = views;
         this.likes = likes;
-        file = null;
+        file = pictureFile;
     }
+
+    // Peek picture constructor
+//    public Picture(String uniqueId, String datePosted, String thumbnailUrl, String fullUrl, int views, int likes) {
+//        this.uniqueId = uniqueId;
+//        this.datePosted = datePosted;
+//        this.thumbnailUrl = thumbnailUrl;
+//        this.fullUrl = fullUrl;
+//        this.views = views;
+//        this.likes = likes;
+//        file = null;
+//    }
 
     public File getFile() {
         return file;

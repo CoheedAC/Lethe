@@ -61,6 +61,12 @@ public class MeFragment extends Fragment {
         return rootView;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        fetchMePicturesFromDatabase();
+    }
+
     /**
      * Hides the refresh and the clear cache buttons.
      */
@@ -95,18 +101,6 @@ public class MeFragment extends Fragment {
             mMeGridViewAdapter.copyFirstImage();
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * Handles actions when a requested activity is finished.
-     */
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == ActionCodes.ME_FULLSCREEN_REQUEST && resultCode == ActionCodes.DELETE_PICTURE)
-            fetchMePicturesFromDatabase();
-
     }
 
     public void setEmptyGridMessage(String errorMessage) {

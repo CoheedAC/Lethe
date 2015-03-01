@@ -73,11 +73,6 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
         mAddressEditText.setEnabled(false);
         mPeekPullToRefreshLayout.setEnabled(false);
 
-        // Gets current location just to test the grid (defaults to IV lat and long)
-        String[] coordinates = NetworkUtilities.getCurrentLocation(getActivity());
-        mLatitude = coordinates[0];
-        mLongitude = coordinates[1];
-
         // asyncronously sets up the maps object. the onMapReady will be automatically called
         // below when it is done loading
         SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
@@ -85,7 +80,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
 
         if (!NetworkUtilities.isNetworkAvailable(getActivity())) {
             setEmptyGridMessage(getString(R.string.grid_no_internet_connection));
-        }else {
+        } else {
             mEmptyGridTextView.setVisibility(View.GONE);
         }
 
@@ -99,18 +94,13 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
          * typed in or where they dropped the pin to get the latitude
          * and longitude. Once you get that information, just type in:
          *
-         * mLatitude = // reverse geocoded latitude
-         * mLongitude = // reverse geocoded longitude
-         * fetchPeekFeedFromServer();
+         * fetchPeekFeedFromServer(latitude, longitude);
          *
          * and it should show the feed of that area in the grid
          */
 
-        //  Tells the grid adapter to fetch the feed from the server with the given coords
-//        mPeekGridViewAdapter.fetchPeekFeedFromServer(mLatitude, mLongitude);
-
         // Listens for user input on the text box
-        mAddressEditText.setOnEditorActionListener(new OnTextEditListener());
+        mAddressEditText.setOnEditorActionListener(new OnAddressBarEditorActionListener());
 
         return rootView;
     }
@@ -145,6 +135,9 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
         mAddressEditText.setEnabled(true);
         mPeekPullToRefreshLayout.setEnabled(true);
 
+        String[] coordinates = NetworkUtilities.getCurrentLocation(getActivity());
+        mLatitude = coordinates[0];
+        mLongitude = coordinates[1];
         double latitude = Double.parseDouble(mLatitude);
         double longitude = Double.parseDouble(mLongitude);
 
@@ -204,53 +197,55 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
     class OnRefreshListener implements SwipeRefreshLayout.OnRefreshListener {
         @Override
         public void onRefresh() {
-            String[] coordinates = NetworkUtilities.getCurrentLocation(getActivity());
-            mLatitude = coordinates[0];
-            mLongitude = coordinates[1];
-
             /*
             // You need to enable GPS on emulator for this feature to work
+            // Sometimes location might be null which results in a crash
             Location location = mMap.getMyLocation();
-            mLatitude = location.getLatitude() + "";
-            mLongitude = location.getLongitude() + "";
+            mLatitude = location.getLatitude() + "";      // "" converts to String
+            mLongitude = location.getLongitude() + "";    // "" converts to String
+            fetchPeekFeedFromServer(mLatitude, mLongitude);
             */
 
-            fetchPeekFeedFromServer();
+            String[] coordinates = NetworkUtilities.getCurrentLocation(getActivity());
+            fetchPeekFeedFromServer(coordinates[0], coordinates[1]);
         }
     }
 
-    private void fetchPeekFeedFromServer() {
+    private void fetchPeekFeedFromServer(String latitude, String longitude) {
         if (NetworkUtilities.isNetworkAvailable(getActivity())) {
-
-            if (mLatitude != null && mLongitude != null)
-                mPeekGridViewAdapter.fetchPeekFeedFromServer(this, mLatitude, mLongitude);
-        }else
-            new NetworkUnavailableDialog().show(getActivity().getFragmentManager(), LOG_TAG);
+            mPeekGridViewAdapter.fetchPeekFeedFromServer(this, latitude, longitude);
+        } else {
+            try {
+                new NetworkUnavailableDialog().show(getActivity().getFragmentManager(), LOG_TAG);
+            }catch (IllegalStateException e) {
+                Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+            }
+        }
     }
 
     /**
-     * Sets up the input listener for the edit textview
+     * Sets up the input listener for the address textview
      */
-    class OnTextEditListener implements TextView.OnEditorActionListener {
+    class OnAddressBarEditorActionListener implements TextView.OnEditorActionListener {
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-            Log.d("Okay","One");
-            if (event == null){
+            Log.d("Okay", "One");
+            if (event == null) {
                 //do the same thing, keeps thing from crashing (good for test)
-                mPeekGridViewAdapter.fetchPeekFeedFromServer(mLatitude, mLongitude);
-            }
-            else if (event.getAction() == KeyEvent.ACTION_DOWN)
-                mPeekGridViewAdapter.fetchPeekFeedFromServer(mLatitude, mLongitude);
+                fetchPeekFeedFromServer(mLatitude, mLongitude);
+            } else if (event.getAction() == KeyEvent.ACTION_DOWN)
+                fetchPeekFeedFromServer(mLatitude, mLongitude);
 
             return false;
         }
 
     }
+
     @Override
-    public void onDestroyView(){
+    public void onDestroyView() {
         android.support.v4.app.FragmentManager fm = getChildFragmentManager();
-        SupportMapFragment frag = (SupportMapFragment)fm.findFragmentById(R.id.map);
-        if(frag != null){
+        SupportMapFragment frag = (SupportMapFragment) fm.findFragmentById(R.id.map);
+        if (frag != null) {
             fm.beginTransaction().remove(frag).commitAllowingStateLoss();
         }
         super.onDestroyView();

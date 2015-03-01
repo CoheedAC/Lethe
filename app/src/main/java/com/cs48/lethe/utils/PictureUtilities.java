@@ -26,9 +26,8 @@ public class PictureUtilities {
 
     public static final int MAX_FULL_WIDTH = 1024;
     public static final int MAX_FULL_HEIGHT = 768;
-    public static final int MAX_THUMBNAIL_WIDTH = 171;
+    public static final int MAX_THUMBNAIL_WIDTH = 205;
     public static final int MAX_THUMBNAIL_HEIGHT = 154;
-
 
     /**
      * Rotates a bitmap by the specified degrees

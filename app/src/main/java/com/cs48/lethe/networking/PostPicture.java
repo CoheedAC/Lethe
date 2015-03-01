@@ -37,11 +37,11 @@ public class PostPicture extends AsyncTask<String, String, String> {
     private final String BOUNDARY = "---------------------Boundary";
 
     private CameraActivity mCameraActivity;
-    private File mImageFile;
+    private File mPictureFile;
 
-    public PostPicture(Context context, File imageFile) {
+    public PostPicture(Context context, File pictureFile) {
         mCameraActivity = (CameraActivity) context;
-        mImageFile = imageFile;
+        mPictureFile = pictureFile;
     }
 
     @Override
@@ -85,12 +85,12 @@ public class PostPicture extends AsyncTask<String, String, String> {
             byte[] writer = combined.getBytes();
             requestBody.write(writer, 0, writer.length);
 
-            String frontBoilerForImage = generateImageBoilerplateFront(mImageFile.getName());
+            String frontBoilerForImage = generateImageBoilerplateFront(mPictureFile.getName());
             writer = frontBoilerForImage.getBytes();
             requestBody.write(writer, 0, writer.length);
 
             //now encode image
-            imageAsStream = new FileInputStream(mImageFile.getAbsolutePath());
+            imageAsStream = new FileInputStream(mPictureFile.getAbsolutePath());
             int bytesAvailable = imageAsStream.available();
             int bufferSize = Math.min(bytesAvailable, 1 * 1024 * 1024);
             byte[] buffer = new byte[bufferSize];
@@ -150,10 +150,12 @@ public class PostPicture extends AsyncTask<String, String, String> {
             try {
                 JSONObject jsonObject = new JSONObject(result);
                 DatabaseHelper databaseHelper = DatabaseHelper.getInstance(mCameraActivity);
-                databaseHelper.insertPictureToMeTable(
-                        new Picture(jsonObject.getString(mCameraActivity.getString(R.string.json_id)),
-                                jsonObject.getString(mCameraActivity.getString(R.string.json_date_posted)),
-                                mImageFile, 0, 0));
+                Picture picture = new Picture(jsonObject.getString(mCameraActivity.getString(R.string.json_id)),
+                        jsonObject.getString(mCameraActivity.getString(R.string.json_date_posted)),
+                        mPictureFile, 0, 0);
+                databaseHelper.insertPictureToMeTable(picture);
+                databaseHelper.insertPictureToFeedTable(picture);
+
 
             } catch (JSONException e) {
                 Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());

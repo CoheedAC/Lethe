@@ -193,6 +193,7 @@ public class MePagerAdapter extends PagerAdapter {
             MeFullScreenActivity meFullScreenActivity = (MeFullScreenActivity) mContext;
             meFullScreenActivity.setResult(ActionCodes.DELETE_PICTURE, meFullScreenActivity.getIntent());
             mDatabaseHelper.deletePictureFromMeTable(mPictureList.get(position));
+            mDatabaseHelper.deletePictureFromFeedTable(mPictureList.get(position));
             Toast.makeText(mContext, "Deleted image", Toast.LENGTH_SHORT).show();
             meFullScreenActivity.finish();
         }

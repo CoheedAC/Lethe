@@ -103,11 +103,19 @@ public class FeedFullScreenActivity extends ActionBarActivity {
             }
         };
         mImageView.setTag(target);
-        Picasso.with(this)
-                .load(mPicture.getFullUrl())
-                .resize(PictureUtilities.MAX_FULL_WIDTH, 0)
-                .onlyScaleDown()
-                .into(target);
+        if (mPicture.getFile() == null) {
+            Picasso.with(this)
+                    .load(mPicture.getFullUrl())
+                    .resize(PictureUtilities.MAX_FULL_WIDTH, 0)
+                    .onlyScaleDown()
+                    .into(target);
+        }else {
+            Picasso.with(this)
+                    .load(mPicture.getFile())
+                    .resize(PictureUtilities.MAX_FULL_WIDTH, 0)
+                    .onlyScaleDown()
+                    .into(target);
+        }
 
         // Displays the statistics on the screen and fetches the statistics from the server
         mLikesTextView.setText("Likes: " + mPicture.getLikes());

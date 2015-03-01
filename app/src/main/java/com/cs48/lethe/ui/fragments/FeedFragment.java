@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -69,7 +70,7 @@ public class FeedFragment extends Fragment {
             setEmptyGridMessage(getString(R.string.grid_no_internet_connection));
         }else {
             setEmptyGridMessage(getString(R.string.grid_area_empty));
-            mFeedGridViewAdapter.fetchFeedFromServer(this);
+            fetchFeedFromServer();
         }
 
         mFeedGridView.setOnItemClickListener(new OnPictureClickListener());
@@ -77,6 +78,12 @@ public class FeedFragment extends Fragment {
         mFeedPullToRefreshLayout.setOnRefreshListener(new OnRefreshListener());
 
         return rootView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        fetchFeedFromServer();
     }
 
     public void setEmptyGridMessage(String errorMessage) {
@@ -115,22 +122,11 @@ public class FeedFragment extends Fragment {
     }
 
     /**
-     * Hides the image from the feed or updates the database with the new
-     * likes and views when returning from the full screen activity
-     */
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == ActionCodes.FEED_FULLSCREEN_REQUEST && resultCode == ActionCodes.HIDE_PICTURE)
-            fetchFeedFromServer();
-    }
-
-    /**
      * Gets the list of images from the server.
      */
     public void fetchFeedFromServer() {
-        mFeedGridViewAdapter.fetchFeedFromServer(null);
+        mFeedGridViewAdapter.fetchFeedFromServer(this);
+        setEmptyGridMessage(getString(R.string.grid_area_empty));
     }
 
     public void stopRefreshAnimation() {
@@ -177,9 +173,14 @@ public class FeedFragment extends Fragment {
         @Override
         public void onRefresh() {
             if (NetworkUtilities.isNetworkAvailable(getActivity()))
-                mFeedGridViewAdapter.fetchFeedFromServer(FeedFragment.this);
-            else
-                new NetworkUnavailableDialog().show(getActivity().getFragmentManager(), LOG_TAG);
+                fetchFeedFromServer();
+            else {
+                try {
+                    new NetworkUnavailableDialog().show(getActivity().getFragmentManager(), LOG_TAG);
+                }catch (IllegalStateException e) {
+                    Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                }
+            }
         }
     }
 }
