@@ -12,8 +12,7 @@ import android.widget.ImageView;
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.networking.HerokuRestClient;
-import com.cs48.lethe.ui.activities.MainActivity;
-import com.cs48.lethe.ui.dialogs.NetworkUnavailableDialog;
+import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
 import com.cs48.lethe.ui.fragments.PeekFragment;
 import com.cs48.lethe.utils.Picture;
 import com.cs48.lethe.utils.PictureUtilities;
@@ -145,7 +144,6 @@ public class PeekGridViewAdapter extends BaseAdapter {
                         mPictureList.add(new Picture(
                                 jsonObject.getString(mContext.getString(R.string.json_id)),
                                 new SimpleDateFormat("yyyyMMdd_HHmmssSS").format(new Date()),
-                                null,
 //                                jsonObject.getString(mContext.getString(R.string.json_date_posted)),
                                 jsonObject.getString(mContext.getString(R.string.json_url_thumbnail)),
                                 jsonObject.getString(mContext.getString(R.string.json_url_full)),
@@ -153,10 +151,8 @@ public class PeekGridViewAdapter extends BaseAdapter {
                                 jsonObject.getInt(mContext.getString(R.string.json_likes))));
                     }
 
-                    if (peekFragment != null) {
-                        peekFragment.stopRefreshAnimation();
-                        peekFragment.setEmptyGridMessage(mContext.getString(R.string.grid_area_empty));
-                    }
+                    peekFragment.stopRefreshAnimation();
+                    peekFragment.setEmptyGridMessage(mContext.getString(R.string.grid_area_empty));
 
                     mDatabaseHelper.updatePeekFeed(mPictureList);
 
@@ -169,14 +165,13 @@ public class PeekGridViewAdapter extends BaseAdapter {
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                if (peekFragment != null) {
-                    peekFragment.stopRefreshAnimation();
-                    peekFragment.setEmptyGridMessage(mContext.getString(R.string.grid_no_internet_connection));
-                }
-                try {
-                    new NetworkUnavailableDialog().show(((MainActivity) mContext).getFragmentManager(), LOG_TAG);
-                }catch (IllegalStateException e) {
-                    Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                peekFragment.stopRefreshAnimation();
+                if (!peekFragment.setEmptyGridMessage(mContext.getString(R.string.grid_error))) {
+                    try {
+                        new OperationFailedDialog().show(peekFragment.getActivity().getFragmentManager(), LOG_TAG);
+                    } catch (IllegalStateException e) {
+                        Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                    }
                 }
             }
         });

@@ -2,7 +2,6 @@ package com.cs48.lethe.ui.adapters;
 
 import android.content.Context;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -11,14 +10,10 @@ import android.widget.ImageView;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
-import com.cs48.lethe.ui.activities.MainActivity;
-import com.cs48.lethe.ui.dialogs.DeleteImageWarningDialog;
-import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.Picture;
 import com.cs48.lethe.utils.PictureUtilities;
 import com.squareup.picasso.Picasso;
 
-import java.io.File;
 import java.util.List;
 
 /**
@@ -102,32 +97,6 @@ public class MeGridViewAdapter extends BaseAdapter {
             picture.getFile().delete();
         mPictureList.removeAll(mPictureList);
         notifyDataSetChanged();
-    }
-
-    /**
-     * Populates 50 temporary image objects from the
-     * first image object in the image list.
-     * <p/>
-     * WARNING: if you press delete in the full screen view
-     * it will delete all 50 images
-     */
-    public void copyFirstImage() {
-        try {
-            Picture picture = mPictureList.get(0);
-            File src = picture.getFile();
-            Log.d(LOG_TAG, src.getAbsolutePath());
-
-            for (int i = 0; i < 50; i++)
-                mPictureList.add(new Picture(picture.getUniqueId(),
-                        picture.getDatePosted(),
-                        picture.getFile(),
-                        picture.getViews(),
-                        picture.getLikes()));
-            new DeleteImageWarningDialog().show(((MainActivity) mContext).getFragmentManager(), LOG_TAG);
-            notifyDataSetChanged();
-        } catch (Exception e) {
-            FileUtilities.logResults(mContext, LOG_TAG, "No image to copy");
-        }
     }
 
 }

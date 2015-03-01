@@ -32,22 +32,18 @@ public class Picture {
     }
 
     // Peek picture constructor
-//    public Picture(String uniqueId, String datePosted, String thumbnailUrl, String fullUrl, int views, int likes) {
-//        this.uniqueId = uniqueId;
-//        this.datePosted = datePosted;
-//        this.thumbnailUrl = thumbnailUrl;
-//        this.fullUrl = fullUrl;
-//        this.views = views;
-//        this.likes = likes;
-//        file = null;
-//    }
+    public Picture(String uniqueId, String datePosted, String thumbnailUrl, String fullUrl, int views, int likes) {
+        this.uniqueId = uniqueId;
+        this.datePosted = datePosted;
+        this.thumbnailUrl = thumbnailUrl;
+        this.fullUrl = fullUrl;
+        this.views = views;
+        this.likes = likes;
+        file = null;
+    }
 
     public File getFile() {
         return file;
-    }
-
-    public void setFile(File file) {
-        this.file = file;
     }
 
     public String getDatePosted() {

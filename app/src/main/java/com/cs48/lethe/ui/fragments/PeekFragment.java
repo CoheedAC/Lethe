@@ -58,7 +58,6 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-
         mPeekGridViewAdapter = new PeekGridViewAdapter(getActivity());
     }
 
@@ -146,13 +145,14 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 15));
     }
 
-    public void setEmptyGridMessage(String errorMessage) {
+    public boolean setEmptyGridMessage(String errorMessage) {
         if (mPeekGridViewAdapter.getCount() == 0) {
             mEmptyGridTextView.setVisibility(View.VISIBLE);
             mEmptyGridTextView.setText(errorMessage);
-        } else {
-            mEmptyGridTextView.setVisibility(View.GONE);
+            return true;
         }
+        mEmptyGridTextView.setVisibility(View.GONE);
+        return false;
     }
 
     public void stopRefreshAnimation() {
@@ -215,10 +215,13 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
         if (NetworkUtilities.isNetworkAvailable(getActivity())) {
             mPeekGridViewAdapter.fetchPeekFeedFromServer(this, latitude, longitude);
         } else {
-            try {
-                new NetworkUnavailableDialog().show(getActivity().getFragmentManager(), LOG_TAG);
-            }catch (IllegalStateException e) {
-                Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+            mPeekPullToRefreshLayout.setRefreshing(false);
+            if (!setEmptyGridMessage(getString(R.string.grid_no_internet_connection))) {
+                try {
+                    new NetworkUnavailableDialog().show(getActivity().getFragmentManager(), LOG_TAG);
+                } catch (IllegalStateException e) {
+                    Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                }
             }
         }
     }

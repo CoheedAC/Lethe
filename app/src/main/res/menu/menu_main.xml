@@ -12,14 +12,9 @@
           android:icon="@drawable/ic_action_discard"
           android:orderInCategory="99"
           app:showAsAction="ifRoom"/>
-    <item android:id="@+id/action_copy_images"
-          android:title="@string/action_copy"
-          android:icon="@drawable/ic_action_copy"
-          android:orderInCategory="98"
-          app:showAsAction="ifRoom"/>
     <item android:id="@+id/action_refresh"
           android:title="@string/action_refresh"
           android:icon="@drawable/refresh"
-          android:orderInCategory="97"
+          android:orderInCategory="98"
           app:showAsAction="ifRoom"/>
 </menu>

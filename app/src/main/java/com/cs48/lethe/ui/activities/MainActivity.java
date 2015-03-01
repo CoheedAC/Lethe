@@ -38,8 +38,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         // primary sections of the activity.
         mTabsPagerAdapter = new TabsPagerAdapter(getSupportFragmentManager(), this);
 
-        setTitle("Home");
-
         // Set up the action bar.
         final ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
@@ -51,7 +49,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mTabsPagerAdapter);
-        mViewPager.setOffscreenPageLimit(1);
+        mViewPager.setOffscreenPageLimit(3);
 
         // When swiping between different sections, select the corresponding
         // tab. We can also use ActionBar.Tab#select() to do this if we have
@@ -89,7 +87,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        menu.findItem(R.id.action_copy_images).setVisible(false);
         menu.findItem(R.id.action_clear_cache).setVisible(false);
         menu.findItem(R.id.action_refresh).setVisible(false);
         return true;

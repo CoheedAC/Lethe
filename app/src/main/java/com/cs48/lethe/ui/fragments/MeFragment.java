@@ -73,7 +73,6 @@ public class MeFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.findItem(R.id.action_clear_cache).setVisible(true);
-        menu.findItem(R.id.action_copy_images).setVisible(true);
     }
 
     /**
@@ -93,13 +92,6 @@ public class MeFragment extends Fragment {
             return true;
         }
 
-        /**
-         * Copies the first image 50 times to create
-         * a dummy grid for testing purposes.
-         */
-        if (id == R.id.action_copy_images) {
-            mMeGridViewAdapter.copyFirstImage();
-        }
         return super.onOptionsItemSelected(item);
     }
 

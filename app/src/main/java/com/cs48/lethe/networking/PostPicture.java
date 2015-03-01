@@ -82,6 +82,9 @@ public class PostPicture extends AsyncTask<String, String, String> {
             String longitude = generateForSimpleText("longitude", coordinates[1]);
             String combined = latitude + longitude;
 
+            // Tim, upload this rotation int to the server
+//            int orientation = PictureUtilities.getImageOrientation(mPictureFile.getAbsolutePath());
+
             byte[] writer = combined.getBytes();
             requestBody.write(writer, 0, writer.length);
 
@@ -165,8 +168,8 @@ public class PostPicture extends AsyncTask<String, String, String> {
             mCameraActivity.setResult(ActionCodes.POST_SUCCESS);
             mCameraActivity.finish();
         } else {
-            mCameraActivity.setResult(ActionCodes.POST_FAILED);
             mCameraActivity.onPostPictureEnd();
+            mCameraActivity.setResult(ActionCodes.POST_FAILED);
             try {
                 new OperationFailedDialog().show(mCameraActivity.getFragmentManager(), LOG_TAG);
             }catch (IllegalStateException e) {

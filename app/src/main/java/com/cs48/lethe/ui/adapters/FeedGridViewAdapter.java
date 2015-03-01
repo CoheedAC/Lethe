@@ -12,8 +12,7 @@ import android.widget.ImageView;
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.networking.HerokuRestClient;
-import com.cs48.lethe.ui.activities.MainActivity;
-import com.cs48.lethe.ui.dialogs.NetworkUnavailableDialog;
+import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
 import com.cs48.lethe.ui.fragments.FeedFragment;
 import com.cs48.lethe.utils.NetworkUtilities;
 import com.cs48.lethe.utils.Picture;
@@ -46,7 +45,10 @@ public class FeedGridViewAdapter extends BaseAdapter {
     public FeedGridViewAdapter(Context context) {
         mContext = context;
         mDatabaseHelper = DatabaseHelper.getInstance(mContext);
-        fetchFeedFromDatabase();
+        if (NetworkUtilities.isNetworkAvailable(mContext)) {
+            fetchFeedFromDatabase();
+        }else
+            mPictureList = new ArrayList<>();
     }
 
     /**
@@ -93,7 +95,7 @@ public class FeedGridViewAdapter extends BaseAdapter {
                     .resize(PictureUtilities.MAX_THUMBNAIL_WIDTH, 0)
                     .onlyScaleDown()
                     .into(imageView);
-        }else {
+        } else {
             Picasso.with(mContext)
                     .load(mPictureList.get(position).getFile())
                     .resize(PictureUtilities.MAX_THUMBNAIL_WIDTH, 0)
@@ -133,7 +135,6 @@ public class FeedGridViewAdapter extends BaseAdapter {
                         Picture picture = new Picture(
                                 jsonObject.getString(mContext.getString(R.string.json_id)),
                                 new SimpleDateFormat("yyyyMMdd_HHmmssSS").format(new Date()),
-                                null,
 //                                jsonObject.getString(mContext.getString(R.string.json_date_posted)),
                                 jsonObject.getString(mContext.getString(R.string.json_url_thumbnail)),
                                 jsonObject.getString(mContext.getString(R.string.json_url_full)),
@@ -164,10 +165,8 @@ public class FeedGridViewAdapter extends BaseAdapter {
                     for (int i = 0; i < mPictureList.size(); i++)
                         Log.d(LOG_TAG, mPictureList.get(i).getUniqueId() + " : " + i);
 
-                    if (feedFragment != null) {
-                        feedFragment.stopRefreshAnimation();
-                        feedFragment.setEmptyGridMessage(mContext.getString(R.string.grid_area_empty));
-                    }
+                    feedFragment.stopRefreshAnimation();
+                    feedFragment.setEmptyGridMessage(mContext.getString(R.string.grid_area_empty));
 
                     // updates the grid to reflect the new data in the image list
                     notifyDataSetChanged();
@@ -178,14 +177,13 @@ public class FeedGridViewAdapter extends BaseAdapter {
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                if (feedFragment != null) {
-                    feedFragment.stopRefreshAnimation();
-                    feedFragment.setEmptyGridMessage(mContext.getString(R.string.grid_no_internet_connection));
-                }
-                try {
-                    new NetworkUnavailableDialog().show(((MainActivity) mContext).getFragmentManager(), LOG_TAG);
-                } catch (IllegalStateException e) {
-                    Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                feedFragment.stopRefreshAnimation();
+                if (!feedFragment.setEmptyGridMessage(feedFragment.getString(R.string.grid_error))) {
+                    try {
+                        new OperationFailedDialog().show(feedFragment.getActivity().getFragmentManager(), LOG_TAG);
+                    } catch (IllegalStateException e) {
+                        Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                    }
                 }
             }
         });

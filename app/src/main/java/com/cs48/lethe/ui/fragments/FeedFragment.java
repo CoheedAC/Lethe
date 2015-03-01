@@ -68,7 +68,7 @@ public class FeedFragment extends Fragment {
 
         if (!NetworkUtilities.isNetworkAvailable(getActivity())) {
             setEmptyGridMessage(getString(R.string.grid_no_internet_connection));
-        }else {
+        } else {
             setEmptyGridMessage(getString(R.string.grid_area_empty));
             fetchFeedFromServer();
         }
@@ -83,16 +83,18 @@ public class FeedFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        fetchFeedFromServer();
+        if (NetworkUtilities.isNetworkAvailable(getActivity()))
+            fetchFeedFromServer();
     }
 
-    public void setEmptyGridMessage(String errorMessage) {
+    public boolean setEmptyGridMessage(String errorMessage) {
         if (mFeedGridViewAdapter.getCount() == 0) {
             mEmptyGridTextView.setVisibility(View.VISIBLE);
             mEmptyGridTextView.setText(errorMessage);
-        } else {
-            mEmptyGridTextView.setVisibility(View.GONE);
+            return true;
         }
+        mEmptyGridTextView.setVisibility(View.GONE);
+        return false;
     }
 
     /**
@@ -125,8 +127,18 @@ public class FeedFragment extends Fragment {
      * Gets the list of images from the server.
      */
     public void fetchFeedFromServer() {
-        mFeedGridViewAdapter.fetchFeedFromServer(this);
-        setEmptyGridMessage(getString(R.string.grid_area_empty));
+        if (NetworkUtilities.isNetworkAvailable(getActivity())) {
+            mFeedGridViewAdapter.fetchFeedFromServer(this);
+        } else {
+            mFeedPullToRefreshLayout.setRefreshing(false);
+            if (!setEmptyGridMessage(getString(R.string.grid_no_internet_connection))) {
+                try {
+                    new NetworkUnavailableDialog().show(getActivity().getFragmentManager(), LOG_TAG);
+                } catch (IllegalStateException e) {
+                    Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                }
+            }
+        }
     }
 
     public void stopRefreshAnimation() {
@@ -172,15 +184,7 @@ public class FeedFragment extends Fragment {
     class OnRefreshListener implements SwipeRefreshLayout.OnRefreshListener {
         @Override
         public void onRefresh() {
-            if (NetworkUtilities.isNetworkAvailable(getActivity()))
-                fetchFeedFromServer();
-            else {
-                try {
-                    new NetworkUnavailableDialog().show(getActivity().getFragmentManager(), LOG_TAG);
-                }catch (IllegalStateException e) {
-                    Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
-                }
-            }
+            fetchFeedFromServer();
         }
     }
 }

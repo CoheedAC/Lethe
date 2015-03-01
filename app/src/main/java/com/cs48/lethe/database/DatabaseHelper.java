@@ -295,6 +295,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    public void deletePictureFromPeekTable(Picture pictureToDelete) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        if (pictureToDelete.getFile() != null && pictureToDelete.getFile().exists())
+            pictureToDelete.getFile().delete();
+
+        String whereClause = PeekTable.COLUMN_NAME_PICTURE_ID + EQUALS + pictureToDelete.getUniqueId();
+        db.delete(PeekTable.TABLE_NAME, whereClause, null);
+
+        db.close();
+    }
+
+    public void deletePictureFromDatabase(Picture pictureToDelete) {
+        deletePictureFromPeekTable(pictureToDelete);
+        deletePictureFromFeedTable(pictureToDelete);
+        deletePictureFromMeTable(pictureToDelete);
+    }
+
     public void deletePictureFromFeedTable(Picture pictureToDelete) {
         SQLiteDatabase db = this.getWritableDatabase();
 
