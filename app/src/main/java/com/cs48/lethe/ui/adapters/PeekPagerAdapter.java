@@ -45,7 +45,7 @@ public class PeekPagerAdapter extends PagerAdapter {
     }
 
     /**
-     * Returns the number of items in the fullscreen slideshow
+     * @return Return the number of views available.
      */
     @Override
     public int getCount() {
@@ -53,7 +53,15 @@ public class PeekPagerAdapter extends PagerAdapter {
     }
 
     /**
-     * Determines whether a page View is associated with a specific key object.
+     * Determines whether a page View is associated with a specific
+     * key object as returned by instantiateItem(ViewGroup, int).
+     * This method is required for a PagerAdapter to function properly.
+     *
+     * @param view Page View to check for association with object
+     * @param object Object to check for association with view
+     *
+     * @return True if view is associated with the key object object.
+     *         False otherwise.
      */
     @Override
     public boolean isViewFromObject(View view, Object object) {
@@ -61,11 +69,16 @@ public class PeekPagerAdapter extends PagerAdapter {
     }
 
     /**
-     * Creates the page for the given position. The adapter is responsible
+     * Create the page for the given position. The adapter is responsible
      * for adding the view to the container given here.
+     *
+     * @param container The containing View in which the page will be shown.
+     * @param position The page position to be instantiated.
+     *
+     * @return Returns a view representing the new page.
      */
     @Override
-    public Object instantiateItem(ViewGroup container, int position) {
+    public View instantiateItem(ViewGroup container, int position) {
         View itemView = mLayoutInflater.inflate(R.layout.layout_fullscreen, container, false);
 
         final TouchImageView imageView = (TouchImageView) itemView.findViewById(R.id.imageView);
@@ -119,8 +132,12 @@ public class PeekPagerAdapter extends PagerAdapter {
     }
 
     /**
-     * Removes a page for the given position. The adapter is responsible
-     * for removing the view from its container.
+     * Remove a page for the given position. The adapter is
+     * responsible for removing the view from its container.
+     *
+     * @param container The containing View from which the page will be removed.
+     * @param position The page position to be removed.
+     * @param object The same object that was returned by instantiateItem(View, int).
      */
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
@@ -128,7 +145,15 @@ public class PeekPagerAdapter extends PagerAdapter {
 
     }
 
+    /**
+     * A callback to be invoked when a view is clicked.
+     */
     class OnPictureClickListener implements View.OnClickListener {
+        /**
+         * Called when a view has been clicked.
+         *
+         * @param v The view that was clicked.
+         */
         @Override
         public void onClick(View v) {
             ((PeekFullScreenActivity) mContext).finish();

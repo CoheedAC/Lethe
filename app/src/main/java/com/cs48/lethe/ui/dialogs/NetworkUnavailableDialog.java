@@ -11,6 +11,14 @@ import android.os.Bundle;
  */
 public class NetworkUnavailableDialog extends DialogFragment {
 
+    /**
+     * Override to build your own custom Dialog container. This is typically
+     * used to show an AlertDialog instead of a generic Dialog;
+     *
+     * @param savedInstanceState The last saved instance state of the Fragment, or null if this is a freshly created Fragment.
+     *
+     * @return Return a new Dialog instance to be displayed by the Fragment.
+     */
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Context context = getActivity();

@@ -8,7 +8,7 @@ import android.view.View;
 /**
  * Detects left and right swipes across a view as well as single taps.
  */
-public class OnHorizontalSwipeListener implements View.OnTouchListener {
+public abstract class OnHorizontalSwipeListener implements View.OnTouchListener {
 
     private final GestureDetector gestureDetector;
 
@@ -16,15 +16,20 @@ public class OnHorizontalSwipeListener implements View.OnTouchListener {
         gestureDetector = new GestureDetector(context, new GestureListener());
     }
 
-    public void onSwipeLeft() {
-    }
+    public abstract void onSwipeLeft();
+    public abstract void onSwipeRight();
+    public abstract void onSingleTap();
 
-    public void onSwipeRight() {
-    }
-
-    public void onSingleTap() {
-    }
-
+    /**
+     * Called when a touch event is dispatched to a view. This allows
+     * listeners to get a chance to respond before the target view.
+     *
+     * @param v The view the touch event has been dispatched to.
+     * @param event The MotionEvent object containing full information about the event.
+     *
+     * @return True if the listener has consumed the event, false otherwise.
+     */
+    @Override
     public boolean onTouch(View v, MotionEvent event) {
         return gestureDetector.onTouchEvent(event);
     }
@@ -34,14 +39,31 @@ public class OnHorizontalSwipeListener implements View.OnTouchListener {
         private static final int SWIPE_DISTANCE_THRESHOLD = 100;
         private static final int SWIPE_VELOCITY_THRESHOLD = 100;
 
+        /**
+         * Notified when a tap occurs with the down MotionEvent that triggered it.
+         * This will be triggered immediately for every down event. All other events
+         * should be preceded by this.
+         *
+         * @param e The down motion event.
+         *
+         * @return true
+         */
         @Override
         public boolean onDown(MotionEvent e) {
             return true;
         }
 
         /**
-         * Handles detecting correct swipes based upon velocity
-         * and direction of swipe.
+         * Notified of a fling event when it occurs with the initial on down
+         * MotionEvent and the matching up MotionEvent. The calculated velocity
+         * is supplied along the x and y axis in pixels per second.
+         *
+         * @param e1 The first down motion event that started the fling.
+         * @param e2 The move motion event that triggered the current onFling.
+         * @param velocityX The velocity of this fling measured in pixels per second along the x axis.
+         * @param velocityY The velocity of this fling measured in pixels per second along the y axis.
+         *
+         * @return true if the event is consumed, else false
          */
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
@@ -58,7 +80,11 @@ public class OnHorizontalSwipeListener implements View.OnTouchListener {
         }
 
         /**
-         * Handles single tab touch events.
+         * Notified when a tap occurs with the up MotionEvent that triggered it.
+         *
+         * @param event The up motion event that completed the first tap
+
+         * @return true if the event is consumed, else false
          */
         @Override
         public boolean onSingleTapUp(MotionEvent event) {

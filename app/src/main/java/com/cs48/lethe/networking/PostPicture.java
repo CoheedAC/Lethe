@@ -9,7 +9,6 @@ import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.ui.activities.CameraActivity;
 import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
-import com.cs48.lethe.utils.ActionCodes;
 import com.cs48.lethe.utils.NetworkUtilities;
 import com.cs48.lethe.utils.Picture;
 
@@ -44,6 +43,9 @@ public class PostPicture extends AsyncTask<String, String, String> {
         mPictureFile = pictureFile;
     }
 
+    /**
+     * Runs on the UI thread before doInBackground(Params...).
+     */
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
@@ -51,8 +53,14 @@ public class PostPicture extends AsyncTask<String, String, String> {
     }
 
     /**
-     * Posts the image on the server while getting the current
-     * location so the image is posted in the correct region.
+     * Performs a computation on a background thread. The specified parameters are
+     * the parameters passed to execute(Params...) by the caller of this task.
+     * This method can call publishProgress(Progress...) to publish updates on
+     * the UI thread.
+     *
+     * @param path The parameters of the task.
+     *
+     * @return A result, defined by the subclass of this task.
      */
     @Override
     protected String doInBackground(String... path) {
@@ -82,7 +90,7 @@ public class PostPicture extends AsyncTask<String, String, String> {
             String longitude = generateForSimpleText("longitude", coordinates[1]);
             String combined = latitude + longitude;
 
-            // Tim, upload this rotation int to the server
+            // TODO: Tim, upload this orientation int to the server
 //            int orientation = PictureUtilities.getImageOrientation(mPictureFile.getAbsolutePath());
 
             byte[] writer = combined.getBytes();
@@ -145,6 +153,13 @@ public class PostPicture extends AsyncTask<String, String, String> {
         return result;
     }
 
+    /**
+     * Runs on the UI thread after doInBackground(Params...). The specified
+     * result is the value returned by doInBackground(Params...). This method
+     * won't be invoked if the task was cancelled.
+     *
+     * @param result The result of the operation computed by doInBackground(Params...).
+     */
     @Override
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
@@ -153,23 +168,17 @@ public class PostPicture extends AsyncTask<String, String, String> {
             try {
                 JSONObject jsonObject = new JSONObject(result);
                 DatabaseHelper databaseHelper = DatabaseHelper.getInstance(mCameraActivity);
-                Picture picture = new Picture(jsonObject.getString(mCameraActivity.getString(R.string.json_id)),
+                databaseHelper.insertPicture(new Picture(
+                        jsonObject.getString(mCameraActivity.getString(R.string.json_id)),
                         jsonObject.getString(mCameraActivity.getString(R.string.json_date_posted)),
-                        mPictureFile, 0, 0);
-                databaseHelper.insertPictureToMeTable(picture);
-                databaseHelper.insertPictureToFeedTable(picture);
-
-
+                        mPictureFile, 0, 0));
             } catch (JSONException e) {
                 Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             }
-
             mCameraActivity.onPostPictureEnd();
-            mCameraActivity.setResult(ActionCodes.POST_SUCCESS);
             mCameraActivity.finish();
         } else {
             mCameraActivity.onPostPictureEnd();
-            mCameraActivity.setResult(ActionCodes.POST_FAILED);
             try {
                 new OperationFailedDialog().show(mCameraActivity.getFragmentManager(), LOG_TAG);
             }catch (IllegalStateException e) {

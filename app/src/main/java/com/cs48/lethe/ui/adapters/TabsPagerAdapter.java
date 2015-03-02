@@ -37,7 +37,11 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
     }
 
     /**
-     * Returns the fragment at a given index.
+     * Return the Fragment associated with a specified position.
+     *
+     * @param position The desired position of the fragment
+     *
+     * @return The Fragment associated with a specified position.
      */
     @Override
     public Fragment getItem(int position) {
@@ -45,18 +49,10 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
     }
 
     /**
-     * Returns the number of fragments.
+     * @return Return the number of views available.
      */
     @Override
     public int getCount() {
         return fragments.size();
     }
-
-    /**
-     * Gets the tag of the fragment
-     */
-    public static String getFragmentTag(int viewPagerId, int position) {
-        return "android:switcher:" + viewPagerId + ":" + position;
-    }
-
 }

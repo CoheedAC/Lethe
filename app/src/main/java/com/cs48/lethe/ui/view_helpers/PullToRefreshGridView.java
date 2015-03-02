@@ -35,6 +35,13 @@ public class PullToRefreshGridView extends GridView {
         return expanded;
     }
 
+    /**
+     * Measure the view and its content to determine the measured width and
+     * the measured height.
+     *
+     * @param widthMeasureSpec horizontal space requirements as imposed by the parent.
+     * @param heightMeasureSpec vertical space requirements as imposed by the parent.
+     */
     @Override
     public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // HACK! TAKE THAT ANDROID!

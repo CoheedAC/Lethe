@@ -32,20 +32,40 @@ public class MoreFragment extends Fragment {
     @InjectView(R.id.contactButton)
     Button mContactButton;
     @InjectView(R.id.tosButton)
-    Button mTOSButton;
+    Button mTermsOfServiceButton;
     @InjectView(R.id.ppButton)
-    Button mPPButton;
+    Button mPrivacyPolicyButton;
 
     /**
-     * onCreate() is used for normal static setup of the activity
+     * Called to do initial creation of a fragment. This is called after onAttach(Activity)
+     * and before onCreateView(LayoutInflater, ViewGroup, Bundle). Note that this can be called
+     * while the fragment's activity is still in the process of being created. As such, you can
+     * not rely on things like the activity's content view hierarchy being initialized at this point.
      *
-     * @param savedInstanceState Saved state data passed into onCreate
+     * @param savedInstanceState If the fragment is being re-created from a
+     *                           previous saved state, this is the state.
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
 
+    /**
+     * Called to have the fragment instantiate its user interface view. This
+     * will be called between onCreate(Bundle) and onActivityCreated(Bundle).
+     * If you return a View from here, you will later be called in
+     * onDestroyView() when the view is being released.
+     *
+     * @param inflater The LayoutInflater object that can be used
+     *                 to inflate any views in the fragment,
+     * @param container If non-null, this is the parent view that the
+     *                  fragment's UI should be attached to. The fragment
+     *                  should not add the view itself, but this can be
+     *                  used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     *                           from a previous saved state as given here.
+     * @return Return the View for the fragment's UI, or null.
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -54,9 +74,9 @@ public class MoreFragment extends Fragment {
 
         ButterKnife.inject(this, rootView);
 
-        mFacebookButton.setOnClickListener(new OnFacebookClickListener());
-        mInstagramButton.setOnClickListener(new OnInstagramClickListener());
-        mContactButton.setOnClickListener(new OnContactUsClickListener());
+        mFacebookButton.setOnClickListener(new OnFacebookButtonClick());
+        mInstagramButton.setOnClickListener(new OnInstagramButtonClick());
+        mContactButton.setOnClickListener(new OnContactUsButtonClick());
 
         return rootView;
     }
@@ -64,7 +84,12 @@ public class MoreFragment extends Fragment {
     /**
      * Listener for facebook, opens to facebook URL
      */
-    class OnFacebookClickListener implements View.OnClickListener {
+    private class OnFacebookButtonClick implements View.OnClickListener {
+        /**
+         * Called when a view has been clicked.
+         *
+         * @param v The view that was clicked.
+         */
         @Override
         public void onClick(View v) {
             startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://www.facebook.com/I5555")));
@@ -74,7 +99,12 @@ public class MoreFragment extends Fragment {
     /**
      * Listener for Instagram, opens Instagram URL
      */
-    class OnInstagramClickListener implements View.OnClickListener {
+    private class OnInstagramButtonClick implements View.OnClickListener {
+        /**
+         * Called when a view has been clicked.
+         *
+         * @param v The view that was clicked.
+         */
         @Override
         public void onClick(View v) {
             startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://instagram.com/lynchifer/")));
@@ -86,21 +116,31 @@ public class MoreFragment extends Fragment {
      * Listener for Contact Us button, prompts user to pick email app,
      * sends email with mailto field already filled in
      */
-    class OnContactUsClickListener implements View.OnClickListener {
+    private class OnContactUsButtonClick implements View.OnClickListener {
+        /**
+         * Called when a view has been clicked.
+         *
+         * @param v The view that was clicked.
+         */
         @Override
         public void onClick(View v) {
-            Intent intent = new Intent(Intent.ACTION_SEND);
-            intent.setType("message/rfc822");
-            intent.putExtra(Intent.EXTRA_EMAIL, "dlynch305@gmail.com");
+            Intent emailIntent = new Intent(Intent.ACTION_SEND);
+            emailIntent.setType("message/rfc822");
+            emailIntent.putExtra(Intent.EXTRA_EMAIL, "dlynch305@gmail.com");
 
-            startActivity(Intent.createChooser(intent, "Send Email"));
+            startActivity(Intent.createChooser(emailIntent, "Send Email"));
         }
     }
 
     /**
      * Listener for showing the Privacy Policy when clicked
      */
-    class OnPrivacyPolicyClickListener implements View.OnClickListener {
+    private class OnPrivacyPolicyButtonClick implements View.OnClickListener {
+        /**
+         * Called when a view has been clicked.
+         *
+         * @param v The view that was clicked.
+         */
         @Override
         public void onClick(View v) {
             //TODO Open Privacy Policy text
@@ -110,7 +150,12 @@ public class MoreFragment extends Fragment {
     /**
      * Listener for showing the Terms of Service when clicked
      */
-    class OnTermsOfServiceClickListener implements View.OnClickListener {
+    private class OnTermsOfServiceButtonClick implements View.OnClickListener {
+        /**
+         * Called when a view has been clicked.
+         *
+         * @param v The view that was clicked.
+         */
         @Override
         public void onClick(View v) {
             //TODO Open Terms of Service Text

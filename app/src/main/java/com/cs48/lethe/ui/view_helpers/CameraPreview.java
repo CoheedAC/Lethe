@@ -21,7 +21,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     public CameraPreview(Context context, Camera camera) {
         super(context);
         mCamera = camera;
-        mCamera.setFaceDetectionListener(new MyFaceDetectionListener());
 
         // Install a SurfaceHolder.Callback so we get notified when the
         // underlying surface is created and destroyed.
@@ -31,20 +30,28 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
     }
 
+    /**
+     * This is called immediately after the surface is first created.
+     *
+     * @param holder The SurfaceHolder whose surface is being created.
+     */
+    @Override
     public void surfaceCreated(SurfaceHolder holder) {
         // The Surface has been created, now tell the camera where to draw the preview.
         try {
             mCamera.setPreviewDisplay(holder);
             mCamera.startPreview();
-
-            mCamera.setFaceDetectionListener(new MyFaceDetectionListener());
-            startFaceDetection(); // start face detection feature
-
         } catch (IOException e) {
             Log.d(TAG, "Error setting camera preview: " + e.getMessage());
         }
     }
 
+    /**
+     * This is called immediately before a surface is being destroyed.
+     *
+     * @param holder The SurfaceHolder whose surface is being destroyed.
+     */
+    @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         // empty. Take care of releasing the Camera preview in your activity.
         if (mCamera != null) {
@@ -53,10 +60,20 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         }
     }
 
+    /**
+     * This is called immediately after any structural changes (format or size)
+     * have been made to the surface. This method is always called at least once,
+     * after surfaceCreated(SurfaceHolder).
+     *
+     * @param holder The SurfaceHolder whose surface has changed.
+     * @param format The new PixelFormat of the surface.
+     * @param w The new width of the surface.
+     * @param h The new height of the surface.
+     */
+    @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         // If your preview can change or rotate, take care of those events here.
         // Make sure to stop the preview before resizing or reformatting it.
-
         if (mHolder.getSurface() == null) {
             // preview surface does not exist
             Log.d(TAG, "mHolder.getSurface() == null");
@@ -78,42 +95,10 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         try {
             mCamera.setPreviewDisplay(mHolder);
             mCamera.startPreview();
-
-            mCamera.setFaceDetectionListener(new MyFaceDetectionListener());
-            startFaceDetection(); // re-start face detection feature
-
         } catch (Exception e) {
             // ignore: tried to stop a non-existent preview
             Log.d(TAG, "Error starting camera preview: " + e.getMessage());
         }
-    }
-
-    class MyFaceDetectionListener implements Camera.FaceDetectionListener {
-
-        @Override
-        public void onFaceDetection(Camera.Face[] faces, Camera camera) {
-            Log.d("FaceDetection", "started");
-            if (faces.length > 0) {
-                Log.d("FaceDetection", "face detected: " + faces.length +
-                        " Face 1 Location X: " + faces[0].rect.centerX() +
-                        "Y: " + faces[0].rect.centerY());
-            } else {
-                Log.d("FaceDetection", "face detected: none");
-            }
-        }
-    }
-
-    public void startFaceDetection() {
-        // Try starting Face Detection
-        Camera.Parameters params = mCamera.getParameters();
-
-        // start face detection only *after* preview has started
-        if (params.getMaxNumDetectedFaces() > 0) {
-            Log.d(TAG, "FaceDetection supported.");
-            // camera supports face detection, so can start it:
-            mCamera.startFaceDetection();
-        } else
-            Log.d(TAG, "FaceDetection supported.");
     }
 
     public void refreshCamera(Camera camera) {
@@ -127,9 +112,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         } catch (Exception e) {
             // ignore: tried to stop a non-existent preview
         }
-        // set preview size and make any resize, rotate or
-        // reformatting changes here
-        // start preview with new settings
+        // start preview
         mCamera = camera;
         try {
             mCamera.setPreviewDisplay(mHolder);

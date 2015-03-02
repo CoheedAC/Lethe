@@ -21,7 +21,6 @@ import com.cs48.lethe.ui.adapters.FeedGridViewAdapter;
 import com.cs48.lethe.ui.dialogs.NetworkUnavailableDialog;
 import com.cs48.lethe.ui.view_helpers.FeedPullToRefreshLayout;
 import com.cs48.lethe.ui.view_helpers.PullToRefreshGridView;
-import com.cs48.lethe.utils.ActionCodes;
 import com.cs48.lethe.utils.NetworkUtilities;
 import com.cs48.lethe.utils.Picture;
 
@@ -42,7 +41,13 @@ public class FeedFragment extends Fragment {
     TextView mEmptyGridTextView;
 
     /**
-     * Sets up the action bar menu.
+     * Called to do initial creation of a fragment. This is called after onAttach(Activity)
+     * and before onCreateView(LayoutInflater, ViewGroup, Bundle). Note that this can be called
+     * while the fragment's activity is still in the process of being created. As such, you can
+     * not rely on things like the activity's content view hierarchy being initialized at this point.
+     *
+     * @param savedInstanceState If the fragment is being re-created from a
+     *                           previous saved state, this is the state.
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -53,12 +58,24 @@ public class FeedFragment extends Fragment {
     }
 
     /**
-     * Creates the feed grid and handles image taps on grid.
+     * Called to have the fragment instantiate its user interface view. This
+     * will be called between onCreate(Bundle) and onActivityCreated(Bundle).
+     * If you return a View from here, you will later be called in
+     * onDestroyView() when the view is being released.
+     *
+     * @param inflater The LayoutInflater object that can be used
+     *                 to inflate any views in the fragment,
+     * @param container If non-null, this is the parent view that the
+     *                  fragment's UI should be attached to. The fragment
+     *                  should not add the view itself, but this can be
+     *                  used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     *                           from a previous saved state as given here.
+     * @return Return the View for the fragment's UI, or null.
      */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         View rootView = inflater.inflate(R.layout.fragment_feed, container, false);
 
         ButterKnife.inject(this, rootView);
@@ -80,6 +97,10 @@ public class FeedFragment extends Fragment {
         return rootView;
     }
 
+    /**
+     * Called when the fragment is visible to the user and actively running. This is
+     * generally tied to Activity.onResume of the containing Activity's lifecycle.
+     */
     @Override
     public void onResume() {
         super.onResume();
@@ -87,18 +108,13 @@ public class FeedFragment extends Fragment {
             fetchFeedFromServer();
     }
 
-    public boolean setEmptyGridMessage(String errorMessage) {
-        if (mFeedGridViewAdapter.getCount() == 0) {
-            mEmptyGridTextView.setVisibility(View.VISIBLE);
-            mEmptyGridTextView.setText(errorMessage);
-            return true;
-        }
-        mEmptyGridTextView.setVisibility(View.GONE);
-        return false;
-    }
-
     /**
-     * Hides the delete all images and copy image button in the action bar.
+     * Initialize the contents of the Activity's standard options menu.
+     * You should place your menu items in to menu. For this method to be
+     * called, you must have first called setHasOptionsMenu(boolean).
+     *
+     * @param menu The options menu in which you place your items.
+     * @param inflater The LayoutInflater object that can be used to inflate any views in the fragment,
      */
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -106,7 +122,12 @@ public class FeedFragment extends Fragment {
     }
 
     /**
-     * Handles action bar menu button clicks.
+     * This hook is called whenever an item in your options menu is selected.
+     *
+     * @param item The menu item that was selected.
+     *
+     * @return Return false to allow normal menu processing to proceed,
+     *         true to consume it here.
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -121,6 +142,16 @@ public class FeedFragment extends Fragment {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public boolean setEmptyGridMessage(String errorMessage) {
+        if (mFeedGridViewAdapter.getCount() == 0) {
+            mEmptyGridTextView.setVisibility(View.VISIBLE);
+            mEmptyGridTextView.setText(errorMessage);
+            return true;
+        }
+        mEmptyGridTextView.setVisibility(View.GONE);
+        return false;
     }
 
     /**
@@ -145,9 +176,9 @@ public class FeedFragment extends Fragment {
         mFeedPullToRefreshLayout.setRefreshing(false);
     }
 
+
     /**
-     * Starts the full-screen activity and sends the necessary data to
-     * that activity through a Bundle.
+     * A callback to be invoked when an item in this AdapterView has been clicked.
      */
     class OnPictureClickListener implements AdapterView.OnItemClickListener {
         @Override
@@ -155,7 +186,7 @@ public class FeedFragment extends Fragment {
             Intent feedFullPictureIntent = new Intent(getActivity(), FeedFullScreenActivity.class);
             Picture picture = (Picture) mFeedGridViewAdapter.getItem(position);
             feedFullPictureIntent.putExtra(getString(R.string.data_uniqueId), picture.getUniqueId());
-            startActivityForResult(feedFullPictureIntent, ActionCodes.FEED_FULLSCREEN_REQUEST);
+            startActivity(feedFullPictureIntent);
         }
     }
 

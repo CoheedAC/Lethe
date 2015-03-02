@@ -1,6 +1,5 @@
 package com.cs48.lethe.ui.activities;
 
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
@@ -12,8 +11,6 @@ import android.view.MenuItem;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.ui.adapters.TabsPagerAdapter;
-import com.cs48.lethe.utils.ActionCodes;
-import com.cs48.lethe.utils.FileUtilities;
 
 /**
  * The main activity where the app launches. It handles all of the tab fragments
@@ -27,7 +24,15 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     private ViewPager mViewPager;
 
     /**
-     * Creates the action bar and title.
+     * Called when the activity is starting. This is where most initialization should go:
+     * calling setContentView(int) to inflate the activity's UI, using findViewById(int)
+     * to programmatically interact with widgets in the UI, and initializing other variables
+     * that need to be set.
+     *
+     * @param savedInstanceState If the activity is being re-initialized after previously
+     *                           being shut down then this Bundle contains the data it most
+     *                           recently supplied in onSaveInstanceState(Bundle).
+     *                           Note: Otherwise it is null.
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,7 +87,12 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     }
 
     /**
-     * Inflate the menu; this adds items to the action bar if it is present.
+     * Initialize the contents of the Activity's standard options menu.
+     *
+     * @param menu The options menu in which you place your items.
+     *
+     * @return You must return true for the menu to be displayed;
+     *         if you return false it will not be shown.
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -93,7 +103,12 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     }
 
     /**
-     * Handles button presses on action bar.
+     * This hook is called whenever an item in your options menu is selected.
+     *
+     * @param item The menu item that was selected.
+     *
+     * @return Return false to allow normal menu processing to
+     *         proceed, true to consume it here.
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -101,14 +116,20 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         // Starts camera activity if camera button pressed
         if (id == R.id.action_camera) {
-            startCamera();
+            startActivity(new Intent(this, CameraActivity.class));
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
     /**
-     * Changes the title on the action bar when a new tab is selected.
+     * Called when a tab enters the selected state.
+     *
+     * @param tab The tab that was selected
+     * @param fragmentTransaction A FragmentTransaction for queuing fragment operations
+     *                            to execute during a tab switch. The previous tab's unselect
+     *                            and this tab's select will be executed in a single transaction.
+     *                            This FragmentTransaction does not support being added to the back stack.
      */
     @Override
     public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
@@ -135,24 +156,29 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         }
     }
 
+    /**
+     * Called when a tab exits the selected state.
+     *
+     * @param tab The tab that was unselected
+     * @param fragmentTransaction A FragmentTransaction for queuing fragment operations to execute
+     *                            during a tab switch. This tab's unselect and the newly selected
+     *                            tab's select will be executed in a single transaction. This
+     *                            FragmentTransaction does not support being added to the back stack.
+     */
     @Override
     public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
     }
 
+    /**
+     * Called when a tab that is already selected is chosen again by the user.
+     *
+     * @param tab The tab that was reselected.
+     * @param fragmentTransaction A FragmentTransaction for queuing fragment operations
+     *                            to execute once this method returns. This FragmentTransaction
+     *                            does not support being added to the back stack.
+     */
     @Override
     public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-    }
-
-    /**
-     * Starts built-in camera functionality and sets path to store file
-     */
-    private void startCamera() {
-        try {
-            Intent cameraCaptureIntent = new Intent(this, CameraActivity.class);
-            startActivityForResult(cameraCaptureIntent, ActionCodes.CAMERA_CAPTURE_REQUEST);
-        } catch (ActivityNotFoundException e) {
-            FileUtilities.logResults(this, LOG_TAG, "Whoops - your device doesn't support capturing images!");
-        }
     }
 
 }

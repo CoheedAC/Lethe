@@ -114,12 +114,35 @@ public class TouchImageView extends ImageView {
 
     private class ScaleListener extends
             ScaleGestureDetector.SimpleOnScaleGestureListener {
+
+        /**
+         * Responds to the beginning of a scaling gesture. Reported by new pointers going down.
+         *
+         * @param detector The detector reporting the event. Use this to
+         *                 retrieve extended info about event state.
+         *
+         * @return Whether or not the detector should continue recognizing this
+         *          gesture. For example, if a gesture is beginning with a focal
+         *          point outside of a region where it makes sense, onScaleBegin()
+         *          may return false to ignore the rest of the gesture.
+         */
         @Override
         public boolean onScaleBegin(ScaleGestureDetector detector) {
             mode = ZOOM;
             return true;
         }
 
+        /**
+         * Responds to scaling events for a gesture in progress. Reported by pointer motion.
+         *
+         * @param detector The detector reporting the event. Use this to
+         *                 retrieve extended info about event state.
+         *
+         * @return Whether or not the detector should consider this event as handled. If an event
+         *         was not handled, the detector will continue to accumulate movement until an event
+         *         is handled. This can be useful if an application, for example, only wants to update
+         *         scaling factors if the change is greater than 0.01.
+         */
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
             float mScaleFactor = detector.getScaleFactor();
@@ -183,6 +206,13 @@ public class TouchImageView extends ImageView {
         return delta;
     }
 
+    /**
+     * Measure the view and its content to determine the measured width and
+     * the measured height.
+     *
+     * @param widthMeasureSpec horizontal space requirements as imposed by the parent.
+     * @param heightMeasureSpec vertical space requirements as imposed by the parent.
+     */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);

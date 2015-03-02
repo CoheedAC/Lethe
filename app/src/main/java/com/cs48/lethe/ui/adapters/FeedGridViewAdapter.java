@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A BaseAdapter that handles the grid for the feed tab.
@@ -52,30 +53,50 @@ public class FeedGridViewAdapter extends BaseAdapter {
     }
 
     /**
-     * Returns the number of items in the grid.
+     * How many items are in the data set represented by this Adapter.
+     *
+     * @return Count of items.
      */
+    @Override
     public int getCount() {
         return mPictureList.size();
     }
 
     /**
-     * Returns the File in the ImageList of Files at the
-     * given index.
+     * Get the data item associated with the specified position in the data set.
+     *
+     * @param position Position of the item whose data we want within the adapter's data set.
+     *
+     * @return The data at the specified position.
      */
-    public Object getItem(int position) {
+    @Override
+    public Picture getItem(int position) {
         return mPictureList.get(position);
     }
 
     /**
-     * Returns the position.
+     * Get the row id associated with the specified position in the list.
+     *
+     * @param position The position of the item within the adapter's data set whose row id we want.
+     *
+     * @return The id of the item at the specified position
      */
+    @Override
     public long getItemId(int position) {
         return position;
     }
 
     /**
-     * Creates a new ImageView for each item referenced by the Adapter
+     * Get a View that displays the data at the specified position in the data set.
+     *
+     * @param position The position of the item within the adapter's
+     *                 data set of the item whose view we want.
+     * @param convertView The old view to reuse, if possible.
+     * @param parent The parent that this view will eventually be attached to.
+     *
+     * @return A View corresponding to the data at the specified position.
      */
+    @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
         // if it's not recycled, initialize some attributes
@@ -125,7 +146,7 @@ public class FeedGridViewAdapter extends BaseAdapter {
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 try {
                     // temporary list to store list of images
-                    HashMap<String, Picture> serverPictureMap = new HashMap<>();
+                    Map<String, Picture> serverPictureMap = new HashMap<>();
 
                     // parses the data received from the server
                     String jsonData = new String(responseBody);
@@ -162,9 +183,6 @@ public class FeedGridViewAdapter extends BaseAdapter {
 
                     // gets an updated list of images from the database
                     mPictureList = mDatabaseHelper.getFeedPictures();
-
-                    for (int i = 0; i < mPictureList.size(); i++)
-                        Log.d(LOG_TAG, mPictureList.get(i).getUniqueId() + " : " + i);
 
                     feedFragment.stopRefreshAnimation();
                     feedFragment.setEmptyGridMessage(mContext.getString(R.string.grid_area_empty));

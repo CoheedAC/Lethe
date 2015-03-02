@@ -14,7 +14,6 @@ import com.cs48.lethe.utils.Picture;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -104,6 +103,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
+    /**
+     * Called when the database is created for the first time. This is where the
+     * creation of tables and the initial population of the tables should happen.
+     *
+     * @param db The database.
+     */
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_FEED_TABLE);
@@ -111,6 +116,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_ME_TABLE);
     }
 
+    /**
+     * Called when the database needs to be upgraded. The implementation should
+     * use this method to drop tables, add tables, or do anything else it needs
+     * to upgrade to the new schema version. This method executes within a transaction.
+     * If an exception is thrown, all changes will automatically be rolled back.
+     *
+     * @param db The database.
+     * @param oldVersion The old database version.
+     * @param newVersion The new database version.
+     */
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // on upgrade drop older tables
@@ -122,6 +137,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    /**
+     * Called when the database needs to be downgraded. This is strictly similar to
+     * onUpgrade(SQLiteDatabase, int, int) method, but is called whenever current version
+     * is newer than requested one. However, this method is not abstract, so it is not
+     * mandatory for a customer to implement it.
+     *
+     * @param db The database.
+     * @param oldVersion The old database version.
+     * @param newVersion The new database version.
+     */
     @Override
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         onUpgrade(db, oldVersion, newVersion);
@@ -153,10 +178,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return (count != 0);
     }
 
-    public void updateFeed(HashMap<String, Picture> pictureHashMap) {
+    public void updateFeed(Map<String, Picture> pictureMap) {
         SQLiteDatabase db = getWritableDatabase();
 
-        Iterator iterator = pictureHashMap.entrySet().iterator();
+        Iterator iterator = pictureMap.entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry pair = (Map.Entry) iterator.next();
             Picture picture = (Picture) pair.getValue();
@@ -259,27 +284,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_LIKES)));
     }
 
-    public void insertPictureToMeTable(Picture postedPicture) {
+    public void insertPicture(Picture postedPicture) {
         SQLiteDatabase db = getWritableDatabase();
 
-        ContentValues values = new ContentValues();
-        values.put(MeTable.COLUMN_NAME_PICTURE_ID, postedPicture.getUniqueId());
-        values.put(MeTable.COLUMN_NAME_FILE_PATH, postedPicture.getFile().getAbsolutePath());
-        values.put(MeTable.COLUMN_NAME_DATE_POSTED, postedPicture.getDatePosted());
+        ContentValues meValues = new ContentValues();
+        meValues.put(MeTable.COLUMN_NAME_PICTURE_ID, postedPicture.getUniqueId());
+        meValues.put(MeTable.COLUMN_NAME_FILE_PATH, postedPicture.getFile().getAbsolutePath());
+        meValues.put(MeTable.COLUMN_NAME_DATE_POSTED, postedPicture.getDatePosted());
 
-        db.insert(MeTable.TABLE_NAME, null, values);
-        db.close();
-    }
+        ContentValues feedValues = new ContentValues();
+        feedValues.put(FeedTable.COLUMN_NAME_PICTURE_ID, postedPicture.getUniqueId());
+        feedValues.put(FeedTable.COLUMN_NAME_FILE_PATH, postedPicture.getFile().getAbsolutePath());
+        feedValues.put(FeedTable.COLUMN_NAME_DATE_POSTED, postedPicture.getDatePosted());
 
-    public void insertPictureToFeedTable(Picture postedPicture) {
-        SQLiteDatabase db = getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(FeedTable.COLUMN_NAME_PICTURE_ID, postedPicture.getUniqueId());
-        values.put(FeedTable.COLUMN_NAME_FILE_PATH, postedPicture.getFile().getAbsolutePath());
-        values.put(FeedTable.COLUMN_NAME_DATE_POSTED, postedPicture.getDatePosted());
-
-        db.insert(FeedTable.TABLE_NAME, null, values);
+        db.insert(MeTable.TABLE_NAME, null, meValues);
+        db.insert(FeedTable.TABLE_NAME, null, feedValues);
         db.close();
     }
 
@@ -307,12 +326,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    public void deletePictureFromDatabase(Picture pictureToDelete) {
-        deletePictureFromPeekTable(pictureToDelete);
-        deletePictureFromFeedTable(pictureToDelete);
-        deletePictureFromMeTable(pictureToDelete);
-    }
-
     public void deletePictureFromFeedTable(Picture pictureToDelete) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -323,6 +336,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.delete(FeedTable.TABLE_NAME, whereClause, null);
 
         db.close();
+    }
+
+    public void deletePictureFromDatabase(Picture pictureToDelete) {
+        deletePictureFromPeekTable(pictureToDelete);
+        deletePictureFromFeedTable(pictureToDelete);
+        deletePictureFromMeTable(pictureToDelete);
     }
 
     public void viewPicture(Picture picture) {

@@ -18,7 +18,6 @@ import com.cs48.lethe.ui.dialogs.AlreadyLikedImageDialog;
 import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
 import com.cs48.lethe.ui.view_helpers.OnHorizontalSwipeListener;
 import com.cs48.lethe.ui.view_helpers.TouchImageView;
-import com.cs48.lethe.utils.ActionCodes;
 import com.cs48.lethe.utils.NetworkUtilities;
 import com.cs48.lethe.utils.Picture;
 import com.cs48.lethe.utils.PictureUtilities;
@@ -55,6 +54,17 @@ public class FeedFullScreenActivity extends ActionBarActivity {
     @InjectView(R.id.buttonsLinearLayout)
     LinearLayout mButtonsLinearLayout;
 
+    /**
+     * Called when the activity is starting. This is where most initialization should go:
+     * calling setContentView(int) to inflate the activity's UI, using findViewById(int)
+     * to programmatically interact with widgets in the UI, and initializing other variables
+     * that need to be set.
+     *
+     * @param savedInstanceState If the activity is being re-initialized after previously
+     *                           being shut down then this Bundle contains the data it most
+     *                           recently supplied in onSaveInstanceState(Bundle).
+     *                           Note: Otherwise it is null.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -182,7 +192,6 @@ public class FeedFullScreenActivity extends ActionBarActivity {
         @Override
         public void onSwipeRight() {
             dislikePicture();
-            setResult(ActionCodes.HIDE_PICTURE);
             finish();
         }
 

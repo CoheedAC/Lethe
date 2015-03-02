@@ -19,6 +19,9 @@ public class PeekPullToRefreshLayout extends SwipeRefreshLayout {
         super(context, attrs);
     }
 
+    /**
+     * @return Whether it is possible for the child view of this layout to scroll up.
+     */
     @Override
     public boolean canChildScrollUp() {
         // Condition to check scrollview reached at top while scrolling
