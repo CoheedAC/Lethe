@@ -32,7 +32,7 @@
             android:value="AIzaSyCF6PG5_C5CtXKGLOxYy-YV_y6g6CSmxqo" />
 
         <activity
-            android:name=".ui.activities.MainActivity"
+            android:name=".ui.main.MainActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" >
             <intent-filter>
@@ -42,22 +42,22 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.activities.FeedFullScreenActivity"
+            android:name=".ui.feed.FeedFullScreenActivity"
             android:label="@string/title_activity_feed_fullscreen"
             android:screenOrientation="portrait" >
         </activity>
         <activity
-            android:name=".ui.activities.PeekFullScreenActivity"
+            android:name=".ui.peek.PeekFullScreenActivity"
             android:label="@string/title_activity_peek_fullscreen"
             android:screenOrientation="portrait" >
         </activity>
         <activity
-            android:name=".ui.activities.MeFullScreenActivity"
+            android:name=".ui.me.MeFullScreenActivity"
             android:label="@string/title_activity_me_fullscreen"
             android:screenOrientation="portrait" >
         </activity>
         <activity
-            android:name=".ui.activities.CameraActivity"
+            android:name=".ui.camera.CameraActivity"
             android:label="@string/title_activity_camera"
             android:screenOrientation="portrait" >
         </activity>

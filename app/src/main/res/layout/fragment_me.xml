@@ -2,7 +2,7 @@
              xmlns:tools="http://schemas.android.com/tools"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
-             tools:context="com.cs48.lethe.ui.fragments.MeFragment">
+             tools:context="com.cs48.lethe.ui.me.MeFragment">
 
     <GridView
         android:layout_width="match_parent"

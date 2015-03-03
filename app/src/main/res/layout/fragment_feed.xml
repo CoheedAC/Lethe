@@ -3,14 +3,14 @@
              android:layout_width="match_parent"
              android:layout_height="match_parent"
              android:id="@+id/relativeLayout"
-             tools:context="com.cs48.lethe.ui.fragments.FeedFragment">
+             tools:context="com.cs48.lethe.ui.feed.FeedFragment">
 
-    <com.cs48.lethe.ui.view_helpers.FeedPullToRefreshLayout
+    <com.cs48.lethe.ui.feed.FeedPullToRefreshLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/swipeRefreshLayout">
 
-        <com.cs48.lethe.ui.view_helpers.PullToRefreshGridView
+        <com.cs48.lethe.ui.miscellaneous.PullToRefreshGridView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/feedGridView"
@@ -20,7 +20,7 @@
             android:scrollbars="none"
             android:horizontalSpacing="4dp"
             android:verticalSpacing="2dp"/>
-    </com.cs48.lethe.ui.view_helpers.FeedPullToRefreshLayout>
+    </com.cs48.lethe.ui.feed.FeedPullToRefreshLayout>
 
     <TextView
         android:layout_width="wrap_content"

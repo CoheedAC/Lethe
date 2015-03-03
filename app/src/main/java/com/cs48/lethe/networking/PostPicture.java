@@ -7,8 +7,8 @@ import android.util.Log;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
-import com.cs48.lethe.ui.activities.CameraActivity;
-import com.cs48.lethe.ui.dialogs.OperationFailedDialog;
+import com.cs48.lethe.ui.camera.CameraActivity;
+import com.cs48.lethe.ui.alertdialogs.OperationFailedDialog;
 import com.cs48.lethe.utils.NetworkUtilities;
 import com.cs48.lethe.utils.Picture;
 
@@ -175,10 +175,10 @@ public class PostPicture extends AsyncTask<String, String, String> {
             } catch (JSONException e) {
                 Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             }
-            mCameraActivity.onPostPictureEnd();
+            mCameraActivity.onPostPictureFailed();
             mCameraActivity.finish();
         } else {
-            mCameraActivity.onPostPictureEnd();
+            mCameraActivity.onPostPictureFailed();
             try {
                 new OperationFailedDialog().show(mCameraActivity.getFragmentManager(), LOG_TAG);
             }catch (IllegalStateException e) {

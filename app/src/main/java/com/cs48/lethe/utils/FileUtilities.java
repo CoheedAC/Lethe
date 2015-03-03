@@ -6,7 +6,7 @@ import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.cs48.lethe.ApplicationSettings;
+import com.cs48.lethe.database.ApplicationSettings;
 import com.cs48.lethe.R;
 
 import java.io.File;

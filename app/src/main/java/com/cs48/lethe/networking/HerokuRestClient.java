@@ -5,10 +5,12 @@ import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
 /**
- * Created by maxkohne on 2/24/15.
+ * A http client class with static accessors to make it
+ * easy to communicate with the Heroku server’s API
  */
 public class HerokuRestClient {
 
+    // Url of the Heroku server
     private static final String BASE_URL = "https://frozen-sea-8879.herokuapp.com/";
 
     private static AsyncHttpClient client = new AsyncHttpClient();

@@ -5,9 +5,9 @@
                 android:paddingTop="@dimen/activity_vertical_margin"
                 android:paddingBottom="@dimen/activity_vertical_margin"
                 android:background="@android:color/black"
-                tools:context="com.cs48.lethe.ui.activities.FeedFullScreenActivity">
+                tools:context="com.cs48.lethe.ui.feed.FeedFullScreenActivity">
 
-    <com.cs48.lethe.ui.view_helpers.TouchImageView
+    <com.cs48.lethe.ui.miscellaneous.PinchToZoomImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/imageView"
