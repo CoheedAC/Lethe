@@ -15,7 +15,7 @@ import android.widget.TextView;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
-import com.cs48.lethe.ui.alertdialogs.OperationFailedDialog;
+import com.cs48.lethe.ui.alertdialogs.OperationFailedAlertDialog;
 import com.cs48.lethe.ui.miscellaneous.PinchToZoomImageView;
 import com.cs48.lethe.utils.Picture;
 import com.cs48.lethe.utils.PictureUtilities;
@@ -24,6 +24,9 @@ import com.squareup.picasso.Target;
 
 import java.util.List;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+
 /**
  * Created by maxkohne on 2/26/15.
  */
@@ -31,10 +34,21 @@ public class PeekPagerAdapter extends PagerAdapter {
 
     public final static String LOG_TAG = PeekPagerAdapter.class.getSimpleName();
 
+    private PeekFullScreenActivity mPeekFullScreenActivity;
     private List<Picture> mPictureList;
     private LayoutInflater mLayoutInflater;
     private DatabaseHelper mDatabaseHelper;
-    private PeekFullScreenActivity mPeekFullScreenActivity;
+
+    @InjectView(R.id.imageView)
+    PinchToZoomImageView mImageView;
+    @InjectView(R.id.progressBar)
+    ProgressBar mProgressBar;
+    @InjectView(R.id.likesTextView)
+    TextView mLikesTextView;
+    @InjectView(R.id.viewsTextView)
+    TextView mViewsTextView;
+    @InjectView(R.id.buttonsLinearLayout)
+    LinearLayout mButtonsLinearLayout;
 
     public PeekPagerAdapter(Context context) {
         mPeekFullScreenActivity = (PeekFullScreenActivity) context;
@@ -80,30 +94,26 @@ public class PeekPagerAdapter extends PagerAdapter {
     public View instantiateItem(ViewGroup container, int position) {
         View itemView = mLayoutInflater.inflate(R.layout.layout_fullscreen, container, false);
 
-        final PinchToZoomImageView imageView = (PinchToZoomImageView) itemView.findViewById(R.id.imageView);
-        final ProgressBar progressBar = (ProgressBar) itemView.findViewById(R.id.progressBar);
-        TextView likesTextView = (TextView) itemView.findViewById(R.id.likesTextView);
-        TextView viewsTextView = (TextView) itemView.findViewById(R.id.viewsTextView);
-        LinearLayout linearLayout = (LinearLayout) itemView.findViewById(R.id.buttonsLinearLayout);
+        ButterKnife.inject(this, itemView);
 
-        likesTextView.setText("Likes: " + mPictureList.get(position).getLikes());
-        viewsTextView.setText("Views: " + mPictureList.get(position).getViews());
+        mLikesTextView.setText("Likes: " + mPictureList.get(position).getLikes());
+        mViewsTextView.setText("Views: " + mPictureList.get(position).getViews());
 
-        linearLayout.setVisibility(View.GONE);
+        mButtonsLinearLayout.setVisibility(View.GONE);
 
         // Display full image
         final Target target = new Target() {
             @Override
             public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                progressBar.setVisibility(View.GONE);
-                imageView.setImageBitmap(bitmap);
+                mProgressBar.setVisibility(View.GONE);
+                mImageView.setImageBitmap(bitmap);
             }
 
             @Override
             public void onBitmapFailed(Drawable errorDrawable) {
-                progressBar.setVisibility(View.GONE);
+                mProgressBar.setVisibility(View.GONE);
                 try {
-                    new OperationFailedDialog().show(mPeekFullScreenActivity.getFragmentManager(), LOG_TAG);
+                    new OperationFailedAlertDialog().show(mPeekFullScreenActivity.getFragmentManager(), LOG_TAG);
                 } catch (IllegalStateException e) {
                     Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                 }
@@ -111,13 +121,13 @@ public class PeekPagerAdapter extends PagerAdapter {
 
             @Override
             public void onPrepareLoad(Drawable placeHolderDrawable) {
-                progressBar.setVisibility(View.VISIBLE);
+                mProgressBar.setVisibility(View.VISIBLE);
             }
         };
-        imageView.setTag(target);
+        mImageView.setTag(target);
 
         // Set up on click listeners
-        imageView.setOnClickListener(new OnPictureClickListener());
+        mImageView.setOnClickListener(new OnPictureClickListener());
 
         Picasso.with(mPeekFullScreenActivity)
                 .load(mPictureList.get(position).getFullUrl())

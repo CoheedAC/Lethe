@@ -16,24 +16,28 @@ import java.io.IOException;
 @SuppressLint("ViewConstructor")
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
 
-    // A String tag that represents the class for the purpose of logging
+    // Logcat tag
     public static final String TAG = CameraPreview.class.getSimpleName();
 
     // Instance variables
     private SurfaceHolder mHolder;
     private Camera mCamera;
 
-    // Constructor
+    /**
+     * The constructor that creates the Camera Preview
+     *
+     * @param context Interface to global information about an application environment
+     * @param camera  The camera currently in-use
+     */
     public CameraPreview(Context context, Camera camera) {
         super(context);
 
         // Sets the camera for the SurfaceView
         mCamera = camera;
 
-        /* Gets the SurfaceHolder which providing access and control
-         * over this SurfaceView's underlying surface and adds a
-         * SurfaceView callback interface to it.
-         */
+        // Gets the SurfaceHolder which providing access and control
+        // over this SurfaceView's underlying surface and adds a
+        // SurfaceView callback interface to it.
         mHolder = getHolder();
         mHolder.addCallback(this);
     }
@@ -45,10 +49,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
      */
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        /*
-        Sets the camera to display the preview with the
-         * SurfaceHolder and starts the camera preview
-         */
+        // Sets the camera to display the preview with the
+        // SurfaceHolder and starts the camera preview
         try {
             mCamera.setPreviewDisplay(holder);
             mCamera.startPreview();
@@ -78,8 +80,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
      *
      * @param holder The SurfaceHolder whose surface has changed.
      * @param format The new PixelFormat of the surface.
-     * @param w The new width of the surface.
-     * @param h The new height of the surface.
+     * @param w      The new width of the surface.
+     * @param h      The new height of the surface.
      */
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {

@@ -17,7 +17,7 @@ import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.networking.HerokuRestClient;
 import com.cs48.lethe.networking.PostPicture;
-import com.cs48.lethe.ui.alertdialogs.NetworkUnavailableDialog;
+import com.cs48.lethe.ui.alertdialogs.NetworkUnavailableAlertDialog;
 import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.NetworkUtilities;
 import com.cs48.lethe.utils.Picture;
@@ -48,7 +48,7 @@ import static android.view.View.OnClickListener;
  */
 public class CameraActivity extends ActionBarActivity {
 
-    // A String tag that represents the class for the purpose of logging
+    // Logcat tag
     public static final String TAG = CameraActivity.class.getSimpleName();
 
     // Initializations of UI elements
@@ -164,10 +164,8 @@ public class CameraActivity extends ActionBarActivity {
      */
     @Override
     public void onBackPressed() {
-        /*
-         * Deletes the picture file if it exists and goes back to the main activity
-         * (previous fragment) only if a picture is not currently being posted.
-         */
+         // Deletes the picture file if it exists and goes back to the main activity
+         // (previous fragment) only if a picture is not currently being posted.
         if (!isCurrentlyPosting) {
             if (mPictureFile != null && mPictureFile.exists())
                 mPictureFile.delete();
@@ -191,10 +189,8 @@ public class CameraActivity extends ActionBarActivity {
             c = Camera.open();
             mCurrentCameraId = CameraInfo.CAMERA_FACING_BACK;
         } catch (Exception e) {
-            /*
-             * Camera is not available (in use or does not exist)
-             * so go back to the main activity
-             */
+             // Camera is not available (in use or does not exist)
+             // so go back to the main activity
             Log.d(TAG, "Camera is not available (in use or does not exist)");
             finish();
         }
@@ -387,7 +383,7 @@ public class CameraActivity extends ActionBarActivity {
          * The format of the data depends on the context of the callback
          * and Camera.Parameters settings.
          *
-         * @param data a byte array of the picture data
+         * @param data   a byte array of the picture data
          * @param camera the Camera service object
          */
         @Override
@@ -456,11 +452,9 @@ public class CameraActivity extends ActionBarActivity {
             mCameraSwitchButton.setVisibility(View.GONE);
             mFlashButton.setVisibility(View.GONE);
 
-            /*
-             * Triggers an asynchronous image capture. The camera
-             * service will initiate a series of callbacks to the
-             * application as the image capture progresses.
-             */
+             // Triggers an asynchronous image capture. The camera
+             // service will initiate a series of callbacks to the
+             // application as the image capture progresses.
             mCamera.takePicture(null, null, new PictureTakenCallBack());
         }
     }
@@ -494,17 +488,15 @@ public class CameraActivity extends ActionBarActivity {
          */
         @Override
         public void onClick(View v) {
-            /*
-             * Posts the picture to the server if the network is available.
-             * Otherwise, shows a network unavailable error dialog.
-             */
+             // Posts the picture to the server if the network is available.
+             // Otherwise, shows a network unavailable error dialog.
             if (NetworkUtilities.isNetworkAvailable(CameraActivity.this)) {
 //                fakePostPicture();
 //                postPicture();
                 new PostPicture(CameraActivity.this, mPictureFile).execute();
             } else {
                 try {
-                    new NetworkUnavailableDialog().show(getFragmentManager(), TAG);
+                    new NetworkUnavailableAlertDialog().show(getFragmentManager(), TAG);
                 }catch (IllegalStateException e) {
                     Log.e(TAG, e.getLocalizedMessage());
                 }
@@ -531,10 +523,8 @@ public class CameraActivity extends ActionBarActivity {
             mCancelButton.setVisibility(View.INVISIBLE);
             mPostButton.setVisibility(View.INVISIBLE);
 
-            /*
-             * Shows the flash and camera switch buttons
-             * if the device supports the functionality
-             */
+            // Shows the flash and camera switch buttons
+            // if the device supports the functionality
             showSupportedFlashButton();
             showSupportedCameraSwitchButton();
 
@@ -591,11 +581,9 @@ public class CameraActivity extends ActionBarActivity {
                 // Creates new parameter to set to the camera
                 Camera.Parameters parameters = mCamera.getParameters();
 
-                /*
-                 * If the flash is currently off, then the flash turns on and the
-                 * icon is changed to the flash on icon. Otherwise, the flash turns
-                 * off and the icon is changed to the flash off icon.
-                 */
+                 // If the flash is currently off, then the flash turns on and the
+                 // icon is changed to the flash on icon. Otherwise, the flash turns
+                 // off and the icon is changed to the flash off icon.
                 if (parameters.getFlashMode().equals(Camera.Parameters.FLASH_MODE_OFF)) {
                     mFlashButton.setImageResource(R.drawable.ic_action_flash_on);
                     parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);

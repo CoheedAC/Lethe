@@ -16,7 +16,7 @@ import android.widget.AdapterView;
 import android.widget.TextView;
 
 import com.cs48.lethe.R;
-import com.cs48.lethe.ui.alertdialogs.NetworkUnavailableDialog;
+import com.cs48.lethe.ui.alertdialogs.NetworkUnavailableAlertDialog;
 import com.cs48.lethe.ui.miscellaneous.PullToRefreshGridView;
 import com.cs48.lethe.utils.NetworkUtilities;
 import com.cs48.lethe.utils.Picture;
@@ -80,13 +80,6 @@ public class FeedFragment extends Fragment {
         mFeedGridView.setAdapter(mFeedGridViewAdapter);
         mFeedGridView.setExpanded(true);
 
-        if (!NetworkUtilities.isNetworkAvailable(getActivity())) {
-            setEmptyGridMessage(getString(R.string.grid_no_internet_connection));
-        } else {
-            setEmptyGridMessage(getString(R.string.grid_area_empty));
-            fetchFeedFromServer();
-        }
-
         mFeedGridView.setOnItemClickListener(new OnPictureClickListener());
         mFeedGridView.setOnScrollListener(new OnScrollListener());
         mFeedPullToRefreshLayout.setOnRefreshListener(new OnRefreshListener());
@@ -101,8 +94,13 @@ public class FeedFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (NetworkUtilities.isNetworkAvailable(getActivity()))
+
+        if (!NetworkUtilities.isNetworkAvailable(getActivity())) {
+            setEmptyGridMessage(getString(R.string.grid_no_internet_connection));
+        } else {
+            setEmptyGridMessage(getString(R.string.grid_area_empty));
             fetchFeedFromServer();
+        }
     }
 
     /**
@@ -156,12 +154,14 @@ public class FeedFragment extends Fragment {
      */
     public void fetchFeedFromServer() {
         if (NetworkUtilities.isNetworkAvailable(getActivity())) {
+            Log.d(LOG_TAG, "internet");
+            mFeedPullToRefreshLayout.setRefreshing(true);
             mFeedGridViewAdapter.fetchFeedFromServer(this);
         } else {
             mFeedPullToRefreshLayout.setRefreshing(false);
             if (!setEmptyGridMessage(getString(R.string.grid_no_internet_connection))) {
                 try {
-                    new NetworkUnavailableDialog().show(getActivity().getFragmentManager(), LOG_TAG);
+                    new NetworkUnavailableAlertDialog().show(getActivity().getFragmentManager(), LOG_TAG);
                 } catch (IllegalStateException e) {
                     Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                 }

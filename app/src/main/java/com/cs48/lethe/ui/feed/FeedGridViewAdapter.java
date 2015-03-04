@@ -12,7 +12,7 @@ import android.widget.ImageView;
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.networking.HerokuRestClient;
-import com.cs48.lethe.ui.alertdialogs.OperationFailedDialog;
+import com.cs48.lethe.ui.alertdialogs.OperationFailedAlertDialog;
 import com.cs48.lethe.utils.NetworkUtilities;
 import com.cs48.lethe.utils.Picture;
 import com.cs48.lethe.utils.PictureUtilities;
@@ -198,7 +198,7 @@ public class FeedGridViewAdapter extends BaseAdapter {
                 feedFragment.stopRefreshAnimation();
                 if (!feedFragment.setEmptyGridMessage(feedFragment.getString(R.string.grid_error))) {
                     try {
-                        new OperationFailedDialog().show(feedFragment.getActivity().getFragmentManager(), LOG_TAG);
+                        new OperationFailedAlertDialog().show(feedFragment.getActivity().getFragmentManager(), LOG_TAG);
                     } catch (IllegalStateException e) {
                         Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                     }

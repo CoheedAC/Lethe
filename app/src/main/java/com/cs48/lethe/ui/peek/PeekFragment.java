@@ -18,7 +18,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.cs48.lethe.R;
-import com.cs48.lethe.ui.alertdialogs.NetworkUnavailableDialog;
+import com.cs48.lethe.ui.alertdialogs.NetworkUnavailableAlertDialog;
 import com.cs48.lethe.ui.miscellaneous.PullToRefreshGridView;
 import com.cs48.lethe.utils.NetworkUtilities;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -203,7 +203,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
         return false;
     }
 
-    public void stopRefreshAnimation() {
+    public void stopRefreshingAnimation() {
         mPeekPullToRefreshLayout.setRefreshing(false);
     }
 
@@ -214,7 +214,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
             mPeekPullToRefreshLayout.setRefreshing(false);
             if (!setEmptyGridMessage(getString(R.string.grid_no_internet_connection))) {
                 try {
-                    new NetworkUnavailableDialog().show(getActivity().getFragmentManager(), LOG_TAG);
+                    new NetworkUnavailableAlertDialog().show(getActivity().getFragmentManager(), LOG_TAG);
                 } catch (IllegalStateException e) {
                     Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                 }

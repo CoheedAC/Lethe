@@ -39,5 +39,6 @@
     <string name="grid_area_empty">No Pictures In Your Area</string>
     <string name="grid_no_posted_pictures">You Have Not Posted Any Pictures</string>
     <string name="grid_error">Error: Couldn\'t Get Feed</string>
+    <string name="settings_storage">Storage</string>
 
 </resources>

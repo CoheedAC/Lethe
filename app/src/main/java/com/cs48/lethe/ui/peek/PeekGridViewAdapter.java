@@ -12,7 +12,7 @@ import android.widget.ImageView;
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.networking.HerokuRestClient;
-import com.cs48.lethe.ui.alertdialogs.OperationFailedDialog;
+import com.cs48.lethe.ui.alertdialogs.OperationFailedAlertDialog;
 import com.cs48.lethe.utils.Picture;
 import com.cs48.lethe.utils.PictureUtilities;
 import com.loopj.android.http.AsyncHttpResponseHandler;
@@ -141,7 +141,7 @@ public class PeekGridViewAdapter extends BaseAdapter {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                peekFragment.stopRefreshAnimation();
+                peekFragment.stopRefreshingAnimation();
                 try {
                     // parses the data received from the server
                     String jsonData = new String(responseBody);
@@ -172,10 +172,10 @@ public class PeekGridViewAdapter extends BaseAdapter {
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                peekFragment.stopRefreshAnimation();
+                peekFragment.stopRefreshingAnimation();
                 if (!peekFragment.setEmptyGridMessage(mContext.getString(R.string.grid_error))) {
                     try {
-                        new OperationFailedDialog().show(peekFragment.getActivity().getFragmentManager(), LOG_TAG);
+                        new OperationFailedAlertDialog().show(peekFragment.getActivity().getFragmentManager(), LOG_TAG);
                     } catch (IllegalStateException e) {
                         Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                     }

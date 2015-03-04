@@ -14,8 +14,8 @@ import android.widget.TextView;
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.networking.HerokuRestClient;
-import com.cs48.lethe.ui.alertdialogs.AlreadyLikedImageDialog;
-import com.cs48.lethe.ui.alertdialogs.OperationFailedDialog;
+import com.cs48.lethe.ui.alertdialogs.OperationFailedAlertDialog;
+import com.cs48.lethe.ui.alertdialogs.PictureAlreadyLikedAlertDialog;
 import com.cs48.lethe.ui.miscellaneous.OnHorizontalSwipeListener;
 import com.cs48.lethe.ui.miscellaneous.PinchToZoomImageView;
 import com.cs48.lethe.utils.NetworkUtilities;
@@ -102,7 +102,7 @@ public class FeedFullScreenActivity extends ActionBarActivity {
             public void onBitmapFailed(Drawable errorDrawable) {
                 mProgressBar.setVisibility(View.GONE);
                 try {
-                    new OperationFailedDialog().show(getFragmentManager(), LOG_TAG);
+                    new OperationFailedAlertDialog().show(getFragmentManager(), LOG_TAG);
                 } catch (IllegalStateException e) {
                     Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                 }
@@ -182,7 +182,7 @@ public class FeedFullScreenActivity extends ActionBarActivity {
                 likePicture();
                 finish();
             } else
-                new AlreadyLikedImageDialog().show(getFragmentManager(), LOG_TAG);
+                new PictureAlreadyLikedAlertDialog().show(getFragmentManager(), LOG_TAG);
         }
 
         /**

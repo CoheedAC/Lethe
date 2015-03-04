@@ -17,7 +17,7 @@ import android.widget.Toast;
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.networking.HerokuRestClient;
-import com.cs48.lethe.ui.alertdialogs.OperationFailedDialog;
+import com.cs48.lethe.ui.alertdialogs.OperationFailedAlertDialog;
 import com.cs48.lethe.ui.miscellaneous.PinchToZoomImageView;
 import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.Picture;
@@ -33,6 +33,9 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.List;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+
 /**
  * Created by maxkohne on 2/26/15.
  */
@@ -44,6 +47,19 @@ public class MePagerAdapter extends PagerAdapter {
     private List<Picture> mPictureList;
     private LayoutInflater mLayoutInflater;
     private DatabaseHelper mDatabaseHelper;
+
+    @InjectView(R.id.imageView)
+    PinchToZoomImageView mImageView;
+    @InjectView(R.id.progressBar)
+    ProgressBar mProgressBar;
+    @InjectView(R.id.likesTextView)
+    TextView mLikesTextView;
+    @InjectView(R.id.viewsTextView)
+    TextView mViewsTextView;
+    @InjectView(R.id.saveButton)
+    ImageButton mSaveButton;
+    @InjectView(R.id.deleteButton)
+    ImageButton mDeleteButton;
 
     public MePagerAdapter(Context context) {
         mMeFullScreenActivity = (MeFullScreenActivity) context;
@@ -90,34 +106,29 @@ public class MePagerAdapter extends PagerAdapter {
     public View instantiateItem(ViewGroup container, int position) {
         View itemView = mLayoutInflater.inflate(R.layout.layout_fullscreen, container, false);
 
-        final PinchToZoomImageView imageView = (PinchToZoomImageView) itemView.findViewById(R.id.imageView);
-        final ProgressBar progressBar = (ProgressBar) itemView.findViewById(R.id.progressBar);
-        TextView likesTextView = (TextView) itemView.findViewById(R.id.likesTextView);
-        TextView viewsTextView = (TextView) itemView.findViewById(R.id.viewsTextView);
-        ImageButton saveButton = (ImageButton) itemView.findViewById(R.id.saveButton);
-        ImageButton deleteButton = (ImageButton) itemView.findViewById(R.id.deleteButton);
+        ButterKnife.inject(this, itemView);
 
-        likesTextView.setText("Likes: " + mPictureList.get(position).getLikes());
-        viewsTextView.setText("Views: " + mPictureList.get(position).getViews());
+        mLikesTextView.setText("Likes: " + mPictureList.get(position).getLikes());
+        mViewsTextView.setText("Views: " + mPictureList.get(position).getViews());
 
         // Set up on click listeners
-        imageView.setOnClickListener(new OnPictureClickListener());
-        deleteButton.setOnClickListener(new OnDeleteButtonClickListener(position));
-        saveButton.setOnClickListener(new OnSaveButtonClickListener(position));
+        mImageView.setOnClickListener(new OnPictureClickListener());
+        mDeleteButton.setOnClickListener(new OnDeleteButtonClickListener(position));
+        mSaveButton.setOnClickListener(new OnSaveButtonClickListener(position));
 
         // Display full image
         final Target target = new Target() {
             @Override
             public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                progressBar.setVisibility(View.GONE);
-                imageView.setImageBitmap(bitmap);
+                mProgressBar.setVisibility(View.GONE);
+                mImageView.setImageBitmap(bitmap);
             }
 
             @Override
             public void onBitmapFailed(Drawable errorDrawable) {
-                progressBar.setVisibility(View.GONE);
+                mProgressBar.setVisibility(View.GONE);
                 try {
-                    new OperationFailedDialog().show(mMeFullScreenActivity.getFragmentManager(), LOG_TAG);
+                    new OperationFailedAlertDialog().show(mMeFullScreenActivity.getFragmentManager(), LOG_TAG);
                 } catch (IllegalStateException e) {
                     Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                 }
@@ -125,10 +136,10 @@ public class MePagerAdapter extends PagerAdapter {
 
             @Override
             public void onPrepareLoad(Drawable placeHolderDrawable) {
-                progressBar.setVisibility(View.VISIBLE);
+                mProgressBar.setVisibility(View.VISIBLE);
             }
         };
-        imageView.setTag(target);
+        mImageView.setTag(target);
 
         Picasso.with(mMeFullScreenActivity)
                 .load(mPictureList.get(position).getFile())
@@ -136,7 +147,7 @@ public class MePagerAdapter extends PagerAdapter {
                 .onlyScaleDown()
                 .into(target);
 
-        fetchPictureStatisticsFromServer(position, likesTextView, viewsTextView);
+        fetchPictureStatisticsFromServer(position);
 
         container.addView(itemView);
 
@@ -161,7 +172,7 @@ public class MePagerAdapter extends PagerAdapter {
      * the internal database with the new statistics. Also
      * displays the new statistics on the screen.
      */
-    public void fetchPictureStatisticsFromServer(final int position, final TextView likesTextView, final TextView viewsTextView) {
+    public void fetchPictureStatisticsFromServer(final int position) {
         HerokuRestClient.get(mPictureList.get(position).getUniqueId(), null, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
@@ -173,8 +184,8 @@ public class MePagerAdapter extends PagerAdapter {
 
                     mDatabaseHelper.updateDatabaseFromPicture(mPictureList.get(position));
 
-                    likesTextView.setText("Likes: " + mPictureList.get(position).getLikes());
-                    viewsTextView.setText("Views: " + mPictureList.get(position).getViews());
+                    mLikesTextView.setText("Likes: " + mPictureList.get(position).getLikes());
+                    mViewsTextView.setText("Views: " + mPictureList.get(position).getViews());
                 } catch (JSONException e) {
                     Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                 }
@@ -246,7 +257,7 @@ public class MePagerAdapter extends PagerAdapter {
         @Override
         public void onClick(View v) {
             try {
-                if (FileUtilities.saveImageForSharing(mMeFullScreenActivity, mPictureList.get(position).getFile().getAbsolutePath()))
+                if (FileUtilities.savePictureForSharing(mMeFullScreenActivity, mPictureList.get(position)))
                     Toast.makeText(mMeFullScreenActivity, "Saved picture to shared storage.", Toast.LENGTH_SHORT).show();
                 else
                     Toast.makeText(mMeFullScreenActivity, "Picture already exists in shared storage", Toast.LENGTH_SHORT).show();

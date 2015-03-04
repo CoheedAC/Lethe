@@ -7,8 +7,8 @@ import android.util.Log;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
+import com.cs48.lethe.ui.alertdialogs.OperationFailedAlertDialog;
 import com.cs48.lethe.ui.camera.CameraActivity;
-import com.cs48.lethe.ui.alertdialogs.OperationFailedDialog;
 import com.cs48.lethe.utils.NetworkUtilities;
 import com.cs48.lethe.utils.Picture;
 
@@ -26,18 +26,27 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
- * Asynchronously posts the image on the server and returns the
- * unique picture id.
+ * Asynchronously posts the image on the server and adds
+ * the picture to the internal database.
  */
 public class PostPicture extends AsyncTask<String, String, String> {
 
-    public static final String LOG_TAG = PostPicture.class.getSimpleName();
+    // Logcat tag
+    public static final String TAG = PostPicture.class.getSimpleName();
 
+    // Boundary used for posting to the server
     private final String BOUNDARY = "---------------------Boundary";
 
+    // Instance variables
     private CameraActivity mCameraActivity;
     private File mPictureFile;
 
+    /**
+     * Constructor that takes in the context and the picture file.
+     *
+     * @param context Interface to global information about an application environment
+     * @param pictureFile The file of the picture taken by the user
+     */
     public PostPicture(Context context, File pictureFile) {
         mCameraActivity = (CameraActivity) context;
         mPictureFile = pictureFile;
@@ -49,6 +58,8 @@ public class PostPicture extends AsyncTask<String, String, String> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
+
+        // Shows and hides certain UI elements when during post process
         mCameraActivity.onPostPictureStart();
     }
 
@@ -122,10 +133,10 @@ public class PostPicture extends AsyncTask<String, String, String> {
             return convertInputStreamToString(connection.getInputStream());
 
         } catch (NetworkOnMainThreadException e) {
-            Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             return null;
         } catch (IOException e) {
-            Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             return null;
         } finally {
             if (connection != null)
@@ -138,7 +149,7 @@ public class PostPicture extends AsyncTask<String, String, String> {
                     requestBody.close();
                 }
             } catch (IOException e) {
-                Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             }
         }
     }
@@ -173,16 +184,16 @@ public class PostPicture extends AsyncTask<String, String, String> {
                         jsonObject.getString(mCameraActivity.getString(R.string.json_date_posted)),
                         mPictureFile, 0, 0));
             } catch (JSONException e) {
-                Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             }
             mCameraActivity.onPostPictureFailed();
             mCameraActivity.finish();
         } else {
             mCameraActivity.onPostPictureFailed();
             try {
-                new OperationFailedDialog().show(mCameraActivity.getFragmentManager(), LOG_TAG);
+                new OperationFailedAlertDialog().show(mCameraActivity.getFragmentManager(), TAG);
             }catch (IllegalStateException e) {
-                Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             }
         }
     }

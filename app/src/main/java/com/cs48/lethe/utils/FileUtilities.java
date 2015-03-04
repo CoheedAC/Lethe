@@ -1,13 +1,12 @@
 package com.cs48.lethe.utils;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.cs48.lethe.database.ApplicationSettings;
 import com.cs48.lethe.R;
+import com.cs48.lethe.database.ApplicationSettings;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -89,18 +88,17 @@ public class FileUtilities {
     /**
      * Copies the image to the public storage directory and returns the Uri
      */
-    public static boolean saveImageForSharing(Context context, String imagePath) throws IOException {
-        File imageSource = new File(imagePath);
-        File imageDestination = new File(getSharedExternalDirectory(context) + "/" + imageSource.getName());
+    public static boolean savePictureForSharing(Context context, Picture picture) throws IOException {
+        File destination = new File(getSharedExternalDirectory(context) + File.separator + picture.getFile().getName());
 
-        if (!imageDestination.exists()) {
-            FileInputStream inStream = new FileInputStream(imageSource);
-            FileOutputStream outStream = new FileOutputStream(imageDestination);
-            FileChannel inChannel = inStream.getChannel();
-            FileChannel outChannel = outStream.getChannel();
+        if (!destination.exists()) {
+            FileInputStream fileInputStream = new FileInputStream(picture.getFile());
+            FileOutputStream fileOutputStream = new FileOutputStream(destination);
+            FileChannel inChannel = fileInputStream.getChannel();
+            FileChannel outChannel = fileOutputStream.getChannel();
             inChannel.transferTo(0, inChannel.size(), outChannel);
-            inStream.close();
-            outStream.close();
+            fileInputStream.close();
+            fileOutputStream.close();
             return true;
         }
         return false;
@@ -120,19 +118,4 @@ public class FileUtilities {
         return mediaFile;
     }
 
-    /**
-     * Create a File for saving an image or video
-     */
-    public static File savePostedImage(Context context) {
-        File fileDirectory = getFileDirectory(context);
-        return new File(fileDirectory.getAbsolutePath(),
-                "IMG_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".jpg");
-    }
-
-    /**
-     * Create a file Uri for saving an image or video
-     */
-    public static Uri getOutputMediaFileUri(Context context) {
-        return Uri.fromFile(getOutputMediaFile(context));
-    }
 }
