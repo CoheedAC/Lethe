@@ -177,7 +177,7 @@ public class FeedFullScreenActivity extends ActionBarActivity {
             // If there is internet, then fetch statistics
             // from the server
             if (NetworkUtilities.isNetworkAvailable(this))
-                fetchPictureStatisticsFromServer();
+                fetchStatisticsFromServer();
         }
     }
 
@@ -209,6 +209,8 @@ public class FeedFullScreenActivity extends ActionBarActivity {
         // Displays the statistics on the screen
         mLikesTextView.setText("Likes: " + mPicture.getLikes());
         mViewsTextView.setText("Views: " + mPicture.getViews());
+
+        HerokuRestClient.get(mPicture.getUniqueId(), null, mStatisticsResponseHandler);
     }
 
     /**
@@ -216,7 +218,7 @@ public class FeedFullScreenActivity extends ActionBarActivity {
      * the internal database with the new statistics. Also
      * displays the new statistics on the screen.
      */
-    public void fetchPictureStatisticsFromServer() {
+    public void fetchStatisticsFromServer() {
         String url = getString(R.string.server_statistics) + mPicture.getUniqueId();
         HerokuRestClient.get(url, null, mStatisticsResponseHandler);
     }
