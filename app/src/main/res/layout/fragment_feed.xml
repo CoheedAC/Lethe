@@ -1,19 +1,35 @@
-<com.cs48.lethe.ui.view_helpers.ScrollableSwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
              xmlns:tools="http://schemas.android.com/tools"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
-             android:id="@+id/swipeRefreshLayout"
-             tools:context="com.cs48.lethe.ui.fragments.FeedFragment">
+             android:id="@+id/relativeLayout"
+             tools:context="com.cs48.lethe.ui.feed.FeedFragment">
 
-    <com.cs48.lethe.ui.view_helpers.ExpandableHeightGridView
+    <com.cs48.lethe.ui.feed.FeedPullToRefreshLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/swipeRefreshLayout">
+
+        <com.cs48.lethe.ui.miscellaneous.PullToRefreshGridView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/feedGridView"
+            android:layout_gravity="left|top"
+            android:numColumns="3"
+            android:stretchMode="columnWidth"
+            android:scrollbars="none"
+            android:horizontalSpacing="4dp"
+            android:verticalSpacing="2dp"/>
+    </com.cs48.lethe.ui.feed.FeedPullToRefreshLayout>
+
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/feedGridView"
-        android:layout_gravity="left|top"
-        android:numColumns="3"
-        android:verticalSpacing="2dp"
-        android:horizontalSpacing="4dp"
-        android:stretchMode="columnWidth"
-        />
+        android:id="@+id/emptyGridTextView"
+        android:layout_gravity="center"
+        android:singleLine="true"
+        android:textColor="#ffb7b7b7"
+        android:textSize="20sp"
+        android:layout_centerInParent="true"/>
 
-</com.cs48.lethe.ui.view_helpers.ScrollableSwipeRefreshLayout>
+</RelativeLayout>

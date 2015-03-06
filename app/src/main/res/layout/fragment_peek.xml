@@ -1,10 +1,60 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             tools:context="com.cs48.lethe.ui.fragments.PeekFragment">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              tools:context="com.cs48.lethe.ui.peek.PeekFragment">
 
-    <!-- TODO: Update blank fragment layout -->
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:id="@+id/addressEditText"
+        android:hint="Enter address"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:singleLine="true"
+        android:gravity="center_vertical"/>
 
+    <fragment
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:id="@+id/map"
+        />
 
-</FrameLayout>
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <com.cs48.lethe.ui.peek.PeekPullToRefreshLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/swipeRefreshLayout"
+            >
+
+            <com.cs48.lethe.ui.miscellaneous.PullToRefreshGridView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/peekGridView"
+                android:layout_gravity="left|top"
+                android:numColumns="3"
+                android:stretchMode="columnWidth"
+                android:scrollbars="none"
+                android:horizontalSpacing="4dp"
+                android:verticalSpacing="2dp"/>
+        </com.cs48.lethe.ui.peek.PeekPullToRefreshLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/emptyGridTextView"
+            android:layout_gravity="center"
+            android:singleLine="true"
+            android:textColor="#ffb7b7b7"
+            android:textSize="20sp"
+            android:layout_alignParentTop="false"
+            android:layout_centerInParent="true"/>
+
+    </RelativeLayout>
+
+</LinearLayout>

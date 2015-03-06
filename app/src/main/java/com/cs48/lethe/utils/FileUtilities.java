@@ -1,19 +1,12 @@
 package com.cs48.lethe.utils;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.location.Criteria;
-import android.location.Location;
-import android.location.LocationManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.cs48.lethe.ApplicationSettings;
 import com.cs48.lethe.R;
+import com.cs48.lethe.database.ApplicationSettings;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -74,40 +67,11 @@ public class FileUtilities {
     }
 
     /**
-     * Returns whether there is internet connectivity or not.
-     */
-    public static boolean isNetworkAvailable(Context context) {
-        ConnectivityManager manager = (ConnectivityManager)
-                context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = manager.getActiveNetworkInfo();
-        return networkInfo != null && networkInfo.isConnected();
-    }
-
-    /**
-     * Returns the current latitude[0] and longitude[1]
-     */
-    public static String[] getLocationCoordinates(Context context) {
-        String[] coordinates = new String[2];
-        LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        Location location = lm.getLastKnownLocation(lm.getBestProvider(new Criteria(), true));
-
-        if (location != null) {
-            coordinates[0] = String.valueOf(location.getLatitude());
-            coordinates[1] = String.valueOf(location.getLongitude());
-        } else {
-            // default to isla vista coordinates
-            coordinates[0] = "34.4133"; // latitude
-            coordinates[1] = "-119.861"; // longitude
-        }
-        return coordinates;
-    }
-
-    /**
      * Returns true if external storage is mounted. False otherwise.
      */
     public static boolean isExternalStorageAvailable() {
         String state = Environment.getExternalStorageState();
-        return (Environment.MEDIA_MOUNTED.equals(state)) ? true : false;
+        return (Environment.MEDIA_MOUNTED.equals(state));
     }
 
     /**
@@ -124,18 +88,17 @@ public class FileUtilities {
     /**
      * Copies the image to the public storage directory and returns the Uri
      */
-    public static boolean saveImageForSharing(Context context, String imagePath) throws IOException {
-        File imageSource = new File(imagePath);
-        File imageDestination = new File(getSharedExternalDirectory(context) + "/" + imageSource.getName());
+    public static boolean savePictureForSharing(Context context, Picture picture) throws IOException {
+        File destination = new File(getSharedExternalDirectory(context) + File.separator + picture.getFile().getName());
 
-        if (!imageDestination.exists()) {
-            FileInputStream inStream = new FileInputStream(imageSource);
-            FileOutputStream outStream = new FileOutputStream(imageDestination);
-            FileChannel inChannel = inStream.getChannel();
-            FileChannel outChannel = outStream.getChannel();
+        if (!destination.exists()) {
+            FileInputStream fileInputStream = new FileInputStream(picture.getFile());
+            FileOutputStream fileOutputStream = new FileOutputStream(destination);
+            FileChannel inChannel = fileInputStream.getChannel();
+            FileChannel outChannel = fileOutputStream.getChannel();
             inChannel.transferTo(0, inChannel.size(), outChannel);
-            inStream.close();
-            outStream.close();
+            fileInputStream.close();
+            fileOutputStream.close();
             return true;
         }
         return false;
@@ -144,39 +107,15 @@ public class FileUtilities {
     /**
      * Create a File for saving an image or video
      */
-    @SuppressLint("SimpleDateFormat")
-    public static File savePostedImage(Context context) {
-        File fileDirectory = getFileDirectory(context);
-        return new File(fileDirectory.getAbsolutePath(),
-                "IMG_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".jpg");
-    }
+    public static File getOutputMediaFile(Context context) {
+        File mediaStorageDir = getFileDirectory(context);
 
-    /**
-     * Returns the full sized bitmap of the image.
-     */
-    public static Bitmap getValidSizedBitmap(Bitmap bitmap) {
-        return getXYSizedBitmap(bitmap, 1024, 1024);
-    }
+        // Create a media file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        File mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+                "IMG_" + timeStamp + ".jpg");
 
-    /**
-     * Returns the thumbnail sized bitmap of the image.
-     */
-    public static Bitmap getThumbnailSizedBitmap(Bitmap bitmap) {
-        return getXYSizedBitmap(bitmap, 171, 171);
-    }
-
-    /**
-     * Returns the custom sized bitmap of the image.
-     */
-    public static Bitmap getXYSizedBitmap(Bitmap bitmap, int maxWidth, int maxHeight) {
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
-
-        while (width > maxWidth && height > maxHeight) {
-            width *= .9;
-            height *= .9;
-        }
-        return Bitmap.createScaledBitmap(bitmap, width, height, false);
+        return mediaFile;
     }
 
 }

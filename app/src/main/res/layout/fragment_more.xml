@@ -2,16 +2,14 @@
              xmlns:tools="http://schemas.android.com/tools"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
-             tools:context="com.cs48.lethe.ui.fragments.MoreFragment">
-
-    <!-- TODO: Update blank fragment layout -->
+             tools:context="com.cs48.lethe.ui.more.MoreFragment">
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:weightSum="1"
-        android:background="@color/image_load">
+        android:background="@color/empty_image">
 
         <TextView
             android:layout_width="wrap_content"

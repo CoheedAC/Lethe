@@ -3,19 +3,19 @@
 
     <string name="app_name">Project Lethe</string>
 
-    <string name="title_section1">Home</string>
-    <string name="title_section2">Peek</string>
-    <string name="title_section3">Me</string>
-    <string name="title_section4">More</string>
+    <string name="title_tab1">Home</string>
+    <string name="title_tab2">Peek</string>
+    <string name="title_tab3">Me</string>
+    <string name="title_tab4">More</string>
 
     <string name="action_camera">Camera</string>
-    <string name="action_copy_images">Copy Images</string>
-    <string name="action_refresh">Refresh</string>
-    <string name="action_delete_images">Delete Images</string>
-    <string name="action_post">Post</string>
+    <string name="action_delete">Delete</string>
 
-    <string name="title_activity_camera">Post a Picture</string>
-    <string name="title_activity_picture">PictureActivity</string>
+    <string name="title_activity_post_picture">Post a Picture</string>
+    <string name="title_activity_feed_fullscreen">FeedFullScreenActivity</string>
+    <string name="title_activity_me_fullscreen">MeFullScreenActivity</string>
+    <string name="title_activity_peek_fullscreen">PeekFullScreenActivity</string>
+    <string name="title_activity_camera">CameraActivity</string>
 
     <string name="server">https://frozen-sea-8879.herokuapp.com/</string>
     <string name="server_dislike">dislike/</string>
@@ -23,15 +23,26 @@
     <string name="server_recent">recent/</string>
     <string name="server_post">sendPic</string>
     <string name="server_like">like/</string>
+    <string name="server_statistics">stats/</string>
+    <string name="server_delete">delete/</string>
 
     <string name="json_id">id</string>
+    <string name="json_date_posted">created</string>
     <string name="json_url_thumbnail">thumb</string>
     <string name="json_url_full">full</string>
     <string name="json_views">views</string>
     <string name="json_likes">likes</string>
 
-<!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="json_date_posted">created</string>
+    <string name="data_uniqueId">uniqueId</string>
+    <string name="data_picture">picture</string>
+    <string name="data_position">position</string>
+
+    <string name="grid_no_internet_connection">No Internet Connection</string>
+    <string name="grid_area_empty">No Pictures In Your Area</string>
+    <string name="grid_no_posted_pictures">You Have Not Posted Any Pictures</string>
+    <string name="grid_error">Error: Couldn\'t Get Feed</string>
+
+    <string name="settings_storage">Storage</string>
+
 
 </resources>

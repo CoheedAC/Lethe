@@ -7,19 +7,9 @@
           android:icon="@drawable/ic_action_camera"
           android:orderInCategory="100"
           app:showAsAction="always"/>
-    <item android:id="@+id/action_delete_images"
-          android:title="@string/action_delete_images"
+    <item android:id="@+id/action_clear_cache"
+          android:title="@string/action_delete"
           android:icon="@drawable/ic_action_discard"
           android:orderInCategory="99"
-          app:showAsAction="ifRoom"/>
-    <item android:id="@+id/action_copy_images"
-          android:title="@string/action_copy_images"
-          android:icon="@drawable/ic_action_copy"
-          android:orderInCategory="98"
-          app:showAsAction="ifRoom"/>
-    <item android:id="@+id/action_refresh"
-          android:title="@string/action_refresh"
-          android:icon="@drawable/refresh"
-          android:orderInCategory="97"
           app:showAsAction="ifRoom"/>
 </menu>
