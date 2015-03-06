@@ -193,6 +193,13 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 15));
     }
 
+    /**
+     * If the grid is empty, then display a error message on the grid.
+     * Otherwise, the message is hidden.
+     *
+     * @param errorMessage The message to display
+     * @return True if grid is empty. False otherwise.
+     */
     public boolean setEmptyGridMessage(String errorMessage) {
         if (mPeekGridViewAdapter.getCount() == 0) {
             mEmptyGridTextView.setVisibility(View.VISIBLE);

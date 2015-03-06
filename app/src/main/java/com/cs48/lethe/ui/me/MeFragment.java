@@ -22,7 +22,10 @@ public class MeFragment extends Fragment {
 
     public static final String LOG_TAG = MeFragment.class.getSimpleName();
 
+    private static final int ME_FULL_SCREEN_REQUEST = 101;
+
     private MeGridViewAdapter mMeGridViewAdapter;
+    private boolean fetchMePicturesFromDatabase;
 
     @InjectView(R.id.meGridView)
     GridView mMeGridView;
@@ -44,6 +47,7 @@ public class MeFragment extends Fragment {
         setHasOptionsMenu(true);
 
         mMeGridViewAdapter = new MeGridViewAdapter(getActivity());
+        fetchMePicturesFromDatabase = false;
     }
 
     /**
@@ -85,7 +89,17 @@ public class MeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        fetchMePicturesFromDatabase();
+        if (fetchMePicturesFromDatabase)
+            fetchMePicturesFromDatabase();
+        else
+            fetchMePicturesFromDatabase = true;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == ME_FULL_SCREEN_REQUEST)
+            fetchMePicturesFromDatabase = false;
     }
 
     /**
@@ -154,7 +168,7 @@ public class MeFragment extends Fragment {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Intent meFullPictureIntent = new Intent(getActivity(), MeFullScreenActivity.class);
             meFullPictureIntent.putExtra(getString(R.string.data_position), position);
-            startActivity(meFullPictureIntent);
+            startActivityForResult(meFullPictureIntent, ME_FULL_SCREEN_REQUEST);
         }
     }
 }

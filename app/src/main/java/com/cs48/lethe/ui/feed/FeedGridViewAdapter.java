@@ -208,10 +208,8 @@ public class FeedGridViewAdapter extends BaseAdapter {
     }
 
     /**
-     * Hides the image from the feed by removing it from the
-     * list of images. The VISIBLE flag has already been
-     * set to HIDE_PICTURE in the database in the swipeRight()
-     * in the FullPictureActivity class
+     * Gets the pictures from the Feed Table in
+     * the database
      */
     public void fetchFeedFromDatabase() {
         mPictureList = mDatabaseHelper.getFeedPictures();

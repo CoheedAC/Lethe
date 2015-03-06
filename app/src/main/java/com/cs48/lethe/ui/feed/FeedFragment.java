@@ -19,17 +19,23 @@ import com.cs48.lethe.R;
 import com.cs48.lethe.ui.alertdialogs.NetworkUnavailableAlertDialog;
 import com.cs48.lethe.ui.miscellaneous.PullToRefreshGridView;
 import com.cs48.lethe.utils.NetworkUtilities;
-import com.cs48.lethe.utils.Picture;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 public class FeedFragment extends Fragment {
 
-    public static final String LOG_TAG = FeedFragment.class.getSimpleName();
+    // Logcat tag
+    public static final String TAG = FeedFragment.class.getSimpleName();
 
+    // Activity request
+    private static final int FEED_FULL_SCREEN_REQUEST = 100;
+
+    // Instance variables
     private FeedGridViewAdapter mFeedGridViewAdapter;
+    private boolean fetchPicturesFromServer;
 
+    // Initializations of UI elements
     @InjectView(R.id.feedGridView)
     PullToRefreshGridView mFeedGridView;
     @InjectView(R.id.swipeRefreshLayout)
@@ -52,6 +58,7 @@ public class FeedFragment extends Fragment {
         setHasOptionsMenu(true);
 
         mFeedGridViewAdapter = new FeedGridViewAdapter(getActivity());
+        fetchPicturesFromServer = true;
     }
 
     /**
@@ -60,12 +67,12 @@ public class FeedFragment extends Fragment {
      * If you return a View from here, you will later be called in
      * onDestroyView() when the view is being released.
      *
-     * @param inflater The LayoutInflater object that can be used
-     *                 to inflate any views in the fragment,
-     * @param container If non-null, this is the parent view that the
-     *                  fragment's UI should be attached to. The fragment
-     *                  should not add the view itself, but this can be
-     *                  used to generate the LayoutParams of the view.
+     * @param inflater           The LayoutInflater object that can be used
+     *                           to inflate any views in the fragment,
+     * @param container          If non-null, this is the parent view that the
+     *                           fragment's UI should be attached to. The fragment
+     *                           should not add the view itself, but this can be
+     *                           used to generate the LayoutParams of the view.
      * @param savedInstanceState If non-null, this fragment is being re-constructed
      *                           from a previous saved state as given here.
      * @return Return the View for the fragment's UI, or null.
@@ -73,13 +80,17 @@ public class FeedFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        // Sets the view to the feed fragment layout
         View rootView = inflater.inflate(R.layout.fragment_feed, container, false);
 
+        // Injects the UI elements into the activity
         ButterKnife.inject(this, rootView);
 
+        // Sets up the grid data
         mFeedGridView.setAdapter(mFeedGridViewAdapter);
         mFeedGridView.setExpanded(true);
 
+        // Sets up click and scroll listeners
         mFeedGridView.setOnItemClickListener(new OnPictureClickListener());
         mFeedGridView.setOnScrollListener(new OnScrollListener());
         mFeedPullToRefreshLayout.setOnRefreshListener(new OnRefreshListener());
@@ -95,11 +106,18 @@ public class FeedFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
+        // If there is no internet and there is an empty grid,
+        // then display network error on grid
         if (!NetworkUtilities.isNetworkAvailable(getActivity())) {
             setEmptyGridMessage(getString(R.string.grid_no_internet_connection));
         } else {
+            // Else, if grid is empty, then display empty error on grid
             setEmptyGridMessage(getString(R.string.grid_area_empty));
-            fetchFeedFromServer();
+            // And fetch pictures from the server
+            if (fetchPicturesFromServer)
+                fetchFeedFromServer();
+            else
+                fetchPicturesFromServer = true;
         }
     }
 
@@ -108,7 +126,7 @@ public class FeedFragment extends Fragment {
      * You should place your menu items in to menu. For this method to be
      * called, you must have first called setHasOptionsMenu(boolean).
      *
-     * @param menu The options menu in which you place your items.
+     * @param menu     The options menu in which you place your items.
      * @param inflater The LayoutInflater object that can be used to inflate any views in the fragment,
      */
     @Override
@@ -139,6 +157,13 @@ public class FeedFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * If the grid is empty, then display a error message on the grid.
+     * Otherwise, the message is hidden.
+     *
+     * @param errorMessage The message to display
+     * @return True if grid is empty. False otherwise.
+     */
     public boolean setEmptyGridMessage(String errorMessage) {
         if (mFeedGridViewAdapter.getCount() == 0) {
             mEmptyGridTextView.setVisibility(View.VISIBLE);
@@ -153,65 +178,129 @@ public class FeedFragment extends Fragment {
      * Gets the list of images from the server.
      */
     public void fetchFeedFromServer() {
+        // If the network is available then enable the refresh animation
+        // and fetch the picture feed from the server
         if (NetworkUtilities.isNetworkAvailable(getActivity())) {
-            Log.d(LOG_TAG, "internet");
             mFeedPullToRefreshLayout.setRefreshing(true);
             mFeedGridViewAdapter.fetchFeedFromServer(this);
         } else {
+            // Else the network is not available, so disable the refresh
+            // animation and display a networt alert dialog
             mFeedPullToRefreshLayout.setRefreshing(false);
             if (!setEmptyGridMessage(getString(R.string.grid_no_internet_connection))) {
                 try {
-                    new NetworkUnavailableAlertDialog().show(getActivity().getFragmentManager(), LOG_TAG);
+                    new NetworkUnavailableAlertDialog().show(getActivity().getFragmentManager(), TAG);
                 } catch (IllegalStateException e) {
-                    Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                    Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                 }
             }
         }
     }
 
+    /**
+     * Disables the refresh animation
+     */
     public void stopRefreshAnimation() {
         mFeedPullToRefreshLayout.setRefreshing(false);
     }
 
+    /**
+     * Receive the result from a previous call to startActivityForResult(Intent, int).
+     * This gets the result from the full screen view.
+     *
+     * @param requestCode The integer request code originally supplied to
+     *                    startActivityForResult(), allowing you to identify who this
+     *                    result came from.
+     * @param resultCode  The integer result code returned by the child activity
+     *                    through its setResult().
+     * @param data        An Intent, which can return result data to the caller
+     *                    (various data can be attached to Intent "extras").
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == FEED_FULL_SCREEN_REQUEST)
+            fetchPicturesFromServer = false;
+    }
 
     /**
-     * A callback to be invoked when an item in this AdapterView has been clicked.
+     * A callback to be invoked when a picture in this AdapterView has been clicked.
+     * In other words, this is invoked when a user clicks on a picture in the grid.
      */
     class OnPictureClickListener implements AdapterView.OnItemClickListener {
+        /**
+         * Callback method to be invoked when picture in this AdapterView has been clicked.
+         * This starts the full screen view of the picture.
+         *
+         * @param parent   The AdapterView where the click happened.
+         * @param view     The view within the AdapterView that was clicked
+         *                 (this will be a view provided by the adapter)
+         * @param position The position of the view in the adapter.
+         * @param id       The row id of the item that was clicked.
+         */
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Intent feedFullPictureIntent = new Intent(getActivity(), FeedFullScreenActivity.class);
-            Picture picture = (Picture) mFeedGridViewAdapter.getItem(position);
-            feedFullPictureIntent.putExtra(getString(R.string.data_uniqueId), picture.getUniqueId());
-            startActivity(feedFullPictureIntent);
+            Intent feedFullScreenIntent = new Intent(getActivity(), FeedFullScreenActivity.class);
+            feedFullScreenIntent.putExtra(getString(R.string.data_uniqueId), mFeedGridViewAdapter.getItem(position).getUniqueId());
+            startActivityForResult(feedFullScreenIntent, FEED_FULL_SCREEN_REQUEST);
         }
     }
 
     /**
-     * Sets up the scroll listeners for pull-to-refresh on the grid
+     * Callback to be invoked when the grid has been scrolled. This enables and
+     * disables the pull-to-refresh feature based upon how the user scrolls.
      */
     class OnScrollListener implements AbsListView.OnScrollListener {
+        /**
+         * Callback method to be invoked while the list view or grid view is being scrolled.
+         * If the view is being scrolled, this method will be called before the next frame
+         * of the scroll is rendered. In particular, it will be called before any calls
+         * to getView(int, View, ViewGroup).
+         *
+         * @param view        The view whose scroll state is being reported
+         * @param scrollState The current scroll state. One of SCROLL_STATE_TOUCH_SCROLL
+         *                    or SCROLL_STATE_IDLE.
+
+         */
         @Override
         public void onScrollStateChanged(AbsListView view, int scrollState) {
+            // Enable pull-to-refresh when not scrolling and at the top of the grid
             if (scrollState == SCROLL_STATE_IDLE && view.getChildAt(0).getTop() >= 0)
                 mFeedPullToRefreshLayout.setEnabled(true);
             else
+            // Else disable pull-to-refresh
                 mFeedPullToRefreshLayout.setEnabled(false);
         }
 
+        /**
+         * Callback method to be invoked when the list or grid has been scrolled.
+         * This will be called after the scroll has completed
+         *
+         * @param view             The view whose scroll state is being reported
+         * @param firstVisibleItem The index of the first visible cell (ignore if visibleItemCount == 0)
+         * @param visibleItemCount The number of visible cells
+         * @param totalItemCount   The number of items in the list adaptor
+         */
         @Override
         public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+            // If the grid is empty, then allow the pull-to-refresh feature
             if (totalItemCount == 0)
                 mFeedPullToRefreshLayout.setEnabled(true);
         }
     }
 
     /**
-     * Sets up the refresh listeners for pull-to-refresh feature
+     * Callback to be invoked when the grid has been refreshed. In other words,
+     * this sets up the refresh listeners for pull-to-refresh feature.
      */
     class OnRefreshListener implements SwipeRefreshLayout.OnRefreshListener {
+        /**
+         * Callback method to be invoked when refresh has happened.
+         */
         @Override
         public void onRefresh() {
+            // Fetches the picture feed from the server
+            // and updates the grid
             fetchFeedFromServer();
         }
     }

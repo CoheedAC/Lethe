@@ -16,7 +16,6 @@ import android.widget.ProgressBar;
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.networking.HerokuRestClient;
-import com.cs48.lethe.networking.PostPicture;
 import com.cs48.lethe.ui.alertdialogs.NetworkUnavailableAlertDialog;
 import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.NetworkUtilities;
@@ -103,35 +102,41 @@ public class CameraActivity extends ActionBarActivity {
         // Create an instance of Camera
         mCamera = getCameraInstance();
 
-        // Forces the orientation of the current camera to match
-        // the orientation of the activity (portrait)
-        setCameraDisplayOrientation(mCurrentCameraId);
+        try {
 
-        // Create our Camera Preview view and set it as the content of our activity.
-        mCameraPreview = new CameraPreview(this, mCamera);
-        mFrameLayout.addView(mCameraPreview);
+            // Forces the orientation of the current camera to match
+            // the orientation of the activity (portrait)
+            setCameraDisplayOrientation(mCurrentCameraId);
 
-        // Shows the camera switch button if the devices has more than one camera
-        showSupportedCameraSwitchButton();
+            // Create our Camera Preview view and set it as the content of our activity.
+            mCameraPreview = new CameraPreview(this, mCamera);
+            mFrameLayout.addView(mCameraPreview);
 
-        // Show flash button if phone supports flash
-        showSupportedFlashButton();
+            // Shows the camera switch button if the devices has more than one camera
+            showSupportedCameraSwitchButton();
 
-        // Initially hides the post button, the progress bar, and the cancel button.
-        mPostButton.setVisibility(View.GONE);
-        mProgressBar.setVisibility(View.GONE);
-        mCancelButton.setVisibility(View.GONE);
+            // Show flash button if phone supports flash
+            showSupportedFlashButton();
 
-        // Front camera set to false because android defaults to back-facing camera
-        isCurrentlyPosting = false;
+            // Initially hides the post button, the progress bar, and the cancel button.
+            mPostButton.setVisibility(View.GONE);
+            mProgressBar.setVisibility(View.GONE);
+            mCancelButton.setVisibility(View.GONE);
 
-        // Add a listeners to the all of the buttons
-        mCaptureButton.setOnClickListener(new OnCaptureButtonClick());
-        mBackButton.setOnClickListener(new OnBackButtonClick());
-        mPostButton.setOnClickListener(new OnPostButtonClick());
-        mCancelButton.setOnClickListener(new OnCancelButtonClick());
-        mCameraSwitchButton.setOnClickListener(new OnCameraSwitchButtonClick());
-        mFlashButton.setOnClickListener(new OnFlashButtonClick());
+            // Front camera set to false because android defaults to back-facing camera
+            isCurrentlyPosting = false;
+
+            // Add a listeners to the all of the buttons
+            mCaptureButton.setOnClickListener(new OnCaptureButtonClick());
+            mBackButton.setOnClickListener(new OnBackButtonClick());
+            mPostButton.setOnClickListener(new OnPostButtonClick());
+            mCancelButton.setOnClickListener(new OnCancelButtonClick());
+            mCameraSwitchButton.setOnClickListener(new OnCameraSwitchButtonClick());
+            mFlashButton.setOnClickListener(new OnFlashButtonClick());
+        }catch (NullPointerException e) {
+            finish();
+        }
+
     }
 
     /**
@@ -491,9 +496,9 @@ public class CameraActivity extends ActionBarActivity {
              // Posts the picture to the server if the network is available.
              // Otherwise, shows a network unavailable error dialog.
             if (NetworkUtilities.isNetworkAvailable(CameraActivity.this)) {
-//                fakePostPicture();
+                fakePostPicture();
 //                postPicture();
-                new PostPicture(CameraActivity.this, mPictureFile).execute();
+//                new PostPicture(CameraActivity.this, mPictureFile).execute();
             } else {
                 try {
                     new NetworkUnavailableAlertDialog().show(getFragmentManager(), TAG);

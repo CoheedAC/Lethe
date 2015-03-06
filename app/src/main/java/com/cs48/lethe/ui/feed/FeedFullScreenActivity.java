@@ -38,11 +38,14 @@ import butterknife.InjectView;
  */
 public class FeedFullScreenActivity extends ActionBarActivity {
 
-    public static final String LOG_TAG = FeedFullScreenActivity.class.getSimpleName();
+    // Logcat tag
+    public static final String TAG = FeedFullScreenActivity.class.getSimpleName();
 
+    // Instance variables
     private DatabaseHelper mDatabaseHelper;
     private Picture mPicture;
 
+    // Initializations of UI elements
     @InjectView(R.id.imageView)
     PinchToZoomImageView mImageView;
     @InjectView(R.id.progressBar)
@@ -68,8 +71,11 @@ public class FeedFullScreenActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Sets the view to the full screen layout
         setContentView(R.layout.layout_fullscreen);
 
+        // Injects the UI elements into the activity
         ButterKnife.inject(this);
 
         // Get access to the database
@@ -79,40 +85,70 @@ public class FeedFullScreenActivity extends ActionBarActivity {
         getSupportActionBar().hide();
         mButtonsLinearLayout.setVisibility(View.GONE);
 
-        // Get photo id from intent
+        // Get photo id passed in from the intent
         String uniqueId = getIntent().getStringExtra(getString(R.string.data_uniqueId));
 
         // Show the loading progress bar
         mProgressBar.setVisibility(View.VISIBLE);
 
-        // Database interactions
-        mPicture = mDatabaseHelper.getFeedPicture(uniqueId);    // get image from feed table
-        if (!mDatabaseHelper.isPictureViewed(mPicture))
-            mDatabaseHelper.viewPicture(mPicture);    // update views in table
+        // Get picture from feed table
+        mPicture = mDatabaseHelper.getFeedPicture(uniqueId);
 
-        // Display full image
+        // Update view count if picture hasn't already been viewed
+        if (!mDatabaseHelper.isPictureViewed(mPicture))
+            mDatabaseHelper.viewPicture(mPicture);
+
+        // Represents an arbitrary listener for image loading.
         final Target target = new Target() {
+            /**
+             * Callback when an image has been successfully loaded.
+             *
+             * @param bitmap The bitmap of the picture
+             * @param from Describes where the image was loaded from
+             */
             @Override
             public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                // Hides the loading progress bar
                 mProgressBar.setVisibility(View.GONE);
+
+                // Displays the picture
                 mImageView.setImageBitmap(bitmap);
             }
 
+            /**
+             * Callback indicating the image could not be successfully loaded.
+             *
+             * @param errorDrawable Drawable that was set from
+             *                      the Picasso call
+             */
             @Override
             public void onBitmapFailed(Drawable errorDrawable) {
+                // Hides the loading progress bar
                 mProgressBar.setVisibility(View.GONE);
+
+                // Displays operation failed alert dialog
                 try {
-                    new OperationFailedAlertDialog().show(getFragmentManager(), LOG_TAG);
+                    new OperationFailedAlertDialog().show(getFragmentManager(), TAG);
                 } catch (IllegalStateException e) {
-                    Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                    Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                 }
             }
 
+            /**
+             * Callback invoked right before your request is submitted.
+             *
+             * @param placeHolderDrawable Placeholder drawable that was
+             *                            set from the Picasso call
+             */
             @Override
             public void onPrepareLoad(Drawable placeHolderDrawable) {
             }
         };
+        // Makes a strong reference to the target
         mImageView.setTag(target);
+
+        // If the picture file doesn't exist, then the picture
+        // is loaded from a URL to the imageview
         if (mPicture.getFile() == null) {
             Picasso.with(this)
                     .load(mPicture.getFullUrl())
@@ -120,6 +156,8 @@ public class FeedFullScreenActivity extends ActionBarActivity {
                     .onlyScaleDown()
                     .into(target);
         }else {
+            // Else the picture is a file, so load the picture
+            // from the file to the imageview
             Picasso.with(this)
                     .load(mPicture.getFile())
                     .resize(PictureUtilities.MAX_FULL_WIDTH, 0)
@@ -127,18 +165,21 @@ public class FeedFullScreenActivity extends ActionBarActivity {
                     .into(target);
         }
 
-        // Displays the statistics on the screen and fetches the statistics from the server
+        // Displays the statistics on the screen
         mLikesTextView.setText("Likes: " + mPicture.getLikes());
         mViewsTextView.setText("Views: " + mPicture.getViews());
 
+        // Sets up the swipe gestures on the imageview
         mImageView.setOnTouchListener(new OnSwipeListener(this));
 
+        // Fetches the statistics from the server if there is internet
         if (NetworkUtilities.isNetworkAvailable(this))
             fetchPictureStatisticsFromServer();
     }
 
     /**
-     * Likes the picture on the server
+     * Likes the picture by incrementing the like count
+     * on the internal database and also on the server
      */
     public void likePicture() {
         mDatabaseHelper.likePicture(mPicture);
@@ -147,7 +188,9 @@ public class FeedFullScreenActivity extends ActionBarActivity {
     }
 
     /**
-     * Dislikes the picture on the server
+     * Dislikes the picture by decrementing the like count
+     * on the internal database and also on the server and
+     * hides it from the user's view on the grid
      */
     public void hidePicture() {
         mDatabaseHelper.hidePicture(mPicture);
@@ -165,10 +208,18 @@ public class FeedFullScreenActivity extends ActionBarActivity {
     }
 
     /**
-     * Handles the swipe / tap gestures.
+     * A callback to be invoked when a touch event is dispatched to this view.
+     * The callback will be invoked before the touch event is given to the view.
+     *
+     * This handles the swipe and tap gestures.
      */
     private class OnSwipeListener extends OnHorizontalSwipeListener {
 
+        /**
+         * Constructor for the Swipe Listener
+         *
+         * @param context Interface to global information about an application environment
+         */
         public OnSwipeListener(Context context) {
             super(context);
         }
@@ -182,7 +233,7 @@ public class FeedFullScreenActivity extends ActionBarActivity {
                 likePicture();
                 finish();
             } else
-                new PictureAlreadyLikedAlertDialog().show(getFragmentManager(), LOG_TAG);
+                new PictureAlreadyLikedAlertDialog().show(getFragmentManager(), TAG);
         }
 
         /**
@@ -208,27 +259,47 @@ public class FeedFullScreenActivity extends ActionBarActivity {
      * Handles the response from server requests
      */
     private AsyncHttpResponseHandler mStatisticsResponseHandler = new AsyncHttpResponseHandler() {
-
+        /**
+         * Fired when a request returns successfully. This gets the response
+         * from the server and and updates the UI and database based upon
+         * the response.
+         *
+         * @param statusCode   the status code of the response
+         * @param headers      return headers, if any
+         * @param responseBody the body of the HTTP response from the server
+         */
         @Override
         public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
             try {
                 String jsonData = new String(responseBody);
                 JSONObject jsonObject = new JSONObject(jsonData);
+
+                // Updates the picture statistics from the response
                 mPicture.setViews(jsonObject.getInt(getString(R.string.json_views)));
                 mPicture.setLikes(jsonObject.getInt(getString(R.string.json_likes)));
+
+                // Updates the database with the new statistics
                 mDatabaseHelper.updateDatabaseFromPicture(mPicture);
+
+                // Updates the text views to show the new statistics
                 mLikesTextView.setText("Likes: " + mPicture.getLikes());
                 mViewsTextView.setText("Views: " + mPicture.getViews());
-                Log.d(LOG_TAG, "Operation succeeded");
             } catch (JSONException e) {
-                Log.d(LOG_TAG, "Operation caught by exception");
-                Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             }
         }
 
+        /**
+         * Fired when a request fails to complete.
+         *
+         * @param statusCode   return HTTP status code
+         * @param headers      return headers, if any
+         * @param responseBody the response body, if any
+         * @param error        the underlying cause of the failure
+         */
         @Override
         public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-            Log.d(LOG_TAG, "Operation failed");
+            Log.d(TAG, "Operation failed");
         }
     };
 }
