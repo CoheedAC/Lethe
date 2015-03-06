@@ -28,12 +28,8 @@ public class FeedFragment extends Fragment {
     // Logcat tag
     public static final String TAG = FeedFragment.class.getSimpleName();
 
-    // Activity request
-    private static final int FEED_FULL_SCREEN_REQUEST = 100;
-
     // Instance variables
     private FeedGridViewAdapter mFeedGridViewAdapter;
-    private boolean fetchPicturesFromServer;
 
     // Initializations of UI elements
     @InjectView(R.id.feedGridView)
@@ -58,7 +54,6 @@ public class FeedFragment extends Fragment {
         setHasOptionsMenu(true);
 
         mFeedGridViewAdapter = new FeedGridViewAdapter(getActivity());
-        fetchPicturesFromServer = true;
     }
 
     /**
@@ -95,6 +90,8 @@ public class FeedFragment extends Fragment {
         mFeedGridView.setOnScrollListener(new OnScrollListener());
         mFeedPullToRefreshLayout.setOnRefreshListener(new OnRefreshListener());
 
+        fetchFeedFromServer();
+
         return rootView;
     }
 
@@ -112,12 +109,8 @@ public class FeedFragment extends Fragment {
             setEmptyGridMessage(getString(R.string.grid_no_internet_connection));
         } else {
             // Else, if grid is empty, then display empty error on grid
+            mFeedGridViewAdapter.fetchFeedFromDatabase();
             setEmptyGridMessage(getString(R.string.grid_area_empty));
-            // And fetch pictures from the server
-//            if (fetchPicturesFromServer)
-                fetchFeedFromServer();
-//            else
-//                fetchPicturesFromServer = true;
         }
     }
 
@@ -205,25 +198,6 @@ public class FeedFragment extends Fragment {
     }
 
     /**
-     * Receive the result from a previous call to startActivityForResult(Intent, int).
-     * This gets the result from the full screen view.
-     *
-     * @param requestCode The integer request code originally supplied to
-     *                    startActivityForResult(), allowing you to identify who this
-     *                    result came from.
-     * @param resultCode  The integer result code returned by the child activity
-     *                    through its setResult().
-     * @param data        An Intent, which can return result data to the caller
-     *                    (various data can be attached to Intent "extras").
-     */
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == FEED_FULL_SCREEN_REQUEST)
-            fetchPicturesFromServer = false;
-    }
-
-    /**
      * A callback to be invoked when a picture in this AdapterView has been clicked.
      * In other words, this is invoked when a user clicks on a picture in the grid.
      */
@@ -242,7 +216,7 @@ public class FeedFragment extends Fragment {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Intent feedFullScreenIntent = new Intent(getActivity(), FeedFullScreenActivity.class);
             feedFullScreenIntent.putExtra(getString(R.string.data_uniqueId), mFeedGridViewAdapter.getItem(position).getUniqueId());
-            startActivityForResult(feedFullScreenIntent, FEED_FULL_SCREEN_REQUEST);
+            startActivity(feedFullScreenIntent);
         }
     }
 

@@ -47,7 +47,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String WHERE = " WHERE ";
     private static final String ORDER_BY = " ORDER BY ";
     private static final String EQUALS = " = ";
-    private static final String ASCENDING = " ASC";
+    private static final String DESCENDING = " DESC";
 
     /* Table Create Statements */
     // Feed table create statement
@@ -180,7 +180,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // Select query to find all of the pictures that have not been hidden in the Feed Table
         // sorted by the the date posted to the server
         String selectQuery = SELECT_ALL_FROM + FeedTable.TABLE_NAME + WHERE + FeedTable.COLUMN_NAME_VISIBILITY
-                + EQUALS + FeedTable.VISIBLE + ORDER_BY + FeedTable.COLUMN_NAME_DATE_POSTED + ASCENDING;
+                + EQUALS + FeedTable.VISIBLE + ORDER_BY + FeedTable.COLUMN_NAME_DATE_POSTED + DESCENDING;
 
         // Reads the query
         Cursor c = db.rawQuery(selectQuery, null);
@@ -226,7 +226,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         // Select query to find all of the pictures in the Peek Table sorted by the the date posted to the server
-        String selectQuery = SELECT_ALL_FROM + PeekTable.TABLE_NAME + ORDER_BY + PeekTable.COLUMN_NAME_DATE_POSTED + ASCENDING;
+        String selectQuery = SELECT_ALL_FROM + PeekTable.TABLE_NAME + ORDER_BY + PeekTable.COLUMN_NAME_DATE_POSTED + DESCENDING;
 
         // Reads the query
         Cursor c = db.rawQuery(selectQuery, null);
@@ -271,7 +271,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         // Select query to find all of the pictures in the Me Table sorted by the the date posted to the server
         String selectQuery = SELECT_ALL_FROM + MeTable.TABLE_NAME + ORDER_BY
-                + MeTable.COLUMN_NAME_DATE_POSTED + ASCENDING;
+                + MeTable.COLUMN_NAME_DATE_POSTED + DESCENDING;
 
         // Reads the query
         Cursor c = db.rawQuery(selectQuery, null);

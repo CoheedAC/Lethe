@@ -24,9 +24,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -136,8 +134,8 @@ public class FeedGridViewAdapter extends BaseAdapter {
         // get current location
         String[] coordinates = NetworkUtilities.getCurrentLocation(mContext);
         String url = mContext.getString(R.string.server_recent) +
-                coordinates[1].replace(".", "a") + "," +    // latitude
-                coordinates[0].replace(".", "a");           // longitude
+                coordinates[0].replace(".", "a") + "," +    // latitude
+                coordinates[1].replace(".", "a");           // longitude
 
         HerokuRestClient.get(url, null, new AsyncHttpResponseHandler() {
 
@@ -155,8 +153,7 @@ public class FeedGridViewAdapter extends BaseAdapter {
 
                         Picture picture = new Picture(
                                 jsonObject.getString(mContext.getString(R.string.json_id)),
-//                                jsonObject.getString(mContext.getString(R.string.json_date_posted)),
-                                new SimpleDateFormat("yyyyMMdd").format(new Date()),
+                                jsonObject.getString(mContext.getString(R.string.json_date_posted)),
                                 jsonObject.getString(mContext.getString(R.string.json_url_thumbnail)),
                                 jsonObject.getString(mContext.getString(R.string.json_url_full)),
                                 jsonObject.getInt(mContext.getString(R.string.json_views)),
@@ -177,20 +174,16 @@ public class FeedGridViewAdapter extends BaseAdapter {
                     }
 
                     // updates the database with the new image list
-                    // (while keeping the integrity of mImageList)
+                        // (while keeping the integrity of mImageList)
                     mDatabaseHelper.updateFeed(serverPictureMap);
 
-                    // gets an updated list of images from the database
-                    mPictureList = mDatabaseHelper.getFeedPictures();
-
-                    feedFragment.stopRefreshAnimation();
-                    feedFragment.setEmptyGridMessage(mContext.getString(R.string.grid_area_empty));
-
-                    // updates the grid to reflect the new data in the image list
-                    notifyDataSetChanged();
+                    // gets an updated list of pictures from the database
+                    fetchFeedFromDatabase();
                 } catch (JSONException e) {
                     Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                 }
+                feedFragment.stopRefreshAnimation();
+                feedFragment.setEmptyGridMessage(mContext.getString(R.string.grid_area_empty));
             }
 
             @Override

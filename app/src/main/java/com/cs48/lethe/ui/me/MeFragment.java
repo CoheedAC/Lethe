@@ -22,10 +22,7 @@ public class MeFragment extends Fragment {
 
     public static final String LOG_TAG = MeFragment.class.getSimpleName();
 
-    private static final int ME_FULL_SCREEN_REQUEST = 101;
-
     private MeGridViewAdapter mMeGridViewAdapter;
-    private boolean fetchMePicturesFromDatabase;
 
     @InjectView(R.id.meGridView)
     GridView mMeGridView;
@@ -47,7 +44,6 @@ public class MeFragment extends Fragment {
         setHasOptionsMenu(true);
 
         mMeGridViewAdapter = new MeGridViewAdapter(getActivity());
-        fetchMePicturesFromDatabase = false;
     }
 
     /**
@@ -56,15 +52,14 @@ public class MeFragment extends Fragment {
      * If you return a View from here, you will later be called in
      * onDestroyView() when the view is being released.
      *
-     * @param inflater The LayoutInflater object that can be used
-     *                 to inflate any views in the fragment,
-     * @param container If non-null, this is the parent view that the
-     *                  fragment's UI should be attached to. The fragment
-     *                  should not add the view itself, but this can be
-     *                  used to generate the LayoutParams of the view.
+     * @param inflater           The LayoutInflater object that can be used
+     *                           to inflate any views in the fragment,
+     * @param container          If non-null, this is the parent view that the
+     *                           fragment's UI should be attached to. The fragment
+     *                           should not add the view itself, but this can be
+     *                           used to generate the LayoutParams of the view.
      * @param savedInstanceState If non-null, this fragment is being re-constructed
      *                           from a previous saved state as given here.
-     *
      * @return Return the View for the fragment's UI, or nullnt.
      */
     @Override
@@ -89,25 +84,15 @@ public class MeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (fetchMePicturesFromDatabase)
-            fetchMePicturesFromDatabase();
-        else
-            fetchMePicturesFromDatabase = true;
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == ME_FULL_SCREEN_REQUEST)
-            fetchMePicturesFromDatabase = false;
+        fetchMePicturesFromDatabase();
     }
 
     /**
-     Initialize the contents of the Activity's standard options menu.
+     * Initialize the contents of the Activity's standard options menu.
      * You should place your menu items in to menu. For this method to be
      * called, you must have first called setHasOptionsMenu(boolean).
      *
-     * @param menu The options menu in which you place your items.
+     * @param menu     The options menu in which you place your items.
      * @param inflater The LayoutInflater object that can be used to inflate any views in the fragment,s.
      */
     @Override
@@ -116,12 +101,11 @@ public class MeFragment extends Fragment {
     }
 
     /**
-     This hook is called whenever an item in your options menu is selected.
+     * This hook is called whenever an item in your options menu is selected.
      *
      * @param item The menu item that was selected.
-     *
      * @return Return false to allow normal menu processing to proceed,
-     *         true to consume it herets.
+     * true to consume it herets.
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -156,9 +140,9 @@ public class MeFragment extends Fragment {
         mMeGridViewAdapter.fetchMePicturesFromDatabase();
         setEmptyGridMessage(getString(R.string.grid_no_posted_pictures));
 
-    /**
-     * A callback to be invoked when an item in this AdapterView has been clicked.
-     */ }
+        /**
+         * A callback to be invoked when an item in this AdapterView has been clicked.
+         */}
 
     /**
      * A callback to be invoked when an item in this AdapterView has been clicked.
@@ -168,7 +152,7 @@ public class MeFragment extends Fragment {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Intent meFullPictureIntent = new Intent(getActivity(), MeFullScreenActivity.class);
             meFullPictureIntent.putExtra(getString(R.string.data_position), position);
-            startActivityForResult(meFullPictureIntent, ME_FULL_SCREEN_REQUEST);
+            startActivity(meFullPictureIntent);
         }
     }
 }
