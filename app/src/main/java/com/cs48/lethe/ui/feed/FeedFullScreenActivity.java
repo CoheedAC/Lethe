@@ -94,10 +94,6 @@ public class FeedFullScreenActivity extends ActionBarActivity {
         // Get picture from feed table
         mPicture = mDatabaseHelper.getFeedPicture(uniqueId);
 
-        // Update view count if picture hasn't already been viewed
-        if (!mDatabaseHelper.isPictureViewed(mPicture))
-            mDatabaseHelper.viewPicture(mPicture);
-
         // Represents an arbitrary listener for image loading.
         final Target target = new Target() {
             /**
@@ -165,16 +161,24 @@ public class FeedFullScreenActivity extends ActionBarActivity {
                     .into(target);
         }
 
-        // Displays the statistics on the screen
-        mLikesTextView.setText("Likes: " + mPicture.getLikes());
-        mViewsTextView.setText("Views: " + mPicture.getViews());
-
         // Sets up the swipe gestures on the imageview
         mImageView.setOnTouchListener(new OnSwipeListener(this));
 
+        // Update view count if picture hasn't already been viewed
+        if (!mDatabaseHelper.isPictureViewed(mPicture))
+            viewPicture();
         // Fetches the statistics from the server if there is internet
-        if (NetworkUtilities.isNetworkAvailable(this))
-            fetchPictureStatisticsFromServer();
+        // and the picture has already been viewed before
+        else {
+            // Displays the database statistics on the screen
+            mLikesTextView.setText("Likes: " + mPicture.getLikes());
+            mViewsTextView.setText("Views: " + mPicture.getViews());
+
+            // If there is internet, then fetch statistics
+            // from the server
+            if (NetworkUtilities.isNetworkAvailable(this))
+                fetchPictureStatisticsFromServer();
+        }
     }
 
     /**
@@ -198,13 +202,23 @@ public class FeedFullScreenActivity extends ActionBarActivity {
         HerokuRestClient.get(url, null, mStatisticsResponseHandler);
     }
 
+    public void viewPicture() {
+        // Update view count in the database
+        mDatabaseHelper.viewPicture(mPicture);
+
+        // Displays the statistics on the screen
+        mLikesTextView.setText("Likes: " + mPicture.getLikes());
+        mViewsTextView.setText("Views: " + mPicture.getViews());
+    }
+
     /**
      * Gets the image statistics from the server and updates
      * the internal database with the new statistics. Also
      * displays the new statistics on the screen.
      */
     public void fetchPictureStatisticsFromServer() {
-        HerokuRestClient.get(mPicture.getUniqueId(), null, mStatisticsResponseHandler);
+        String url = getString(R.string.server_statistics) + mPicture.getUniqueId();
+        HerokuRestClient.get(url, null, mStatisticsResponseHandler);
     }
 
     /**

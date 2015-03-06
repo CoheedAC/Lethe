@@ -173,7 +173,8 @@ public class MePagerAdapter extends PagerAdapter {
      * displays the new statistics on the screen.
      */
     public void fetchPictureStatisticsFromServer(final int position) {
-        HerokuRestClient.get(mPictureList.get(position).getUniqueId(), null, new AsyncHttpResponseHandler() {
+        String url = mMeFullScreenActivity.getString(R.string.server_statistics) + mPictureList.get(position).getUniqueId();
+        HerokuRestClient.get(url, null, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 try {
@@ -231,10 +232,26 @@ public class MePagerAdapter extends PagerAdapter {
          */
         @Override
         public void onClick(View v) {
-            // TODO: delete from server. if successful, then delete from internal database
-            mDatabaseHelper.deletePictureFromDatabase(mPictureList.get(position));
-            Toast.makeText(mMeFullScreenActivity, "Deleted image", Toast.LENGTH_SHORT).show();
-            mMeFullScreenActivity.finish();
+            mProgressBar.setVisibility(View.VISIBLE);
+            String url = mMeFullScreenActivity.getString(R.string.server_delete) + mPictureList.get(position).getUniqueId();
+            HerokuRestClient.get(url, null, new AsyncHttpResponseHandler() {
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                    mProgressBar.setVisibility(View.GONE);
+                    mDatabaseHelper.deletePictureFromDatabase(mPictureList.get(position));
+                    mMeFullScreenActivity.finish();
+                }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                    mProgressBar.setVisibility(View.GONE);
+                    try {
+                        new OperationFailedAlertDialog().show(mMeFullScreenActivity.getFragmentManager(), LOG_TAG);
+                    }catch (IllegalStateException e) {
+                        Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                    }
+                }
+            });
         }
     }
 
@@ -266,4 +283,5 @@ public class MePagerAdapter extends PagerAdapter {
             }
         }
     }
+
 }

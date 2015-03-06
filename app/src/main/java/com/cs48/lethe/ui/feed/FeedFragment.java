@@ -114,10 +114,10 @@ public class FeedFragment extends Fragment {
             // Else, if grid is empty, then display empty error on grid
             setEmptyGridMessage(getString(R.string.grid_area_empty));
             // And fetch pictures from the server
-            if (fetchPicturesFromServer)
+//            if (fetchPicturesFromServer)
                 fetchFeedFromServer();
-            else
-                fetchPicturesFromServer = true;
+//            else
+//                fetchPicturesFromServer = true;
         }
     }
 

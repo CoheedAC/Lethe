@@ -23,6 +23,8 @@
     <string name="server_recent">recent/</string>
     <string name="server_post">sendPic</string>
     <string name="server_like">like/</string>
+    <string name="server_statistics">stats/</string>
+    <string name="server_delete">delete/</string>
 
     <string name="json_id">id</string>
     <string name="json_date_posted">created</string>
@@ -39,6 +41,8 @@
     <string name="grid_area_empty">No Pictures In Your Area</string>
     <string name="grid_no_posted_pictures">You Have Not Posted Any Pictures</string>
     <string name="grid_error">Error: Couldn\'t Get Feed</string>
+
     <string name="settings_storage">Storage</string>
+
 
 </resources>

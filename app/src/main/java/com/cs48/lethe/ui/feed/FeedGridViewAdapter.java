@@ -155,8 +155,8 @@ public class FeedGridViewAdapter extends BaseAdapter {
 
                         Picture picture = new Picture(
                                 jsonObject.getString(mContext.getString(R.string.json_id)),
-                                new SimpleDateFormat("yyyyMMdd_HHmmssSS").format(new Date()),
 //                                jsonObject.getString(mContext.getString(R.string.json_date_posted)),
+                                new SimpleDateFormat("yyyyMMdd").format(new Date()),
                                 jsonObject.getString(mContext.getString(R.string.json_url_thumbnail)),
                                 jsonObject.getString(mContext.getString(R.string.json_url_full)),
                                 jsonObject.getInt(mContext.getString(R.string.json_views)),

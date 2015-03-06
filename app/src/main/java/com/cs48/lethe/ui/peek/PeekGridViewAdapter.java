@@ -23,9 +23,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -152,8 +150,7 @@ public class PeekGridViewAdapter extends BaseAdapter {
                         // adds a new image to the list with the info from the server
                         mPictureList.add(new Picture(
                                 jsonObject.getString(mContext.getString(R.string.json_id)),
-                                new SimpleDateFormat("yyyyMMdd_HHmmssSS").format(new Date()),
-//                                jsonObject.getString(mContext.getString(R.string.json_date_posted)),
+                                jsonObject.getString(mContext.getString(R.string.json_date_posted)),
                                 jsonObject.getString(mContext.getString(R.string.json_url_thumbnail)),
                                 jsonObject.getString(mContext.getString(R.string.json_url_full)),
                                 jsonObject.getInt(mContext.getString(R.string.json_views)),

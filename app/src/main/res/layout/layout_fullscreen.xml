@@ -97,6 +97,6 @@
         android:id="@+id/progressBar"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
-        android:background="#61000000"/>
+        />
 
 </RelativeLayout>

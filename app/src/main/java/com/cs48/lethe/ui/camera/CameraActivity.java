@@ -16,6 +16,7 @@ import android.widget.ProgressBar;
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.networking.HerokuRestClient;
+import com.cs48.lethe.networking.PostPicture;
 import com.cs48.lethe.ui.alertdialogs.NetworkUnavailableAlertDialog;
 import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.NetworkUtilities;
@@ -289,7 +290,7 @@ public class CameraActivity extends ActionBarActivity {
      * This is to test working with the network library rather than using
      * the android async class.
      */
-    private void postPicture() {
+    private void disfunctionalPostPicture() {
 //        try {
         String[] currentLocation = NetworkUtilities.getCurrentLocation(this);
 
@@ -496,9 +497,9 @@ public class CameraActivity extends ActionBarActivity {
              // Posts the picture to the server if the network is available.
              // Otherwise, shows a network unavailable error dialog.
             if (NetworkUtilities.isNetworkAvailable(CameraActivity.this)) {
-                fakePostPicture();
-//                postPicture();
-//                new PostPicture(CameraActivity.this, mPictureFile).execute();
+//                fakePostPicture();
+//                disfunctionalPostPicture();
+                new PostPicture(CameraActivity.this, mPictureFile).execute();
             } else {
                 try {
                     new NetworkUnavailableAlertDialog().show(getFragmentManager(), TAG);
