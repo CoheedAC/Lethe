@@ -1,9 +1,13 @@
 package com.cs48.lethe.ui.peek;
 
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -27,10 +31,13 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.io.IOException;
+import java.util.List;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
-public class PeekFragment extends Fragment implements OnMapReadyCallback {
+public class PeekFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
 
     public static final String LOG_TAG = PeekFragment.class.getSimpleName();
 
@@ -38,6 +45,10 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
     private PeekGridViewAdapter mPeekGridViewAdapter;
     private String mLatitude;
     private String mLongitude;
+    private String inputAddress;
+    private List<Address> geocodeMatches = null;
+
+
 
     @InjectView(R.id.peekGridView)
     PullToRefreshGridView mPeekGridView;
@@ -120,7 +131,34 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
          */
 
         // Listens for user input on the text box
-        mAddressEditText.setOnEditorActionListener(new OnAddressBarEditorActionListener());
+
+        mAddressEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                //Stub
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                //Stub
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                inputAddress = mAddressEditText.getText().toString();
+                try {
+                    Geocoder geocoder = new Geocoder(getActivity());
+                    geocodeMatches = geocoder.getFromLocationName(inputAddress,5);
+                    mLongitude = String.valueOf(geocodeMatches.get(0).getLongitude());
+                    mLatitude = String.valueOf(geocodeMatches.get(0).getLatitude());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        mPeekGridViewAdapter.fetchPeekFeedFromServer(this, mLatitude, mLongitude);
+
 
         return rootView;
     }
@@ -190,6 +228,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
 
         mMap = googleMap;
         mMap.setMyLocationEnabled(true);
+        mMap.getUiSettings().setAllGesturesEnabled(true);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 15));
     }
 
@@ -227,6 +266,14 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
                 }
             }
         }
+    }
+
+    @Override
+    public void onMapClick(LatLng latLng) {
+        mLatitude = String.valueOf(latLng.latitude);
+        mLongitude = String.valueOf(latLng.longitude);
+
+        mPeekGridViewAdapter.fetchPeekFeedFromServer(this, mLatitude, mLongitude);
     }
 
     /**
