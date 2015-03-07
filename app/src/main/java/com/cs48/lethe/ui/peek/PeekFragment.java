@@ -16,7 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -58,8 +57,6 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
     EditText mAddressEditText;
     @InjectView(R.id.emptyGridTextView)
     TextView mEmptyGridTextView;
-    @InjectView(R.id.peekButton)
-    Button mPeekButton;
 
     /**
      * Called to do initial creation of a fragment. This is called after onAttach(Activity)
@@ -121,6 +118,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
         mPeekGridView.setOnItemClickListener(new OnPictureClickListener());
         mPeekGridView.setOnScrollListener(new OnScrollListener());
         mPeekPullToRefreshLayout.setOnRefreshListener(new OnRefreshListener());
+        mAddressEditText.setOnEditorActionListener(new OnAddressBarEditorActionListener());
 
         /*
          * TODO     Once the user types in the address or drops a pin, you need to
@@ -134,60 +132,13 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
 
         // Listens for user input on the text box
 
-/*      THIS IS THE ATTEMPT AT TAKING THE ADDRESS INPUT FROM DIRECTLY THE EDITTEXT
 
-        mAddressEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                //Stub
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-                CharSequence successMessage = "Entered afterTextChanged!";
-                CharSequence foundAddressMessage = "Found address matches!";
-                CharSequence noAddressMessage = "Did not find address matches!";
-                Toast toast = Toast.makeText(getActivity(), successMessage, Toast.LENGTH_LONG);
-                Toast toast2 = Toast.makeText(getActivity(), noAddressMessage, Toast.LENGTH_LONG);
-
-
-                inputAddress = mAddressEditText.getText().toString();
-                Geocoder geocoder = new Geocoder(getActivity());
-                try {
-                    geocodeMatches = geocoder.getFromLocationName(inputAddress,5);
-                    CharSequence addressFound = geocodeMatches.get(0).toString();
-                    Toast toast1 = Toast.makeText(getActivity(), addressFound, Toast.LENGTH_LONG);
-
-                    toast.show();
-                    if (!(geocodeMatches.isEmpty())) {
-                        mLongitude = String.valueOf(geocodeMatches.get(0).getLongitude());
-                        mLatitude = String.valueOf(geocodeMatches.get(0).getLatitude());
-                        fetchPeekFeedFromServer(mLatitude, mLongitude);
-                        toast1.show();
-
-                    } else {
-                        toast2.show();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-        });
- */
-
+/*
         mPeekButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 inputAddress = mAddressEditText.getText().toString();
                 Geocoder geocoder = new Geocoder(getActivity());
-
                 try {
                     geocodeMatches = geocoder.getFromLocationName(inputAddress, 2);
                     mLongitude = String.valueOf(geocodeMatches.get(0).getLongitude());
@@ -201,7 +152,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
                 }
             }
         });
-
+*/
         return rootView;
     }
 
@@ -380,9 +331,21 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
             Log.d("Okay", "One");
             if (event == null || event.getAction() == KeyEvent.ACTION_DOWN) {
                 mPeekPullToRefreshLayout.setRefreshing(true);
-                fetchPeekFeedFromServer(mLatitude, mLongitude);
+                inputAddress = mAddressEditText.getText().toString();
+                Geocoder geocoder = new Geocoder(getActivity());
+                try {
+                    geocodeMatches = geocoder.getFromLocationName(inputAddress, 2);
+                    mLongitude = String.valueOf(geocodeMatches.get(0).getLongitude());
+                    mLatitude = String.valueOf(geocodeMatches.get(0).getLatitude());
+                    fetchPeekFeedFromServer(mLatitude, mLongitude);
+                    CharSequence address = geocodeMatches.get(0).getAddressLine(0);
+                    Toast toast = Toast.makeText(getActivity(), address, Toast.LENGTH_LONG);
+                    toast.show();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return true;
             }
-
             return false;
         }
 
