@@ -132,8 +132,8 @@ public class PeekGridViewAdapter extends BaseAdapter {
         peekFragment.setEmptyGridMessage("");
         // url with specified latitude and longitude
         String url = mContext.getString(R.string.server_recent) +
-                longitude.replace(".", "a") + "," +    // latitude
-                latitude.replace(".", "a");           // longitude
+                latitude.replace(".", "a") + "," +    // latitude
+                longitude.replace(".", "a");           // longitude
 
         HerokuRestClient.get(url, null, new AsyncHttpResponseHandler() {
 

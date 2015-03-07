@@ -433,7 +433,8 @@ public class CameraActivity extends ActionBarActivity {
                     }
                 }
             }
-
+            mPostButton.setVisibility(View.VISIBLE);
+            mCancelButton.setVisibility(View.VISIBLE);
         }
     }
 
@@ -449,8 +450,10 @@ public class CameraActivity extends ActionBarActivity {
         @Override
         public void onClick(View v) {
             // Shows the cancel and post button
-            mPostButton.setVisibility(View.VISIBLE);
-            mCancelButton.setVisibility(View.VISIBLE);
+
+            //Below 2 lines are pasted in pictureTakenCallBAck
+            //mPostButton.setVisibility(View.VISIBLE);
+            //mCancelButton.setVisibility(View.VISIBLE);
 
             // Hides the capture, back, camera switch, and flash buttons
             mCaptureButton.setVisibility(View.GONE);

@@ -134,7 +134,8 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
 
         // Listens for user input on the text box
 
-/*
+/*      THIS IS THE ATTEMPT AT TAKING THE ADDRESS INPUT FROM DIRECTLY THE EDITTEXT
+
         mAddressEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -192,19 +193,14 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
                     mLongitude = String.valueOf(geocodeMatches.get(0).getLongitude());
                     mLatitude = String.valueOf(geocodeMatches.get(0).getLatitude());
                     fetchPeekFeedFromServer(mLatitude, mLongitude);
-                    CharSequence address = geocodeMatches.get(0).getAddressLine(1);
+                    CharSequence address = geocodeMatches.get(0).getAddressLine(0);
                     Toast toast = Toast.makeText(getActivity(), address, Toast.LENGTH_LONG);
                     toast.show();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
-
             }
         });
-
-    //    mPeekGridViewAdapter.fetchPeekFeedFromServer(this, mLatitude, mLongitude);
-
 
         return rootView;
     }
