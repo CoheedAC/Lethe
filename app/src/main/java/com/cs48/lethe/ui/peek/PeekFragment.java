@@ -185,7 +185,6 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
     public void onMapReady(GoogleMap googleMap) {
         mAddressEditText.setEnabled(true);
         mPeekPullToRefreshLayout.setEnabled(true);
-//lksdjf
         String[] coordinates = NetworkUtilities.getCurrentLocation(getActivity());
         mLatitude = coordinates[0];
         mLongitude = coordinates[1];
@@ -310,7 +309,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
             Log.d("Okay", "One");
-            String address = "";
+
             if (event == null || event.getAction() == KeyEvent.ACTION_DOWN) {
                 mPeekPullToRefreshLayout.setRefreshing(true);
                 inputAddress = mAddressEditText.getText().toString();
@@ -320,7 +319,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
                     mLongitude = String.valueOf(geocodeMatches.get(0).getLongitude());
                     mLatitude = String.valueOf(geocodeMatches.get(0).getLatitude());
                     fetchPeekFeedFromServer(mLatitude, mLongitude);
-                    address = geocodeMatches.get(0).getAddressLine(0) + " " + geocodeMatches.get(0).getAddressLine(1);
+                    String address = geocodeMatches.get(0).getAddressLine(0) + " " + geocodeMatches.get(0).getAddressLine(1);
                     Toast toast = Toast.makeText(getActivity(), address, Toast.LENGTH_LONG);
                     toast.show();
                 } catch (IOException e) {
@@ -328,7 +327,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
                 }
                 LatLng latLng = new LatLng(Double.valueOf(mLatitude), Double.valueOf(mLongitude));
                 mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng, 17, 0, 0)));
-                mMarker = mMap.addMarker(new MarkerOptions().position(latLng).title(address));
+                mMarker.setPosition(latLng);
                 return true;
             }
             return false;
