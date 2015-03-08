@@ -185,13 +185,12 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
     public void onMapReady(GoogleMap googleMap) {
         mAddressEditText.setEnabled(true);
         mPeekPullToRefreshLayout.setEnabled(true);
-
+//lksdjf
         String[] coordinates = NetworkUtilities.getCurrentLocation(getActivity());
         mLatitude = coordinates[0];
         mLongitude = coordinates[1];
         double latitude = Double.parseDouble(mLatitude);
         double longitude = Double.parseDouble(mLongitude);
-
         mMap = googleMap;
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setAllGesturesEnabled(true);
