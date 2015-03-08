@@ -38,7 +38,7 @@ import java.util.List;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
-public class PeekFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener{
+public class PeekFragment extends Fragment implements OnMapReadyCallback{
 
     public static final String LOG_TAG = PeekFragment.class.getSimpleName();
 
@@ -175,7 +175,8 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
     }
 
     /**
-     * Called when the map is ready to be used.
+     * Called when the map is ready to be used. Initialized the map location and a map marker
+     * to the current location of the user
      *
      * @param googleMap A non-null instance of a GoogleMap associated with the
      *                  MapFragment or MapView that defines the callback.
@@ -193,10 +194,23 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
         mMap.getUiSettings().setAllGesturesEnabled(true);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 15));
         LatLng latLng = new LatLng(Double.valueOf(mLatitude), Double.valueOf(mLongitude));
+
+        String address = "";
+        Geocoder geocoder = new Geocoder(getActivity());
+        try {
+            geocodeMatches = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 5);
+            address = geocodeMatches.get(0).getAddressLine(1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         mMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("You are here"));
         mMarker.setDraggable(true);
+        mMarker.setTitle(address);
+        mMarker.showInfoWindow();
 
         mMap.setOnMarkerDragListener(new OnMapDrag());
+        mMap.setOnMapClickListener(new OnMapClick());
 
     }
 
@@ -236,15 +250,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
         }
     }
 
-    @Override
-    public void onMapClick(LatLng latLng) {
-        mLatitude = String.valueOf(latLng.latitude);
-        mLongitude = String.valueOf(latLng.longitude);
 
-        mMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("Peeking here!"));
-
-        fetchPeekFeedFromServer(mLatitude, mLongitude);
-    }
 
 
 
@@ -310,7 +316,6 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
             String address = "";
 
             if (event == null || event.getAction() == KeyEvent.ACTION_DOWN) {
-                mPeekPullToRefreshLayout.setRefreshing(true);
                 inputAddress = mAddressEditText.getText().toString();
                 Geocoder geocoder = new Geocoder(getActivity());
                 try {
@@ -323,10 +328,11 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
                     e.printStackTrace();
                 }
                 LatLng latLng = new LatLng(Double.valueOf(mLatitude), Double.valueOf(mLongitude));
-                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng, 17, 0, 0)));
+                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng, 15, 0, 0)));
                 mMarker.hideInfoWindow();
                 mMarker.setPosition(latLng);
                 mMarker.setTitle(address);
+                mMarker.showInfoWindow();
                 return true;
             }
             return false;
@@ -351,6 +357,29 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
             mLatitude = String.valueOf(marker.getPosition().latitude);
             mLongitude = String.valueOf(marker.getPosition().longitude);
             fetchPeekFeedFromServer(mLatitude, mLongitude);
+        }
+    }
+    private class OnMapClick implements GoogleMap.OnMapClickListener {
+
+        @Override
+        public void onMapClick(LatLng latLng) {
+            mLatitude = String.valueOf(latLng.latitude);
+            mLongitude = String.valueOf(latLng.longitude);
+            String address = "";
+
+            fetchPeekFeedFromServer(mLatitude,mLongitude);
+            Geocoder geocoder = new Geocoder(getActivity());
+            try {
+                geocodeMatches = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 5);
+                address = geocodeMatches.get(0).getAddressLine(1);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            mMarker.setPosition(latLng);
+            mMarker.setTitle(address);
+            mMarker.showInfoWindow();
+
         }
     }
 }
