@@ -1,6 +1,7 @@
 package com.cs48.lethe.ui.me;
 
 import android.content.Context;
+import android.media.ExifInterface;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import com.cs48.lethe.utils.Picture;
 import com.cs48.lethe.utils.PictureUtilities;
 import com.squareup.picasso.Picasso;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -100,8 +102,14 @@ public class MeGridViewAdapter extends BaseAdapter {
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             imageView.setBackgroundColor(mContext.getResources().getColor(R.color.empty_image));
         }
-
-        int orientation = PictureUtilities.getImageOrientation(mPictureList.get(position).getFile().getAbsolutePath());
+        ExifInterface exif = null;
+        int orientation = 0;
+        try {
+            exif = new ExifInterface(mPictureList.get(position).getFile().getAbsolutePath());
+            orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         Picasso.with(mContext)
                 .load(mPictureList.get(position).getFile())
