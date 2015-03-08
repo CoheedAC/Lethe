@@ -28,7 +28,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
 import java.util.List;
@@ -36,7 +39,7 @@ import java.util.List;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
-public class PeekFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
+public class PeekFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMapClickListener{
 
     public static final String LOG_TAG = PeekFragment.class.getSimpleName();
 
@@ -46,6 +49,8 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
     private String mLongitude;
     private String inputAddress;
     private List<Address> geocodeMatches = null;
+    private Marker mMarker;
+
 
 
 
@@ -224,6 +229,12 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setAllGesturesEnabled(true);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 15));
+        LatLng latLng = new LatLng(Double.valueOf(mLatitude), Double.valueOf(mLongitude));
+        mMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("Peeking here!"));
+        mMarker.setDraggable(true);
+
+        mMap.setOnMarkerDragListener(new OnMapDrag());
+
     }
 
     /**
@@ -267,8 +278,12 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
         mLatitude = String.valueOf(latLng.latitude);
         mLongitude = String.valueOf(latLng.longitude);
 
-        mPeekGridViewAdapter.fetchPeekFeedFromServer(this, mLatitude, mLongitude);
+        mMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("Peeking here!"));
+
+        fetchPeekFeedFromServer(mLatitude, mLongitude);
     }
+
+
 
     /**
      * Starts the full-screen activity and sends the necessary data to
@@ -317,8 +332,8 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
             fetchPeekFeedFromServer(mLatitude, mLongitude);
             */
 
-            String[] coordinates = NetworkUtilities.getCurrentLocation(getActivity());
-            fetchPeekFeedFromServer(coordinates[0], coordinates[1]);
+            if (mLatitude != null && mLongitude != null)
+                fetchPeekFeedFromServer(mLatitude, mLongitude);
         }
     }
 
@@ -338,16 +353,41 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
                     mLongitude = String.valueOf(geocodeMatches.get(0).getLongitude());
                     mLatitude = String.valueOf(geocodeMatches.get(0).getLatitude());
                     fetchPeekFeedFromServer(mLatitude, mLongitude);
-                    CharSequence address = geocodeMatches.get(0).getAddressLine(0);
+                    String address = geocodeMatches.get(0).getAddressLine(0);
+                    address += geocodeMatches.get(0).getAddressLine(1);
+                    address += geocodeMatches.get(0).getAddressLine(2);
                     Toast toast = Toast.makeText(getActivity(), address, Toast.LENGTH_LONG);
                     toast.show();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                LatLng latLng = new LatLng(Double.valueOf(mLatitude), Double.valueOf(mLongitude));
+                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng, 17, 0, 0)));
+                mMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("Peeking here!"));
                 return true;
             }
             return false;
         }
 
+    }
+
+    private class OnMapDrag implements GoogleMap.OnMarkerDragListener {
+        @Override
+        public void onMarkerDragStart(Marker marker) {
+
+        }
+
+        @Override
+        public void onMarkerDrag(Marker marker) {
+
+        }
+
+        @Override
+        public void onMarkerDragEnd(Marker marker) {
+            marker = mMarker;
+            mLatitude = String.valueOf(marker.getPosition().latitude);
+            mLongitude = String.valueOf(marker.getPosition().longitude);
+            fetchPeekFeedFromServer(mLatitude, mLongitude);
+        }
     }
 }
