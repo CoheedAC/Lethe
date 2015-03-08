@@ -52,8 +52,6 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
     private Marker mMarker;
 
 
-
-
     @InjectView(R.id.peekGridView)
     PullToRefreshGridView mPeekGridView;
     @InjectView(R.id.swipeRefreshLayout)
@@ -79,6 +77,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
         setRetainInstance(true);
 
         mPeekGridViewAdapter = new PeekGridViewAdapter(getActivity());
+        geocodeMatches = null;
     }
 
     /**
@@ -185,7 +184,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
     public void onMapReady(GoogleMap googleMap) {
         mAddressEditText.setEnabled(true);
         mPeekPullToRefreshLayout.setEnabled(true);
-//lksdjf
+
         String[] coordinates = NetworkUtilities.getCurrentLocation(getActivity());
         mLatitude = coordinates[0];
         mLongitude = coordinates[1];
@@ -289,15 +288,6 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
     private class OnRefreshListener implements SwipeRefreshLayout.OnRefreshListener {
         @Override
         public void onRefresh() {
-            /*
-            // You need to enable GPS on emulator for this feature to work
-            // Sometimes location might be null which results in a crash
-            Location location = mMap.getMyLocation();
-            mLatitude = location.getLatitude() + "";      // "" converts to String
-            mLongitude = location.getLongitude() + "";    // "" converts to String
-            fetchPeekFeedFromServer(mLatitude, mLongitude);
-            */
-
             if (mLatitude != null && mLongitude != null)
                 fetchPeekFeedFromServer(mLatitude, mLongitude);
         }
