@@ -112,12 +112,14 @@ public class FeedGridViewAdapter extends BaseAdapter {
                     .load(mPictureList.get(position).getThumbnailUrl())
                     .resize(PictureUtilities.MAX_THUMBNAIL_WIDTH, 0)
                     .onlyScaleDown()
+                    .rotate(mPictureList.get(position).getOrientation())
                     .into(imageView);
         } else {
             Picasso.with(mContext)
                     .load(mPictureList.get(position).getFile())
                     .resize(PictureUtilities.MAX_THUMBNAIL_WIDTH, 0)
                     .onlyScaleDown()
+                    .rotate(mPictureList.get(position).getOrientation())
                     .into(imageView);
         }
         return imageView;

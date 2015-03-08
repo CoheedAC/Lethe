@@ -75,6 +75,7 @@ public class CameraActivity extends ActionBarActivity {
     private File mPictureFile;
     private boolean isCurrentlyPosting;
     private int mCurrentCameraId;
+    private int mOrientation;
 
     /**
      * Called when the activity is starting. This is where most initialization should go:
@@ -261,14 +262,13 @@ public class CameraActivity extends ActionBarActivity {
                 break;
         }
 
-        int result;
         if (info.facing == CameraInfo.CAMERA_FACING_FRONT) {
-            result = (info.orientation + degrees) % 360;
-            result = (360 - result) % 360;  // compensate the mirror
+            mOrientation = (info.orientation + degrees) % 360;
+            mOrientation = (360 - mOrientation) % 360;  // compensate the mirror
         } else {  // back-facing
-            result = (info.orientation - degrees + 360) % 360;
+            mOrientation = (info.orientation - degrees + 360) % 360;
         }
-        mCamera.setDisplayOrientation(result);
+        mCamera.setDisplayOrientation(mOrientation);
     }
 
     /**
@@ -310,7 +310,7 @@ public class CameraActivity extends ActionBarActivity {
                     DatabaseHelper databaseHelper = DatabaseHelper.getInstance(CameraActivity.this);
                     Picture picture = new Picture(jsonObject.getString(getString(R.string.json_id)),
                             jsonObject.getString(getString(R.string.json_date_posted)),
-                            mPictureFile, 0, 0);
+                            mPictureFile, mOrientation, 0, 0);
                     databaseHelper.insertPicture(picture);
 
                 } catch (JSONException e) {
@@ -343,7 +343,7 @@ public class CameraActivity extends ActionBarActivity {
         Date date = new Date();
         DatabaseHelper databaseHelper = DatabaseHelper.getInstance(this);
         Picture picture = new Picture(date.getTime() + "", new SimpleDateFormat("yyyyMMdd_HHmmss").
-                format(date), mPictureFile, 0, 0);
+                format(date), mPictureFile, mOrientation, 0, 0);
         databaseHelper.insertPicture(picture);
         finish();
     }
@@ -502,7 +502,7 @@ public class CameraActivity extends ActionBarActivity {
             if (NetworkUtilities.isNetworkAvailable(CameraActivity.this)) {
 //                fakePostPicture();
 //                disfunctionalPostPicture();
-                new PostPicture(CameraActivity.this, mPictureFile).execute();
+                new PostPicture(CameraActivity.this, mPictureFile, mOrientation).execute();
             } else {
                 try {
                     new NetworkUnavailableAlertDialog().show(getFragmentManager(), TAG);

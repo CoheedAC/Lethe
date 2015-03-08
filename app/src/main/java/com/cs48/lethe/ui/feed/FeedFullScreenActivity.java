@@ -150,6 +150,7 @@ public class FeedFullScreenActivity extends ActionBarActivity {
                     .load(mPicture.getFullUrl())
                     .resize(PictureUtilities.MAX_FULL_WIDTH, 0)
                     .onlyScaleDown()
+                    .rotate(mPicture.getOrientation())
                     .into(target);
         }else {
             // Else the picture is a file, so load the picture
@@ -158,6 +159,7 @@ public class FeedFullScreenActivity extends ActionBarActivity {
                     .load(mPicture.getFile())
                     .resize(PictureUtilities.MAX_FULL_WIDTH, 0)
                     .onlyScaleDown()
+                    .rotate(mPicture.getOrientation())
                     .into(target);
         }
 
