@@ -18,7 +18,6 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.ui.alertdialogs.NetworkUnavailableAlertDialog;
@@ -191,11 +190,10 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
         double latitude = Double.parseDouble(mLatitude);
         double longitude = Double.parseDouble(mLongitude);
         mMap = googleMap;
-        mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setAllGesturesEnabled(true);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 15));
         LatLng latLng = new LatLng(Double.valueOf(mLatitude), Double.valueOf(mLongitude));
-        mMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("Peek here"));
+        mMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("You are here"));
         mMarker.setDraggable(true);
 
         mMap.setOnMarkerDragListener(new OnMapDrag());
@@ -309,6 +307,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
             Log.d("Okay", "One");
+            String address = "";
 
             if (event == null || event.getAction() == KeyEvent.ACTION_DOWN) {
                 mPeekPullToRefreshLayout.setRefreshing(true);
@@ -319,15 +318,15 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
                     mLongitude = String.valueOf(geocodeMatches.get(0).getLongitude());
                     mLatitude = String.valueOf(geocodeMatches.get(0).getLatitude());
                     fetchPeekFeedFromServer(mLatitude, mLongitude);
-                    String address = geocodeMatches.get(0).getAddressLine(0) + " " + geocodeMatches.get(0).getAddressLine(1);
-                    Toast toast = Toast.makeText(getActivity(), address, Toast.LENGTH_LONG);
-                    toast.show();
+                    address = geocodeMatches.get(0).getAddressLine(0) + " " + geocodeMatches.get(0).getAddressLine(1);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
                 LatLng latLng = new LatLng(Double.valueOf(mLatitude), Double.valueOf(mLongitude));
                 mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng, 17, 0, 0)));
+                mMarker.hideInfoWindow();
                 mMarker.setPosition(latLng);
+                mMarker.setTitle(address);
                 return true;
             }
             return false;
