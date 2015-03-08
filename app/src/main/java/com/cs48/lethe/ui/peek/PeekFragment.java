@@ -18,6 +18,7 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.ui.alertdialogs.NetworkUnavailableAlertDialog;
@@ -324,15 +325,18 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback{
                     mLatitude = String.valueOf(geocodeMatches.get(0).getLatitude());
                     fetchPeekFeedFromServer(mLatitude, mLongitude);
                     address = geocodeMatches.get(0).getAddressLine(0) + " " + geocodeMatches.get(0).getAddressLine(1);
-                } catch (IOException e) {
+                    LatLng latLng = new LatLng(Double.valueOf(mLatitude), Double.valueOf(mLongitude));
+                    mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng, 15, 0, 0)));
+                    mMarker.hideInfoWindow();
+                    mMarker.setPosition(latLng);
+                    mMarker.setTitle(address);
+                    mMarker.showInfoWindow();
+
+                } catch (IOException e ) {
                     e.printStackTrace();
+                }catch (IndexOutOfBoundsException e) {
+                    Toast.makeText(getActivity(), "Invalid Address!", Toast.LENGTH_SHORT).show();
                 }
-                LatLng latLng = new LatLng(Double.valueOf(mLatitude), Double.valueOf(mLongitude));
-                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng, 15, 0, 0)));
-                mMarker.hideInfoWindow();
-                mMarker.setPosition(latLng);
-                mMarker.setTitle(address);
-                mMarker.showInfoWindow();
                 return true;
             }
             return false;
