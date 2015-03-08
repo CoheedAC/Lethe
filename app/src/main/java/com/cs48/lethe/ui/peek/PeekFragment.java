@@ -125,39 +125,6 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
         mPeekPullToRefreshLayout.setOnRefreshListener(new OnRefreshListener());
         mAddressEditText.setOnEditorActionListener(new OnAddressBarEditorActionListener());
 
-        /*
-         * TODO     Once the user types in the address or drops a pin, you need to
-         * TODO     reverse geocode that address to get the latitude and
-         * TODO     longitude. Then you can call:
-         *
-         * TODO     fetchPeekFeedFromServer(latitude, longitude);
-         *
-         * TODO     and it should show the feed of that area in the grid.
-         */
-
-        // Listens for user input on the text box
-
-
-/*
-        mPeekButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                inputAddress = mAddressEditText.getText().toString();
-                Geocoder geocoder = new Geocoder(getActivity());
-                try {
-                    geocodeMatches = geocoder.getFromLocationName(inputAddress, 2);
-                    mLongitude = String.valueOf(geocodeMatches.get(0).getLongitude());
-                    mLatitude = String.valueOf(geocodeMatches.get(0).getLatitude());
-                    fetchPeekFeedFromServer(mLatitude, mLongitude);
-                    CharSequence address = geocodeMatches.get(0).getAddressLine(0);
-                    Toast toast = Toast.makeText(getActivity(), address, Toast.LENGTH_LONG);
-                    toast.show();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-*/
         return rootView;
     }
 
@@ -230,7 +197,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
         mMap.getUiSettings().setAllGesturesEnabled(true);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 15));
         LatLng latLng = new LatLng(Double.valueOf(mLatitude), Double.valueOf(mLongitude));
-        mMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("Peeking here!"));
+        mMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("Peek here"));
         mMarker.setDraggable(true);
 
         mMap.setOnMarkerDragListener(new OnMapDrag());
@@ -344,6 +311,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
             Log.d("Okay", "One");
+            String address = "";
             if (event == null || event.getAction() == KeyEvent.ACTION_DOWN) {
                 mPeekPullToRefreshLayout.setRefreshing(true);
                 inputAddress = mAddressEditText.getText().toString();
@@ -353,9 +321,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
                     mLongitude = String.valueOf(geocodeMatches.get(0).getLongitude());
                     mLatitude = String.valueOf(geocodeMatches.get(0).getLatitude());
                     fetchPeekFeedFromServer(mLatitude, mLongitude);
-                    String address = geocodeMatches.get(0).getAddressLine(0);
-                    address += geocodeMatches.get(0).getAddressLine(1);
-                    address += geocodeMatches.get(0).getAddressLine(2);
+                    address = geocodeMatches.get(0).getAddressLine(0) + " " + geocodeMatches.get(0).getAddressLine(1);
                     Toast toast = Toast.makeText(getActivity(), address, Toast.LENGTH_LONG);
                     toast.show();
                 } catch (IOException e) {
@@ -363,7 +329,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback, Google
                 }
                 LatLng latLng = new LatLng(Double.valueOf(mLatitude), Double.valueOf(mLongitude));
                 mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng, 17, 0, 0)));
-                mMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("Peeking here!"));
+                mMarker = mMap.addMarker(new MarkerOptions().position(latLng).title(address));
                 return true;
             }
             return false;

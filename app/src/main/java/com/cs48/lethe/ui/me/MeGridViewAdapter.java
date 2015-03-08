@@ -100,10 +100,14 @@ public class MeGridViewAdapter extends BaseAdapter {
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             imageView.setBackgroundColor(mContext.getResources().getColor(R.color.empty_image));
         }
+
+        int orientation = PictureUtilities.getImageOrientation(mPictureList.get(position).getFile().getAbsolutePath());
+
         Picasso.with(mContext)
                 .load(mPictureList.get(position).getFile())
                 .resize(PictureUtilities.MAX_THUMBNAIL_WIDTH, 0)
                 .onlyScaleDown()
+                .rotate(orientation)
                 .into(imageView);
         return imageView;
     }

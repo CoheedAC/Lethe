@@ -433,7 +433,8 @@ public class CameraActivity extends ActionBarActivity {
                     }
                 }
             }
-
+            mPostButton.setVisibility(View.VISIBLE);
+            mCancelButton.setVisibility(View.VISIBLE);
         }
     }
 
