@@ -14,21 +14,32 @@ public class Picture {
     private File file;
     private int views;
     private int likes;
+    private int orientation;
 
     // Me picture constructor
-    public Picture(String uniqueId, String datePosted, File pictureFile, int views, int likes) {
-        this(uniqueId, datePosted, pictureFile, null, null, views, likes);
+    public Picture(String uniqueId, String datePosted, File pictureFile, int orientation, int views, int likes) {
+        this(uniqueId, datePosted, pictureFile, null, null, orientation, views, likes);
     }
 
     // Feed picture constructor
-    public Picture(String uniqueId, String datePosted, File pictureFile, String thumbnailUrl, String fullUrl, int views, int likes) {
+    public Picture(String uniqueId, String datePosted, File pictureFile, String thumbnailUrl, String fullUrl,int orientation, int views, int likes) {
         this.uniqueId = uniqueId;
         this.datePosted = datePosted;
         this.thumbnailUrl = thumbnailUrl;
         this.fullUrl = fullUrl;
+        this.orientation = orientation;
         this.views = views;
         this.likes = likes;
         file = pictureFile;
+
+    }
+
+    public int getOrientation() {
+        return orientation;
+    }
+
+    public void setOrientation(int orientation) {
+        this.orientation = orientation;
     }
 
     // Peek picture constructor

@@ -145,6 +145,7 @@ public class MePagerAdapter extends PagerAdapter {
                 .load(mPictureList.get(position).getFile())
                 .resize(PictureUtilities.MAX_FULL_WIDTH, 0)
                 .onlyScaleDown()
+                .rotate(mPictureList.get(position).getOrientation())
                 .into(target);
 
         fetchPictureStatisticsFromServer(position);

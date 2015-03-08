@@ -40,6 +40,7 @@ public class PostPicture extends AsyncTask<String, String, String> {
     // Instance variables
     private CameraActivity mCameraActivity;
     private File mPictureFile;
+    private int mOrientation;
 
     /**
      * Constructor that takes in the context and the picture file.
@@ -47,9 +48,10 @@ public class PostPicture extends AsyncTask<String, String, String> {
      * @param context Interface to global information about an application environment
      * @param pictureFile The file of the picture taken by the user
      */
-    public PostPicture(Context context, File pictureFile) {
+    public PostPicture(Context context, File pictureFile, int orientation) {
         mCameraActivity = (CameraActivity) context;
         mPictureFile = pictureFile;
+        mOrientation = orientation;
     }
 
     /**
@@ -106,7 +108,7 @@ public class PostPicture extends AsyncTask<String, String, String> {
             String combined = latitude + longitude;
 
             // TODO: Tim, upload this orientation int to the server
-//            int orientation = PictureUtilities.getImageOrientation(mPictureFile.getAbsolutePath());
+            // mOrientation  <-- that variable
 
             // Write the latitude and longitude to the server
             byte[] writer = combined.getBytes();
@@ -208,7 +210,7 @@ public class PostPicture extends AsyncTask<String, String, String> {
                 databaseHelper.insertPicture(new Picture(
                         jsonObject.getString(mCameraActivity.getString(R.string.json_id)),
                         jsonObject.getString(mCameraActivity.getString(R.string.json_date_posted)),
-                        mPictureFile, 0, 0));
+                        mPictureFile, mOrientation, 0, 0));
             } catch (JSONException e) {
                 Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             }

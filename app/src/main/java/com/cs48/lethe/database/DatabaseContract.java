@@ -15,6 +15,7 @@ public class DatabaseContract {
         // Column names for the table
         public static final String COLUMN_NAME_PICTURE_ID = "pictureId";
         public static final String COLUMN_NAME_DATE_POSTED = "datePosted";
+        public static final String COLUMN_NAME_ORIENTATION = "orientation";
         public static final String COLUMN_NAME_VIEWS = "views";
         public static final String COLUMN_NAME_LIKES = "likes";
     }
