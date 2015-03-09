@@ -44,6 +44,8 @@
 
     <string name="settings_storage">Storage</string>
     <string name="json_orientation">orientation</string>
+    <string name="server_latitude">latitude</string>
+    <string name="server_longitude">longitude</string>
 
 
 </resources>

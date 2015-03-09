@@ -103,12 +103,10 @@ public class PostPicture extends AsyncTask<String, String, String> {
 
             // Get latitude and longitude
             String[] coordinates = NetworkUtilities.getCurrentLocation(mCameraActivity);
-            String latitude = generateForSimpleText("latitude", coordinates[0]);
-            String longitude = generateForSimpleText("longitude", coordinates[1]);
-            String combined = latitude + longitude;
-
-            // TODO: Tim, upload this orientation int to the server
-            // mOrientation  <-- that variable
+            String latitude = generateForSimpleText(mCameraActivity.getString(R.string.server_latitude), coordinates[0]);
+            String longitude = generateForSimpleText(mCameraActivity.getString(R.string.server_longitude), coordinates[1]);
+            String orientation = generateForSimpleText(mCameraActivity.getString(R.string.json_orientation), mOrientation + "");
+            String combined = latitude + longitude + orientation;
 
             // Write the latitude and longitude to the server
             byte[] writer = combined.getBytes();
