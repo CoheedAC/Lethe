@@ -7,24 +7,26 @@
 
     <EditText
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="0px"
         android:id="@+id/addressEditText"
         android:hint="Enter address"
         android:paddingStart="10dp"
         android:paddingEnd="10dp"
         android:singleLine="true"
-        android:gravity="center_vertical"/>
+        android:gravity="center_vertical"
+        android:layout_weight="1"/>
 
     <fragment
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="0px"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:id="@+id/map"
-        />
+        android:layout_weight="4"/>
 
     <RelativeLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+        android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_weight="10">
 
         <com.cs48.lethe.ui.peek.PeekPullToRefreshLayout
             android:layout_width="match_parent"

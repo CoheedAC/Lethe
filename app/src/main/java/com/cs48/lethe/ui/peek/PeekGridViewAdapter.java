@@ -36,11 +36,14 @@ public class PeekGridViewAdapter extends BaseAdapter {
     private Context mContext;
     private List<Picture> mPictureList;
     private DatabaseHelper mDatabaseHelper;
+    private PeekFragment mPeekFragment;
 
-    public PeekGridViewAdapter(Context context) {
+    public PeekGridViewAdapter(Context context, PeekFragment peekFragment) {
         mContext = context;
+        mPeekFragment = peekFragment;
         mDatabaseHelper = DatabaseHelper.getInstance(mContext);
-        clearPeekFeed();
+        mPictureList = new ArrayList<>();
+        mDatabaseHelper.clearPeekTable();
     }
 
     /**
@@ -57,7 +60,6 @@ public class PeekGridViewAdapter extends BaseAdapter {
      * Get the data item associated with the specified position in the data set.
      *
      * @param position Position of the item whose data we want within the adapter's data set.
-     *
      * @return The data at the specified position.
      */
     @Override
@@ -69,7 +71,6 @@ public class PeekGridViewAdapter extends BaseAdapter {
      * Get the row id associated with the specified position in the list.
      *
      * @param position The position of the item within the adapter's data set whose row id we want.
-     *
      * @return The id of the item at the specified position
      */
     @Override
@@ -80,11 +81,10 @@ public class PeekGridViewAdapter extends BaseAdapter {
     /**
      * Get a View that displays the data at the specified position in the data set.
      *
-     * @param position The position of the item within the adapter's
-     *                 data set of the item whose view we want.
+     * @param position    The position of the item within the adapter's
+     *                    data set of the item whose view we want.
      * @param convertView The old view to reuse, if possible.
-     * @param parent The parent that this view will eventually be attached to.
-     *
+     * @param parent      The parent that this view will eventually be attached to.
      * @return A View corresponding to the data at the specified position.
      */
     @Override
@@ -105,6 +105,7 @@ public class PeekGridViewAdapter extends BaseAdapter {
                 .load(mPictureList.get(position).getThumbnailUrl())
                 .resize(PictureUtilities.MAX_THUMBNAIL_WIDTH, 0)
                 .onlyScaleDown()
+                .rotate(mPictureList.get(position).getOrientation())
                 .into(imageView);
         return imageView;
     }
@@ -116,6 +117,7 @@ public class PeekGridViewAdapter extends BaseAdapter {
     public void clearPeekFeed() {
         mPictureList = new ArrayList<>();
         mDatabaseHelper.clearPeekTable();
+        mPeekFragment.setEmptyGridMessage(mContext.getString(R.string.grid_area_empty));
         notifyDataSetChanged();
     }
 
@@ -127,9 +129,9 @@ public class PeekGridViewAdapter extends BaseAdapter {
      * to start the refresh animation before a server response
      * and to stop on a server response.
      */
-    public void fetchPeekFeedFromServer(final PeekFragment peekFragment, String latitude, String longitude) {
+    public void fetchPeekFeedFromServer(String latitude, String longitude) {
         clearPeekFeed();
-        peekFragment.setEmptyGridMessage("");
+        mPeekFragment.setEmptyGridMessage("");
         // url with specified latitude and longitude
         String url = mContext.getString(R.string.server_recent) +
                 latitude.replace(".", "a") + "," +    // latitude
@@ -139,7 +141,7 @@ public class PeekGridViewAdapter extends BaseAdapter {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                peekFragment.stopRefreshingAnimation();
+                mPeekFragment.stopRefreshingAnimation();
                 try {
                     // parses the data received from the server
                     String jsonData = new String(responseBody);
@@ -153,10 +155,11 @@ public class PeekGridViewAdapter extends BaseAdapter {
                                 jsonObject.getString(mContext.getString(R.string.json_date_posted)),
                                 jsonObject.getString(mContext.getString(R.string.json_url_thumbnail)),
                                 jsonObject.getString(mContext.getString(R.string.json_url_full)),
+                                jsonObject.getInt(mContext.getString(R.string.json_orientation)),
                                 jsonObject.getInt(mContext.getString(R.string.json_views)),
                                 jsonObject.getInt(mContext.getString(R.string.json_likes))));
                     }
-                    peekFragment.setEmptyGridMessage(mContext.getString(R.string.grid_area_empty));
+                    mPeekFragment.setEmptyGridMessage(mContext.getString(R.string.grid_area_empty));
 
                     mDatabaseHelper.updatePeekFeed(mPictureList);
 
@@ -169,10 +172,10 @@ public class PeekGridViewAdapter extends BaseAdapter {
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                peekFragment.stopRefreshingAnimation();
-                if (!peekFragment.setEmptyGridMessage(mContext.getString(R.string.grid_error))) {
+                mPeekFragment.stopRefreshingAnimation();
+                if (!mPeekFragment.setEmptyGridMessage(mContext.getString(R.string.grid_error))) {
                     try {
-                        new OperationFailedAlertDialog().show(peekFragment.getActivity().getFragmentManager(), LOG_TAG);
+                        new OperationFailedAlertDialog().show(mPeekFragment.getActivity().getFragmentManager(), LOG_TAG);
                     } catch (IllegalStateException e) {
                         Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                     }

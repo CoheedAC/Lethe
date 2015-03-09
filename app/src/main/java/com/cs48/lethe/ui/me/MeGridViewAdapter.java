@@ -14,6 +14,7 @@ import com.cs48.lethe.utils.Picture;
 import com.cs48.lethe.utils.PictureUtilities;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -118,7 +119,7 @@ public class MeGridViewAdapter extends BaseAdapter {
         mDatabaseHelper.clearMeTable();
         for (Picture picture : mPictureList)
             picture.getFile().delete();
-        mPictureList.removeAll(mPictureList);
+        mPictureList = new ArrayList<>();
         notifyDataSetChanged();
     }
 

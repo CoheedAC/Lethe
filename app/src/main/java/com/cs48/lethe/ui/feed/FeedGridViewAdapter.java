@@ -158,6 +158,7 @@ public class FeedGridViewAdapter extends BaseAdapter {
                                 jsonObject.getString(mContext.getString(R.string.json_date_posted)),
                                 jsonObject.getString(mContext.getString(R.string.json_url_thumbnail)),
                                 jsonObject.getString(mContext.getString(R.string.json_url_full)),
+                                jsonObject.getInt(mContext.getString(R.string.json_orientation)),
                                 jsonObject.getInt(mContext.getString(R.string.json_views)),
                                 jsonObject.getInt(mContext.getString(R.string.json_likes)));
 

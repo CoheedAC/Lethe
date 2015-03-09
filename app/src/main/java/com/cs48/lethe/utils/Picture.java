@@ -22,7 +22,7 @@ public class Picture {
     }
 
     // Feed picture constructor
-    public Picture(String uniqueId, String datePosted, File pictureFile, String thumbnailUrl, String fullUrl,int orientation, int views, int likes) {
+    public Picture(String uniqueId, String datePosted, File pictureFile, String thumbnailUrl, String fullUrl, int orientation, int views, int likes) {
         this.uniqueId = uniqueId;
         this.datePosted = datePosted;
         this.thumbnailUrl = thumbnailUrl;
@@ -31,7 +31,11 @@ public class Picture {
         this.views = views;
         this.likes = likes;
         file = pictureFile;
+    }
 
+    // Peek picture constructor
+    public Picture(String uniqueId, String datePosted, String thumbnailUrl, String fullUrl, int orientation, int views, int likes) {
+        this(uniqueId, datePosted, null, thumbnailUrl, fullUrl, orientation, views, likes);
     }
 
     public int getOrientation() {
@@ -40,17 +44,6 @@ public class Picture {
 
     public void setOrientation(int orientation) {
         this.orientation = orientation;
-    }
-
-    // Peek picture constructor
-    public Picture(String uniqueId, String datePosted, String thumbnailUrl, String fullUrl, int views, int likes) {
-        this.uniqueId = uniqueId;
-        this.datePosted = datePosted;
-        this.thumbnailUrl = thumbnailUrl;
-        this.fullUrl = fullUrl;
-        this.views = views;
-        this.likes = likes;
-        file = null;
     }
 
     public File getFile() {

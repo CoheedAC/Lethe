@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Project Lethe</string>
+    <string name="app_name">PicLapse</string>
 
     <string name="title_tab1">Home</string>
     <string name="title_tab2">Peek</string>
@@ -43,6 +43,7 @@
     <string name="grid_error">Error: Couldn\'t Get Feed</string>
 
     <string name="settings_storage">Storage</string>
+    <string name="json_orientation">orientation</string>
 
 
 </resources>

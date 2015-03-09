@@ -18,7 +18,6 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.ui.alertdialogs.NetworkUnavailableAlertDialog;
@@ -41,18 +40,14 @@ import butterknife.InjectView;
 
 public class PeekFragment extends Fragment implements OnMapReadyCallback{
 
-    public static final String LOG_TAG = PeekFragment.class.getSimpleName();
+    public static final String TAG = PeekFragment.class.getSimpleName();
 
     private GoogleMap mMap;
     private PeekGridViewAdapter mPeekGridViewAdapter;
     private String mLatitude;
     private String mLongitude;
-    private String inputAddress;
-    private List<Address> geocodeMatches = null;
     private Marker mMarker;
-
-
-
+    private int mMapZoom = 14;
 
     @InjectView(R.id.peekGridView)
     PullToRefreshGridView mPeekGridView;
@@ -78,7 +73,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback{
         setHasOptionsMenu(true);
         setRetainInstance(true);
 
-        mPeekGridViewAdapter = new PeekGridViewAdapter(getActivity());
+        mPeekGridViewAdapter = new PeekGridViewAdapter(getActivity(), this);
     }
 
     /**
@@ -186,33 +181,36 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback{
     public void onMapReady(GoogleMap googleMap) {
         mAddressEditText.setEnabled(true);
         mPeekPullToRefreshLayout.setEnabled(true);
+
         String[] coordinates = NetworkUtilities.getCurrentLocation(getActivity());
         mLatitude = coordinates[0];
         mLongitude = coordinates[1];
-        double latitude = Double.parseDouble(mLatitude);
-        double longitude = Double.parseDouble(mLongitude);
+
         mMap = googleMap;
         mMap.getUiSettings().setAllGesturesEnabled(true);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 15));
-        LatLng latLng = new LatLng(Double.valueOf(mLatitude), Double.valueOf(mLongitude));
 
-        String address = "";
+        mMap.setOnMapClickListener(new OnMapClick());
+        mMap.setOnCameraChangeListener(new OnZoomChange());
+
+        LatLng latLng = new LatLng(Double.parseDouble(mLatitude), Double.parseDouble(mLongitude));
+        mMarker = mMap.addMarker(new MarkerOptions().position(latLng));
+        setMarkerPosition(latLng);
+    }
+
+    private void setMarkerPosition(LatLng latLng) {
         Geocoder geocoder = new Geocoder(getActivity());
         try {
-            geocodeMatches = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 5);
-            address = geocodeMatches.get(0).getAddressLine(1);
+            List<Address> addressList = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 5);
+            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng, mMapZoom, 0, 0)), 200, null);
+            mMarker.setPosition(latLng);
+            mMarker.setTitle(addressList.get(0).getAddressLine(1));
+            mMarker.showInfoWindow();
         } catch (IOException e) {
             e.printStackTrace();
+        }catch (IndexOutOfBoundsException e) {
+            mPeekGridViewAdapter.clearPeekFeed();
+            mMarker.hideInfoWindow();
         }
-
-        mMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("You are here"));
-        mMarker.setDraggable(true);
-        mMarker.setTitle(address);
-        mMarker.showInfoWindow();
-
-        mMap.setOnMarkerDragListener(new OnMapDrag());
-        mMap.setOnMapClickListener(new OnMapClick());
-
     }
 
     /**
@@ -238,22 +236,18 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback{
 
     private void fetchPeekFeedFromServer(String latitude, String longitude) {
         if (NetworkUtilities.isNetworkAvailable(getActivity())) {
-            mPeekGridViewAdapter.fetchPeekFeedFromServer(this, latitude, longitude);
+            mPeekGridViewAdapter.fetchPeekFeedFromServer(latitude, longitude);
         } else {
             mPeekPullToRefreshLayout.setRefreshing(false);
             if (!setEmptyGridMessage(getString(R.string.grid_no_internet_connection))) {
                 try {
-                    new NetworkUnavailableAlertDialog().show(getActivity().getFragmentManager(), LOG_TAG);
+                    new NetworkUnavailableAlertDialog().show(getActivity().getFragmentManager(), TAG);
                 } catch (IllegalStateException e) {
-                    Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                    Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                 }
             }
         }
     }
-
-
-
-
 
     /**
      * Starts the full-screen activity and sends the necessary data to
@@ -293,15 +287,6 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback{
     private class OnRefreshListener implements SwipeRefreshLayout.OnRefreshListener {
         @Override
         public void onRefresh() {
-            /*
-            // You need to enable GPS on emulator for this feature to work
-            // Sometimes location might be null which results in a crash
-            Location location = mMap.getMyLocation();
-            mLatitude = location.getLatitude() + "";      // "" converts to String
-            mLongitude = location.getLongitude() + "";    // "" converts to String
-            fetchPeekFeedFromServer(mLatitude, mLongitude);
-            */
-
             if (mLatitude != null && mLongitude != null)
                 fetchPeekFeedFromServer(mLatitude, mLongitude);
         }
@@ -313,77 +298,49 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback{
     private class OnAddressBarEditorActionListener implements TextView.OnEditorActionListener {
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-            Log.d("Okay", "One");
-            String address = "";
-
             if (event == null || event.getAction() == KeyEvent.ACTION_DOWN) {
-                inputAddress = mAddressEditText.getText().toString();
-                Geocoder geocoder = new Geocoder(getActivity());
                 try {
-                    geocodeMatches = geocoder.getFromLocationName(inputAddress, 2);
-                    mLongitude = String.valueOf(geocodeMatches.get(0).getLongitude());
-                    mLatitude = String.valueOf(geocodeMatches.get(0).getLatitude());
+                    Geocoder geocoder = new Geocoder(getActivity());
+                    List<Address> addressList = geocoder.getFromLocationName(mAddressEditText.getText().toString(), 2);
+                    mLongitude = addressList.get(0).getLongitude() + "";
+                    mLatitude = addressList.get(0).getLatitude() + "";
+
                     fetchPeekFeedFromServer(mLatitude, mLongitude);
-                    address = geocodeMatches.get(0).getAddressLine(0) + " " + geocodeMatches.get(0).getAddressLine(1);
+
+                    String address = addressList.get(0).getAddressLine(0) + " " + addressList.get(0).getAddressLine(1);
                     LatLng latLng = new LatLng(Double.valueOf(mLatitude), Double.valueOf(mLongitude));
-                    mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng, 15, 0, 0)));
-                    mMarker.hideInfoWindow();
+
+                    mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng, mMapZoom, 0, 0)));
                     mMarker.setPosition(latLng);
                     mMarker.setTitle(address);
                     mMarker.showInfoWindow();
-
+                    return true;
                 } catch (IOException e ) {
                     e.printStackTrace();
                 }catch (IndexOutOfBoundsException e) {
-                    Toast.makeText(getActivity(), "Invalid Address!", Toast.LENGTH_SHORT).show();
+                    mPeekGridViewAdapter.clearPeekFeed();
+                    mMarker.hideInfoWindow();
                 }
-                return true;
             }
             return false;
         }
-
     }
 
-    private class OnMapDrag implements GoogleMap.OnMarkerDragListener {
+    private class OnZoomChange implements GoogleMap.OnCameraChangeListener {
         @Override
-        public void onMarkerDragStart(Marker marker) {
-
-        }
-
-        @Override
-        public void onMarkerDrag(Marker marker) {
-
-        }
-
-        @Override
-        public void onMarkerDragEnd(Marker marker) {
-            marker = mMarker;
-            mLatitude = String.valueOf(marker.getPosition().latitude);
-            mLongitude = String.valueOf(marker.getPosition().longitude);
-            fetchPeekFeedFromServer(mLatitude, mLongitude);
+        public void onCameraChange(CameraPosition cameraPosition) {
+            mMapZoom = (int) cameraPosition.zoom;
         }
     }
+
     private class OnMapClick implements GoogleMap.OnMapClickListener {
-
         @Override
         public void onMapClick(LatLng latLng) {
-            mLatitude = String.valueOf(latLng.latitude);
-            mLongitude = String.valueOf(latLng.longitude);
-            String address = "";
+            mLatitude = latLng.latitude + "";
+            mLongitude = latLng.longitude + "";
 
+            setMarkerPosition(latLng);
             fetchPeekFeedFromServer(mLatitude,mLongitude);
-            Geocoder geocoder = new Geocoder(getActivity());
-            try {
-                geocodeMatches = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 5);
-                address = geocodeMatches.get(0).getAddressLine(1);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            mMarker.setPosition(latLng);
-            mMarker.setTitle(address);
-            mMarker.showInfoWindow();
-
         }
     }
 }
