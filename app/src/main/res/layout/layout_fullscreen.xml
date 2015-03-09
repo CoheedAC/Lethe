@@ -21,33 +21,64 @@
         android:id="@+id/statisticsLinearLayout"
         android:background="#61000000">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Views: ##"
-            android:id="@+id/viewsTextView"
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:id="@+id/viewsLinearLayout"
             android:layout_weight=".5"
-            android:textSize="25sp"
-            android:textColor="@android:color/white"
-            android:gravity="start"
-            android:paddingEnd="10dp"
+            android:gravity="left"
             android:paddingStart="10dp"
-            android:singleLine="true"
-            />
+            android:paddingEnd="10dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Likes: ##"
-            android:id="@+id/likesTextView"
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="match_parent"
+                android:id="@+id/viewsImageView"
+                android:src="@drawable/ic_eye"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="##"
+                android:id="@+id/viewsTextView"
+                android:textSize="25sp"
+                android:textColor="@android:color/white"
+                android:gravity="start"
+                android:singleLine="true"
+                android:paddingStart="10dp"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:id="@+id/likesLinearLayout"
             android:layout_weight=".5"
-            android:textSize="25sp"
-            android:textColor="@android:color/white"
+            android:gravity="right"
             android:paddingEnd="10dp"
-            android:paddingStart="10dp"
-            android:gravity="end"
-            android:singleLine="true"
-            />
+            android:paddingStart="10dp">
+
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="match_parent"
+                android:id="@+id/likesImageView"
+                android:src="@drawable/ic_heart"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="##"
+                android:id="@+id/likesTextView"
+                android:textSize="25sp"
+                android:textColor="@android:color/white"
+                android:singleLine="true"
+                android:paddingStart="10dp"/>
+
+        </LinearLayout>
+
     </LinearLayout>
 
     <LinearLayout

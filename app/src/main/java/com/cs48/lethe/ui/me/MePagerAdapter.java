@@ -108,8 +108,8 @@ public class MePagerAdapter extends PagerAdapter {
 
         ButterKnife.inject(this, itemView);
 
-        mLikesTextView.setText("Likes: " + mPictureList.get(position).getLikes());
-        mViewsTextView.setText("Views: " + mPictureList.get(position).getViews());
+        mLikesTextView.setText(mPictureList.get(position).getLikes() + "");
+        mViewsTextView.setText(mPictureList.get(position).getViews() + "");
 
         // Set up on click listeners
         mImageView.setOnClickListener(new OnPictureClickListener());
@@ -186,8 +186,8 @@ public class MePagerAdapter extends PagerAdapter {
 
                     mDatabaseHelper.updateDatabaseFromPicture(mPictureList.get(position));
 
-                    mLikesTextView.setText("Likes: " + mPictureList.get(position).getLikes());
-                    mViewsTextView.setText("Views: " + mPictureList.get(position).getViews());
+                    mLikesTextView.setText(mPictureList.get(position).getLikes() + "");
+                    mViewsTextView.setText(mPictureList.get(position).getViews() + "");
                 } catch (JSONException e) {
                     Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                 }

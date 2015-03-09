@@ -173,8 +173,8 @@ public class FeedFullScreenActivity extends ActionBarActivity {
         // and the picture has already been viewed before
         else {
             // Displays the database statistics on the screen
-            mLikesTextView.setText("Likes: " + mPicture.getLikes());
-            mViewsTextView.setText("Views: " + mPicture.getViews());
+            mLikesTextView.setText(mPicture.getLikes() + "");
+            mViewsTextView.setText(mPicture.getViews() + "");
 
             // If there is internet, then fetch statistics
             // from the server
@@ -209,8 +209,8 @@ public class FeedFullScreenActivity extends ActionBarActivity {
         mDatabaseHelper.viewPicture(mPicture);
 
         // Displays the statistics on the screen
-        mLikesTextView.setText("Likes: " + mPicture.getLikes());
-        mViewsTextView.setText("Views: " + mPicture.getViews());
+        mLikesTextView.setText(mPicture.getLikes() + "");
+        mViewsTextView.setText(mPicture.getViews() + "");
 
         HerokuRestClient.get(mPicture.getUniqueId(), null, mStatisticsResponseHandler);
     }
@@ -300,8 +300,8 @@ public class FeedFullScreenActivity extends ActionBarActivity {
                 mDatabaseHelper.updateDatabaseFromPicture(mPicture);
 
                 // Updates the text views to show the new statistics
-                mLikesTextView.setText("Likes: " + mPicture.getLikes());
-                mViewsTextView.setText("Views: " + mPicture.getViews());
+                mLikesTextView.setText(mPicture.getLikes() + "");
+                mViewsTextView.setText(mPicture.getViews() + "");
             } catch (JSONException e) {
                 Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             }

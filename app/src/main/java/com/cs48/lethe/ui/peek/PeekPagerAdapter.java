@@ -96,8 +96,8 @@ public class PeekPagerAdapter extends PagerAdapter {
 
         ButterKnife.inject(this, itemView);
 
-        mLikesTextView.setText("Likes: " + mPictureList.get(position).getLikes());
-        mViewsTextView.setText("Views: " + mPictureList.get(position).getViews());
+        mLikesTextView.setText(mPictureList.get(position).getLikes() + "");
+        mViewsTextView.setText(mPictureList.get(position).getViews() + "");
 
         mButtonsLinearLayout.setVisibility(View.GONE);
 
