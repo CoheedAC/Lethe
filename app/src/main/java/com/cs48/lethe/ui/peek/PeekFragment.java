@@ -195,6 +195,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback{
         LatLng latLng = new LatLng(Double.parseDouble(mLatitude), Double.parseDouble(mLongitude));
         mMarker = mMap.addMarker(new MarkerOptions().position(latLng));
         setMarkerPosition(latLng);
+        mMarker.hideInfoWindow();
     }
 
     private void setMarkerPosition(LatLng latLng) {
@@ -308,12 +309,12 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback{
                     fetchPeekFeedFromServer(mLatitude, mLongitude);
 
                     String address = addressList.get(0).getAddressLine(0) + " " + addressList.get(0).getAddressLine(1);
+                    mAddressEditText.setText(address);
                     LatLng latLng = new LatLng(Double.valueOf(mLatitude), Double.valueOf(mLongitude));
 
                     mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng, mMapZoom, 0, 0)));
                     mMarker.setPosition(latLng);
-                    mMarker.setTitle(address);
-                    mMarker.showInfoWindow();
+                    mMarker.hideInfoWindow();
                     return true;
                 } catch (IOException e ) {
                     e.printStackTrace();
@@ -338,6 +339,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback{
         public void onMapClick(LatLng latLng) {
             mLatitude = latLng.latitude + "";
             mLongitude = latLng.longitude + "";
+            mAddressEditText.setText("");
 
             setMarkerPosition(latLng);
             fetchPeekFeedFromServer(mLatitude,mLongitude);
