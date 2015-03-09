@@ -133,6 +133,7 @@ public class PeekPagerAdapter extends PagerAdapter {
                 .load(mPictureList.get(position).getFullUrl())
                 .resize(PictureUtilities.MAX_FULL_WIDTH, 0)
                 .onlyScaleDown()
+                .rotate(mPictureList.get(position).getOrientation())
                 .into(target);
 
         container.addView(itemView);

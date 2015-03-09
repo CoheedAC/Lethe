@@ -102,7 +102,6 @@ public class MeGridViewAdapter extends BaseAdapter {
             imageView.setBackgroundColor(mContext.getResources().getColor(R.color.empty_image));
         }
 
-
         Picasso.with(mContext)
                 .load(mPictureList.get(position).getFile())
                 .resize(PictureUtilities.MAX_THUMBNAIL_WIDTH, 0)

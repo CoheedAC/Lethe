@@ -244,7 +244,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         null,
                         c.getString(c.getColumnIndex(PeekTable.COLUMN_NAME_THUMBNAIL_URL)),
                         c.getString(c.getColumnIndex(PeekTable.COLUMN_NAME_FULL_URL)),
-                        c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_ORIENTATION)),
+                        c.getInt(c.getColumnIndex(PeekTable.COLUMN_NAME_ORIENTATION)),
                         c.getInt(c.getColumnIndex(PeekTable.COLUMN_NAME_VIEWS)),
                         c.getInt(c.getColumnIndex(PeekTable.COLUMN_NAME_LIKES))));
             } while (c.moveToNext());
@@ -330,6 +330,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 values.put(FeedTable.COLUMN_NAME_DATE_POSTED, picture.getDatePosted());
                 values.put(FeedTable.COLUMN_NAME_THUMBNAIL_URL, picture.getThumbnailUrl());
                 values.put(FeedTable.COLUMN_NAME_FULL_URL, picture.getFullUrl());
+                values.put(FeedTable.COLUMN_NAME_ORIENTATION, picture.getOrientation());
                 values.put(FeedTable.COLUMN_NAME_VIEWS, picture.getViews());
                 values.put(FeedTable.COLUMN_NAME_LIKES, picture.getLikes());
 
@@ -371,6 +372,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 values.put(PeekTable.COLUMN_NAME_DATE_POSTED, picture.getDatePosted());
                 values.put(PeekTable.COLUMN_NAME_THUMBNAIL_URL, picture.getThumbnailUrl());
                 values.put(PeekTable.COLUMN_NAME_FULL_URL, picture.getFullUrl());
+                values.put(PeekTable.COLUMN_NAME_ORIENTATION, picture.getOrientation());
                 values.put(PeekTable.COLUMN_NAME_VIEWS, picture.getViews());
                 values.put(PeekTable.COLUMN_NAME_LIKES, picture.getLikes());
 
