@@ -9,9 +9,6 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -70,7 +67,6 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
         setRetainInstance(true);
 
         mPeekGridViewAdapter = new PeekGridViewAdapter(getActivity(), this);
@@ -121,42 +117,6 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback{
         mAddressEditText.setOnEditorActionListener(new OnAddressBarEditorActionListener());
 
         return rootView;
-    }
-
-    /**
-     * Initialize the contents of the Activity's standard options menu.
-     * You should place your menu items in to menu. For this method to be
-     * called, you must have first called setHasOptionsMenu(boolean).
-     *
-     * @param menu The options menu in which you place your items.
-     * @param inflater The LayoutInflater object that can be used to inflate any views in the fragment,
-     */
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        menu.findItem(R.id.action_clear_cache).setVisible(true);
-    }
-
-    /**
-     * This hook is called whenever an item in your options menu is selected.
-     *
-     * @param item The menu item that was selected.
-     *
-     * @return Return false to allow normal menu processing to proceed,
-     *         true to consume it here.
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        /**
-         * Clears the images in the cache and refreshes the grid.
-         */
-        if (id == R.id.action_clear_cache) {
-            mPeekGridViewAdapter.clearPeekFeed();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -314,6 +274,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback{
 
                     mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng, mMapZoom, 0, 0)));
                     mMarker.setPosition(latLng);
+                    mMarker.setTitle(address);
                     mMarker.hideInfoWindow();
                     return true;
                 } catch (IOException e ) {
