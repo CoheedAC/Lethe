@@ -18,7 +18,7 @@
             android:text=" Social Media &amp; Contact"
             android:id="@+id/textView"
             android:layout_marginTop="5dp"
-            android:textColor="@color/instagram_dark"/>
+            android:textColor="@color/flik_dark"/>
 
         <Button
             android:layout_width="match_parent"
@@ -27,7 +27,7 @@
             android:text="Like Us on Facebook"
             android:id="@+id/facebookButton"
             android:layout_gravity="center_horizontal"
-            android:background="@color/instagram_light"
+            android:background="@color/flik_light"
             android:textColor="@android:color/white"
             android:layout_margin="5dp"
             android:paddingLeft="5dp"/>
@@ -39,7 +39,7 @@
             android:text="Follow Us on Instagram"
             android:id="@+id/instagramButton"
             android:layout_gravity="center_horizontal"
-            android:background="@color/instagram_light"
+            android:background="@color/flik_light"
             android:textColor="@android:color/white"
             android:layout_margin="5dp"
             android:paddingLeft="5dp"/>
@@ -51,7 +51,7 @@
             android:text="Contact Us"
             android:id="@+id/contactButton"
             android:layout_gravity="center_horizontal"
-            android:background="@color/instagram_light"
+            android:background="@color/flik_light"
             android:textColor="@android:color/white"
             android:layout_margin="5dp"
             android:paddingLeft="5dp"/>
@@ -62,7 +62,7 @@
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text=" Legal"
             android:id="@+id/textView2"
-            android:textColor="@color/instagram_dark"
+            android:textColor="@color/flik_dark"
             android:layout_marginTop="20dp"/>
 
         <Button
@@ -71,7 +71,7 @@
             android:gravity="left|center_vertical"
             android:text="Terms of Service"
             android:id="@+id/tosButton"
-            android:background="@color/instagram_light"
+            android:background="@color/flik_light"
             android:textColor="@android:color/white"
             android:layout_margin="5dp"
             android:layout_gravity="center_horizontal"
@@ -83,7 +83,7 @@
             android:gravity="left|center_vertical"
             android:text="Privacy Policy"
             android:id="@+id/ppButton"
-            android:background="@color/instagram_light"
+            android:background="@color/flik_light"
             android:textColor="@android:color/white"
             android:layout_margin="5dp"
             android:layout_gravity="center_horizontal"

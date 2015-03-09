@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">PicLapse</string>
+    <string name="app_name">Flik</string>
 
     <string name="title_tab1">Home</string>
     <string name="title_tab2">Peek</string>

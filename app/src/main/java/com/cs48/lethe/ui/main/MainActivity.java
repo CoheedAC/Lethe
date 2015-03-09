@@ -18,7 +18,7 @@ import com.cs48.lethe.ui.camera.CameraActivity;
  */
 public class MainActivity extends ActionBarActivity implements ActionBar.TabListener {
 
-    public static final String LOG_TAG = MainActivity.class.getSimpleName();
+    public static final String TAG = MainActivity.class.getSimpleName();
 
     private TabsPagerAdapter mTabsPagerAdapter;
     private ViewPager mViewPager;
@@ -50,6 +50,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         // Show app icon
         actionBar.setDisplayShowHomeEnabled(true);
         actionBar.setIcon(R.drawable.ic_launcher);
+
+        setTitle("");
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
@@ -132,27 +134,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
      */
     @Override
     public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-        int position = tab.getPosition();
-
-        // When the given tab is selected, switch to the corresponding page in
-        // the ViewPager.
-        mViewPager.setCurrentItem(position);
-
-        // Changes title based upon which tab is selected
-        switch (position) {
-            case 0:
-                setTitle(R.string.title_tab1);
-                break;
-            case 1:
-                setTitle(R.string.title_tab2);
-                break;
-            case 2:
-                setTitle(R.string.title_tab3);
-                break;
-            case 3:
-                setTitle(R.string.title_tab4);
-                break;
-        }
+        mViewPager.setCurrentItem(tab.getPosition());
     }
 
     /**

@@ -1,335 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Yikyak" parent="@style/Theme.AppCompat.Light.DarkActionBar">
-        <item name="actionBarItemBackground">@drawable/selectable_background_yikyak</item>
-        <item name="popupMenuStyle">@style/PopupMenu.Yikyak</item>
-        <item name="dropDownListViewStyle">@style/DropDownListView.Yikyak</item>
-        <item name="actionBarTabStyle">@style/ActionBarTabStyle.Yikyak</item>
-        <item name="actionDropDownStyle">@style/DropDownNav.Yikyak</item>
-        <item name="actionBarStyle">@style/ActionBar.Solid.Yikyak</item>
-        <item name="actionModeBackground">@drawable/cab_background_top_yikyak</item>
-        <item name="actionModeSplitBackground">@drawable/cab_background_bottom_yikyak</item>
-        <item name="actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Yikyak</item>
-        <item name="actionBarWidgetTheme">@style/Theme.Yikyak.Widget</item>
+
+    <style name="Flik" parent="@style/Theme.AppCompat.Light.DarkActionBar">
+        <item name="actionBarItemBackground">@drawable/selectable_background_flik</item>
+        <item name="popupMenuStyle">@style/PopupMenu.Flik</item>
+        <item name="dropDownListViewStyle">@style/DropDownListView.Flik</item>
+        <item name="actionBarTabStyle">@style/ActionBarTabStyle.Flik</item>
+        <item name="actionDropDownStyle">@style/DropDownNav.Flik</item>
+        <item name="actionBarStyle">@style/ActionBar.Solid.Flik</item>
+        <item name="actionModeBackground">@drawable/cab_background_top_flik</item>
+        <item name="actionModeSplitBackground">@drawable/cab_background_bottom_flik</item>
+        <item name="actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Flik</item>
+
+        <item name="android:typeface">monospace</item>
+
+        <item name="actionBarWidgetTheme">@style/Theme.Flik.Widget</item>
 
     </style>
 
-    <style name="ActionBar.Solid.Yikyak" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
-        <item name="background">@drawable/ab_solid_yikyak</item>
-        <item name="backgroundStacked">@drawable/ab_stacked_solid_yikyak</item>
-        <item name="backgroundSplit">@drawable/ab_bottom_solid_yikyak</item>
-        <item name="progressBarStyle">@style/ProgressBar.Yikyak</item>
+    <style name="ActionBar.Solid.Flik" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
+        <item name="background">@drawable/ab_solid_flik</item>
+        <item name="backgroundStacked">@drawable/ab_stacked_solid_flik</item>
+        <item name="backgroundSplit">@drawable/ab_bottom_solid_flik</item>
+        <item name="progressBarStyle">@style/ProgressBar.Flik</item>
     </style>
 
-    <style name="ActionBar.Transparent.Yikyak" parent="@style/Widget.AppCompat.ActionBar">
-        <item name="background">@drawable/ab_transparent_yikyak</item>
-        <item name="progressBarStyle">@style/ProgressBar.Yikyak</item>
+    <style name="ActionBar.Transparent.Flik" parent="@style/Widget.AppCompat.ActionBar">
+        <item name="background">@drawable/ab_transparent_flik</item>
+        <item name="progressBarStyle">@style/ProgressBar.Flik</item>
     </style>
 
-    <style name="PopupMenu.Yikyak" parent="@style/Widget.AppCompat.PopupMenu">
-        <item name="android:popupBackground">@drawable/menu_dropdown_panel_yikyak</item>
+    <style name="PopupMenu.Flik" parent="@style/Widget.AppCompat.PopupMenu">
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_flik</item>
     </style>
 
-    <style name="DropDownListView.Yikyak" parent="@style/Widget.AppCompat.ListView.DropDown">
-        <item name="android:listSelector">@drawable/selectable_background_yikyak</item>
+    <style name="DropDownListView.Flik" parent="@style/Widget.AppCompat.ListView.DropDown">
+        <item name="android:listSelector">@drawable/selectable_background_flik</item>
     </style>
 
-    <style name="ActionBarTabStyle.Yikyak" parent="@style/Widget.AppCompat.ActionBar.TabView">
-        <item name="android:background">@drawable/tab_indicator_ab_yikyak</item>
+    <style name="ActionBarTabStyle.Flik" parent="@style/Widget.AppCompat.ActionBar.TabView">
+        <item name="android:background">@drawable/tab_indicator_ab_flik</item>
     </style>
 
-    <style name="DropDownNav.Yikyak" parent="@style/Widget.AppCompat.Spinner.DropDown.ActionBar">
-        <item name="android:background">@drawable/spinner_background_ab_yikyak</item>
-        <item name="android:popupBackground">@drawable/menu_dropdown_panel_yikyak</item>
-        <item name="android:dropDownSelector">@drawable/selectable_background_yikyak</item>
+    <style name="DropDownNav.Flik" parent="@style/Widget.AppCompat.Spinner.DropDown.ActionBar">
+        <item name="android:background">@drawable/spinner_background_ab_flik</item>
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_flik</item>
+        <item name="android:dropDownSelector">@drawable/selectable_background_flik</item>
     </style>
 
-    <style name="ProgressBar.Yikyak" parent="@style/Widget.AppCompat.ProgressBar.Horizontal">
-        <item name="android:progressDrawable">@drawable/progress_horizontal_yikyak</item>
+    <style name="ProgressBar.Flik" parent="@style/Widget.AppCompat.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/progress_horizontal_flik</item>
     </style>
 
-    <style name="ActionButton.CloseMode.Yikyak" parent="@style/Widget.AppCompat.ActionButton.CloseMode">
-        <item name="android:background">@drawable/btn_cab_done_yikyak</item>
-    </style>
-
-    <!-- this style is only referenced in a Light.DarkActionBar based theme -->
-    <style name="Theme.Yikyak.Widget" parent="@style/Theme.AppCompat">
-        <item name="popupMenuStyle">@style/PopupMenu.Yikyak</item>
-        <item name="dropDownListViewStyle">@style/DropDownListView.Yikyak</item>
-    </style>
-
-
-
-
-
-
-
-    <style name="Instagram" parent="@style/Theme.AppCompat.Light.DarkActionBar">
-        <item name="actionBarItemBackground">@drawable/selectable_background_instagram</item>
-        <item name="popupMenuStyle">@style/PopupMenu.Instagram</item>
-        <item name="dropDownListViewStyle">@style/DropDownListView.Instagram</item>
-        <item name="actionBarTabStyle">@style/ActionBarTabStyle.Instagram</item>
-        <item name="actionDropDownStyle">@style/DropDownNav.Instagram</item>
-        <item name="actionBarStyle">@style/ActionBar.Solid.Instagram</item>
-        <item name="actionModeBackground">@drawable/cab_background_top_instagram</item>
-        <item name="actionModeSplitBackground">@drawable/cab_background_bottom_instagram</item>
-        <item name="actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Instagram</item>
-        <item name="actionBarWidgetTheme">@style/Theme.Instagram.Widget</item>
-
-    </style>
-
-    <style name="ActionBar.Solid.Instagram" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
-        <item name="background">@drawable/ab_solid_instagram</item>
-        <item name="backgroundStacked">@drawable/ab_stacked_solid_instagram</item>
-        <item name="backgroundSplit">@drawable/ab_bottom_solid_instagram</item>
-        <item name="progressBarStyle">@style/ProgressBar.Instagram</item>
-    </style>
-
-    <style name="ActionBar.Transparent.Instagram" parent="@style/Widget.AppCompat.ActionBar">
-        <item name="background">@drawable/ab_transparent_instagram</item>
-        <item name="progressBarStyle">@style/ProgressBar.Instagram</item>
-    </style>
-
-    <style name="PopupMenu.Instagram" parent="@style/Widget.AppCompat.PopupMenu">
-        <item name="android:popupBackground">@drawable/menu_dropdown_panel_instagram</item>
-    </style>
-
-    <style name="DropDownListView.Instagram" parent="@style/Widget.AppCompat.ListView.DropDown">
-        <item name="android:listSelector">@drawable/selectable_background_instagram</item>
-    </style>
-
-    <style name="ActionBarTabStyle.Instagram" parent="@style/Widget.AppCompat.ActionBar.TabView">
-        <item name="android:background">@drawable/tab_indicator_ab_instagram</item>
-    </style>
-
-    <style name="DropDownNav.Instagram" parent="@style/Widget.AppCompat.Spinner.DropDown.ActionBar">
-        <item name="android:background">@drawable/spinner_background_ab_instagram</item>
-        <item name="android:popupBackground">@drawable/menu_dropdown_panel_instagram</item>
-        <item name="android:dropDownSelector">@drawable/selectable_background_instagram</item>
-    </style>
-
-    <style name="ProgressBar.Instagram" parent="@style/Widget.AppCompat.ProgressBar.Horizontal">
-        <item name="android:progressDrawable">@drawable/progress_horizontal_instagram</item>
-    </style>
-
-    <style name="ActionButton.CloseMode.Instagram" parent="@style/Widget.AppCompat.ActionButton.CloseMode">
-        <item name="android:background">@drawable/btn_cab_done_instagram</item>
+    <style name="ActionButton.CloseMode.Flik" parent="@style/Widget.AppCompat.ActionButton.CloseMode">
+        <item name="android:background">@drawable/btn_cab_done_flik</item>
     </style>
 
     <!-- this style is only referenced in a Light.DarkActionBar based theme -->
-    <style name="Theme.Instagram.Widget" parent="@style/Theme.AppCompat">
-        <item name="popupMenuStyle">@style/PopupMenu.Instagram</item>
-        <item name="dropDownListViewStyle">@style/DropDownListView.Instagram</item>
+    <style name="Theme.Flik.Widget" parent="@style/Theme.AppCompat">
+        <item name="popupMenuStyle">@style/PopupMenu.Flik</item>
+        <item name="dropDownListViewStyle">@style/DropDownListView.Flik</item>
     </style>
-
-
-
-
-
-
-
-
-
-
-    <style name="Facebook" parent="@style/Theme.AppCompat.Light.DarkActionBar">
-        <item name="actionBarItemBackground">@drawable/selectable_background_facebook</item>
-        <item name="popupMenuStyle">@style/PopupMenu.Facebook</item>
-        <item name="dropDownListViewStyle">@style/DropDownListView.Facebook</item>
-        <item name="actionBarTabStyle">@style/ActionBarTabStyle.Facebook</item>
-        <item name="actionDropDownStyle">@style/DropDownNav.Facebook</item>
-        <item name="actionBarStyle">@style/ActionBar.Solid.Facebook</item>
-        <item name="actionModeBackground">@drawable/cab_background_top_facebook</item>
-        <item name="actionModeSplitBackground">@drawable/cab_background_bottom_facebook</item>
-        <item name="actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Facebook</item>
-        <item name="actionBarWidgetTheme">@style/Theme.Facebook.Widget</item>
-
-    </style>
-
-    <style name="ActionBar.Solid.Facebook" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
-        <item name="background">@drawable/ab_solid_facebook</item>
-        <item name="backgroundStacked">@drawable/ab_stacked_solid_facebook</item>
-        <item name="backgroundSplit">@drawable/ab_bottom_solid_facebook</item>
-        <item name="progressBarStyle">@style/ProgressBar.Facebook</item>
-    </style>
-
-    <style name="ActionBar.Transparent.Facebook" parent="@style/Widget.AppCompat.ActionBar">
-        <item name="background">@drawable/ab_transparent_facebook</item>
-        <item name="progressBarStyle">@style/ProgressBar.Facebook</item>
-    </style>
-
-    <style name="PopupMenu.Facebook" parent="@style/Widget.AppCompat.PopupMenu">
-        <item name="android:popupBackground">@drawable/menu_dropdown_panel_facebook</item>
-    </style>
-
-    <style name="DropDownListView.Facebook" parent="@style/Widget.AppCompat.ListView.DropDown">
-        <item name="android:listSelector">@drawable/selectable_background_facebook</item>
-    </style>
-
-    <style name="ActionBarTabStyle.Facebook" parent="@style/Widget.AppCompat.ActionBar.TabView">
-        <item name="android:background">@drawable/tab_indicator_ab_facebook</item>
-    </style>
-
-    <style name="DropDownNav.Facebook" parent="@style/Widget.AppCompat.Spinner.DropDown.ActionBar">
-        <item name="android:background">@drawable/spinner_background_ab_facebook</item>
-        <item name="android:popupBackground">@drawable/menu_dropdown_panel_facebook</item>
-        <item name="android:dropDownSelector">@drawable/selectable_background_facebook</item>
-    </style>
-
-    <style name="ProgressBar.Facebook" parent="@style/Widget.AppCompat.ProgressBar.Horizontal">
-        <item name="android:progressDrawable">@drawable/progress_horizontal_facebook</item>
-    </style>
-
-    <style name="ActionButton.CloseMode.Facebook" parent="@style/Widget.AppCompat.ActionButton.CloseMode">
-        <item name="android:background">@drawable/btn_cab_done_facebook</item>
-    </style>
-
-    <!-- this style is only referenced in a Light.DarkActionBar based theme -->
-    <style name="Theme.Facebook.Widget" parent="@style/Theme.AppCompat">
-        <item name="popupMenuStyle">@style/PopupMenu.Facebook</item>
-        <item name="dropDownListViewStyle">@style/DropDownListView.Facebook</item>
-    </style>
-
-
-
-
-
-
-
-
-    <style name="Orange" parent="@style/Theme.AppCompat.Light.DarkActionBar">
-        <item name="actionBarItemBackground">@drawable/selectable_background_orange</item>
-        <item name="popupMenuStyle">@style/PopupMenu.Orange</item>
-        <item name="dropDownListViewStyle">@style/DropDownListView.Orange</item>
-        <item name="actionBarTabStyle">@style/ActionBarTabStyle.Orange</item>
-        <item name="actionDropDownStyle">@style/DropDownNav.Orange</item>
-        <item name="actionBarStyle">@style/ActionBar.Solid.Orange</item>
-        <item name="actionModeBackground">@drawable/cab_background_top_orange</item>
-        <item name="actionModeSplitBackground">@drawable/cab_background_bottom_orange</item>
-        <item name="actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Orange</item>
-        <item name="actionBarWidgetTheme">@style/Theme.Orange.Widget</item>
-
-    </style>
-
-    <style name="ActionBar.Solid.Orange" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
-        <item name="background">@drawable/ab_solid_orange</item>
-        <item name="backgroundStacked">@drawable/ab_stacked_solid_orange</item>
-        <item name="backgroundSplit">@drawable/ab_bottom_solid_orange</item>
-        <item name="progressBarStyle">@style/ProgressBar.Orange</item>
-    </style>
-
-    <style name="ActionBar.Transparent.Orange" parent="@style/Widget.AppCompat.ActionBar">
-        <item name="background">@drawable/ab_transparent_orange</item>
-        <item name="progressBarStyle">@style/ProgressBar.Orange</item>
-    </style>
-
-    <style name="PopupMenu.Orange" parent="@style/Widget.AppCompat.PopupMenu">
-        <item name="android:popupBackground">@drawable/menu_dropdown_panel_orange</item>
-    </style>
-
-    <style name="DropDownListView.Orange" parent="@style/Widget.AppCompat.ListView.DropDown">
-        <item name="android:listSelector">@drawable/selectable_background_orange</item>
-    </style>
-
-    <style name="ActionBarTabStyle.Orange" parent="@style/Widget.AppCompat.ActionBar.TabView">
-        <item name="android:background">@drawable/tab_indicator_ab_orange</item>
-    </style>
-
-    <style name="DropDownNav.Orange" parent="@style/Widget.AppCompat.Spinner.DropDown.ActionBar">
-        <item name="android:background">@drawable/spinner_background_ab_orange</item>
-        <item name="android:popupBackground">@drawable/menu_dropdown_panel_orange</item>
-        <item name="android:dropDownSelector">@drawable/selectable_background_orange</item>
-    </style>
-
-    <style name="ProgressBar.Orange" parent="@style/Widget.AppCompat.ProgressBar.Horizontal">
-        <item name="android:progressDrawable">@drawable/progress_horizontal_orange</item>
-    </style>
-
-    <style name="ActionButton.CloseMode.Orange" parent="@style/Widget.AppCompat.ActionButton.CloseMode">
-        <item name="android:background">@drawable/btn_cab_done_orange</item>
-    </style>
-
-    <!-- this style is only referenced in a Light.DarkActionBar based theme -->
-    <style name="Theme.Orange.Widget" parent="@style/Theme.AppCompat">
-        <item name="popupMenuStyle">@style/PopupMenu.Orange</item>
-        <item name="dropDownListViewStyle">@style/DropDownListView.Orange</item>
-    </style>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <style name="GoogleHangouts" parent="@style/Theme.AppCompat.Light.DarkActionBar">
-        <item name="actionBarItemBackground">@drawable/selectable_background_googlehangouts</item>
-        <item name="popupMenuStyle">@style/PopupMenu.Googlehangouts</item>
-        <item name="dropDownListViewStyle">@style/DropDownListView.Googlehangouts</item>
-        <item name="actionBarTabStyle">@style/ActionBarTabStyle.Googlehangouts</item>
-        <item name="actionDropDownStyle">@style/DropDownNav.Googlehangouts</item>
-        <item name="actionBarStyle">@style/ActionBar.Solid.Googlehangouts</item>
-        <item name="actionModeBackground">@drawable/cab_background_top_googlehangouts</item>
-        <item name="actionModeSplitBackground">@drawable/cab_background_bottom_googlehangouts</item>
-        <item name="actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Googlehangouts</item>
-
-        <!-- Light.DarkActionBar specific -->
-        <item name="actionBarWidgetTheme">@style/Theme.Googlehangouts.Widget</item>
-
-    </style>
-
-    <style name="ActionBar.Solid.Googlehangouts" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
-        <item name="background">@drawable/ab_solid_googlehangouts</item>
-        <item name="backgroundStacked">@drawable/ab_stacked_solid_googlehangouts</item>
-        <item name="backgroundSplit">@drawable/ab_bottom_solid_googlehangouts</item>
-        <item name="progressBarStyle">@style/ProgressBar.Googlehangouts</item>
-    </style>
-
-    <style name="ActionBar.Transparent.Googlehangouts" parent="@style/Widget.AppCompat.ActionBar">
-        <item name="background">@drawable/ab_transparent_googlehangouts</item>
-        <item name="progressBarStyle">@style/ProgressBar.Googlehangouts</item>
-    </style>
-
-    <style name="PopupMenu.Googlehangouts" parent="@style/Widget.AppCompat.PopupMenu">
-        <item name="android:popupBackground">@drawable/menu_dropdown_panel_googlehangouts</item>
-    </style>
-
-    <style name="DropDownListView.Googlehangouts" parent="@style/Widget.AppCompat.ListView.DropDown">
-        <item name="android:listSelector">@drawable/selectable_background_googlehangouts</item>
-    </style>
-
-    <style name="ActionBarTabStyle.Googlehangouts" parent="@style/Widget.AppCompat.ActionBar.TabView">
-        <item name="android:background">@drawable/tab_indicator_ab_googlehangouts</item>
-    </style>
-
-    <style name="DropDownNav.Googlehangouts" parent="@style/Widget.AppCompat.Spinner.DropDown.ActionBar">
-        <item name="android:background">@drawable/spinner_background_ab_googlehangouts</item>
-        <item name="android:popupBackground">@drawable/menu_dropdown_panel_googlehangouts</item>
-        <item name="android:dropDownSelector">@drawable/selectable_background_googlehangouts</item>
-    </style>
-
-    <style name="ProgressBar.Googlehangouts" parent="@style/Widget.AppCompat.ProgressBar.Horizontal">
-        <item name="android:progressDrawable">@drawable/progress_horizontal_googlehangouts</item>
-    </style>
-
-    <style name="ActionButton.CloseMode.Googlehangouts" parent="@style/Widget.AppCompat.ActionButton.CloseMode">
-        <item name="android:background">@drawable/btn_cab_done_googlehangouts</item>
-    </style>
-
-    <!-- this style is only referenced in a Light.DarkActionBar based theme -->
-    <style name="Theme.Googlehangouts.Widget" parent="@style/Theme.AppCompat">
-        <item name="popupMenuStyle">@style/PopupMenu.Googlehangouts</item>
-        <item name="dropDownListViewStyle">@style/DropDownListView.Googlehangouts</item>
-    </style>
-
-
 
 </resources>

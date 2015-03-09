@@ -14,7 +14,7 @@
         android:paddingEnd="10dp"
         android:singleLine="true"
         android:gravity="center_vertical"
-        android:layout_weight="1"/>
+        android:layout_weight="1.2"/>
 
     <fragment
         android:layout_width="match_parent"
