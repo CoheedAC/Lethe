@@ -4,9 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -20,7 +17,7 @@ import butterknife.InjectView;
 
 public class MeFragment extends Fragment {
 
-    public static final String LOG_TAG = MeFragment.class.getSimpleName();
+    public static final String TAG = MeFragment.class.getSimpleName();
 
     private MeGridViewAdapter mMeGridViewAdapter;
 
@@ -41,7 +38,6 @@ public class MeFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
 
         mMeGridViewAdapter = new MeGridViewAdapter(getActivity());
     }
@@ -85,43 +81,6 @@ public class MeFragment extends Fragment {
     public void onResume() {
         super.onResume();
         fetchMePicturesFromDatabase();
-    }
-
-    /**
-     * Initialize the contents of the Activity's standard options menu.
-     * You should place your menu items in to menu. For this method to be
-     * called, you must have first called setHasOptionsMenu(boolean).
-     *
-     * @param menu     The options menu in which you place your items.
-     * @param inflater The LayoutInflater object that can be used to inflate any views in the fragment,s.
-     */
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        menu.findItem(R.id.action_clear_cache).setVisible(true);
-    }
-
-    /**
-     * This hook is called whenever an item in your options menu is selected.
-     *
-     * @param item The menu item that was selected.
-     * @return Return false to allow normal menu processing to proceed,
-     * true to consume it herets.
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        /**
-         * Deletes all the images stored on the device for
-         * testing purposes.
-         */
-        if (id == R.id.action_clear_cache) {
-            mMeGridViewAdapter.deleteAllPostedImages();
-            setEmptyGridMessage(getString(R.string.grid_no_posted_pictures));
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     public void setEmptyGridMessage(String errorMessage) {
