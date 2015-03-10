@@ -1,9 +1,6 @@
 package com.cs48.lethe.utils;
 
 import android.content.Context;
-import android.location.Criteria;
-import android.location.Location;
-import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
@@ -12,7 +9,7 @@ import android.net.NetworkInfo;
  */
 public class NetworkUtilities {
 
-    public static final String LOG_TAG = NetworkUtilities.class.getSimpleName();
+    public static final String TAG = NetworkUtilities.class.getSimpleName();
 
     /**
      * Returns whether there is internet connectivity or not.
@@ -24,22 +21,7 @@ public class NetworkUtilities {
         return networkInfo != null && networkInfo.isConnected();
     }
 
-    /**
-     * Returns the current latitude[0] and longitude[1]
-     */
-    public static String[] getCurrentLocation(Context context) {
-        String[] coordinates = new String[2];
-        LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        Location location = lm.getLastKnownLocation(lm.getBestProvider(new Criteria(), true));
 
-        if (location != null) {
-            coordinates[0] = String.valueOf(location.getLatitude());
-            coordinates[1] = String.valueOf(location.getLongitude());
-        } else {
-            // default to isla vista coordinates
-            coordinates[0] = "34.4133"; // latitude
-            coordinates[1] = "-119.861"; // longitude
-        }
-        return coordinates;
-    }
+
+
 }

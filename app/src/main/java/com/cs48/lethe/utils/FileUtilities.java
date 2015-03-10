@@ -3,7 +3,6 @@ package com.cs48.lethe.utils;
 import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.ApplicationSettings;
@@ -22,7 +21,7 @@ import java.util.Date;
  */
 public class FileUtilities {
 
-    public static final String LOG_TAG = FileUtilities.class.getSimpleName();
+    public static final String TAG = FileUtilities.class.getSimpleName();
 
     /**
      * Returns directory where images will be stored
@@ -36,6 +35,7 @@ public class FileUtilities {
              where files created with openFileOutput(String, int) are stored.
              In other words, this is internal storage.
              */
+            Log.d(TAG, "INTERNAL");
             return context.getFilesDir();
         } else if (storageType.equals(StorageType.PRIVATE_EXTERNAL)) {
             /**
@@ -44,6 +44,7 @@ public class FileUtilities {
              not always available: they will disappear if the user mounts the
              external storage on a computer or removes it.
              */
+            Log.d(TAG, "PRIVATE EXTERNAL");
             return context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         } else {
             /**
@@ -51,16 +52,9 @@ public class FileUtilities {
              so you should be careful about what you put here to ensure you don't erase
              their files or get in the way of their own organization.
              */
+            Log.d(TAG, "PUBLIC EXTERNAL");
             return getSharedExternalDirectory(context);
         }
-    }
-
-    /**
-     * Prints out a message for debugging
-     */
-    public static void logResults(Context context, String classTag, String messageResult) {
-        Toast.makeText(context, messageResult, Toast.LENGTH_SHORT).show();
-        Log.d(classTag, messageResult);
     }
 
     /**
@@ -78,7 +72,7 @@ public class FileUtilities {
         File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
                 context.getResources().getString(R.string.app_name).replace(" ", "").toLowerCase());
         if (!dir.mkdirs())
-            Log.e(LOG_TAG, "Directory not created");
+            Log.e(TAG, "Directory not created");
         return dir;
     }
 
@@ -106,13 +100,13 @@ public class FileUtilities {
      */
     public static File getOutputMediaFile(Context context) {
         File mediaStorageDir = getFileDirectory(context);
+        Log.d(TAG, "outputdir = " + mediaStorageDir.getAbsolutePath());
 
         // Create a media file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        File mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                "IMG_" + timeStamp + ".jpg");
 
-        return mediaFile;
+        return new File(mediaStorageDir.getPath() + File.separator +
+                "IMG_" + timeStamp + ".jpg");
     }
 
 }

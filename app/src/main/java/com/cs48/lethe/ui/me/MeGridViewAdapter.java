@@ -2,6 +2,7 @@ package com.cs48.lethe.ui.me;
 
 import android.content.Context;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -14,7 +15,6 @@ import com.cs48.lethe.utils.Picture;
 import com.cs48.lethe.utils.PictureUtilities;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class MeGridViewAdapter extends BaseAdapter {
 
-    public static final String LOG_TAG = MeGridViewAdapter.class.getSimpleName();
+    public static final String TAG = MeGridViewAdapter.class.getSimpleName();
 
     private Context mContext;
     private List<Picture> mPictureList;
@@ -102,6 +102,9 @@ public class MeGridViewAdapter extends BaseAdapter {
             imageView.setBackgroundColor(mContext.getResources().getColor(R.color.empty_image));
         }
 
+        Log.d(TAG, mPictureList.get(position).getFile().getAbsolutePath());
+        Log.d(TAG, "exists = " + mPictureList.get(position).getFile().exists());
+
         Picasso.with(mContext)
                 .load(mPictureList.get(position).getFile())
                 .resize(PictureUtilities.MAX_THUMBNAIL_WIDTH, 0)
@@ -110,16 +113,4 @@ public class MeGridViewAdapter extends BaseAdapter {
                 .into(imageView);
         return imageView;
     }
-
-    /**
-     * Deletes all of the images taken from this app.
-     */
-    public void deleteAllPostedImages() {
-        mDatabaseHelper.clearMeTable();
-        for (Picture picture : mPictureList)
-            picture.getFile().delete();
-        mPictureList = new ArrayList<>();
-        notifyDataSetChanged();
-    }
-
 }

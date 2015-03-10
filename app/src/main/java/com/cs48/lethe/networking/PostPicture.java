@@ -9,7 +9,6 @@ import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.ui.alertdialogs.OperationFailedAlertDialog;
 import com.cs48.lethe.ui.camera.CameraActivity;
-import com.cs48.lethe.utils.NetworkUtilities;
 import com.cs48.lethe.utils.Picture;
 
 import org.json.JSONException;
@@ -71,12 +70,12 @@ public class PostPicture extends AsyncTask<String, String, String> {
      * This method can call publishProgress(Progress...) to publish updates on
      * the UI thread.
      *
-     * @param path The parameters of the task.
+     * @param location The parameters of the task.
      *
      * @return A result, defined by the subclass of this task.
      */
     @Override
-    protected String doInBackground(String... path) {
+    protected String doInBackground(String... location) {
         HttpURLConnection connection = null;
         OutputStream requestBody = null;
         FileInputStream imageAsStream = null;
@@ -102,9 +101,8 @@ public class PostPicture extends AsyncTask<String, String, String> {
             requestBody = connection.getOutputStream();
 
             // Get latitude and longitude
-            String[] coordinates = NetworkUtilities.getCurrentLocation(mCameraActivity);
-            String latitude = generateForSimpleText(mCameraActivity.getString(R.string.server_latitude), coordinates[0]);
-            String longitude = generateForSimpleText(mCameraActivity.getString(R.string.server_longitude), coordinates[1]);
+            String latitude = generateForSimpleText(mCameraActivity.getString(R.string.server_latitude), location[0]);
+            String longitude = generateForSimpleText(mCameraActivity.getString(R.string.server_longitude), location[1]);
             String orientation = generateForSimpleText(mCameraActivity.getString(R.string.json_orientation), mOrientation + "");
             String combined = latitude + longitude + orientation;
 

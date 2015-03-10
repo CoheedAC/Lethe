@@ -586,23 +586,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
 
         // Creates the values to store into the Me Table
-        ContentValues meValues = new ContentValues();
-        meValues.put(MeTable.COLUMN_NAME_PICTURE_ID, postedPicture.getUniqueId());
-        meValues.put(MeTable.COLUMN_NAME_FILE_PATH, postedPicture.getFile().getAbsolutePath());
-        meValues.put(MeTable.COLUMN_NAME_DATE_POSTED, postedPicture.getDatePosted());
-        meValues.put(MeTable.COLUMN_NAME_ORIENTATION, postedPicture.getOrientation());
-
-        // Creates the values to store into the Feed Table
-        ContentValues feedValues = new ContentValues();
-        feedValues.put(FeedTable.COLUMN_NAME_PICTURE_ID, postedPicture.getUniqueId());
-        feedValues.put(FeedTable.COLUMN_NAME_FILE_PATH, postedPicture.getFile().getAbsolutePath());
-        feedValues.put(FeedTable.COLUMN_NAME_DATE_POSTED, postedPicture.getDatePosted());
-        feedValues.put(FeedTable.COLUMN_NAME_ORIENTATION, postedPicture.getOrientation());
+        ContentValues values = new ContentValues();
+        values.put(MeTable.COLUMN_NAME_PICTURE_ID, postedPicture.getUniqueId());
+        values.put(MeTable.COLUMN_NAME_FILE_PATH, postedPicture.getFile().getAbsolutePath());
+        values.put(MeTable.COLUMN_NAME_DATE_POSTED, postedPicture.getDatePosted());
+        values.put(MeTable.COLUMN_NAME_ORIENTATION, postedPicture.getOrientation());
 
         // Inserts the values into the respective tables
         // (other columns will go to their default values)
-        db.insert(MeTable.TABLE_NAME, null, meValues);
-        db.insert(FeedTable.TABLE_NAME, null, feedValues);
+        db.insert(MeTable.TABLE_NAME, null, values);
+        db.insert(FeedTable.TABLE_NAME, null, values);
 
         // Releases the database resources
         db.close();
@@ -640,10 +633,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // Create and/or open a database that will be used for reading and writing
         SQLiteDatabase db = this.getWritableDatabase();
 
-        // Deletes the picture file if it exists
-        if (pictureToDelete.getFile() != null && pictureToDelete.getFile().exists())
-            pictureToDelete.getFile().delete();
-
         // The constraint of the picture deletion (the unique ID's have to match)
         String whereClause = PeekTable.COLUMN_NAME_PICTURE_ID + EQUALS + pictureToDelete.getUniqueId();
 
@@ -662,10 +651,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void deletePictureFromFeedTable(Picture pictureToDelete) {
         // Create and/or open a database that will be used for reading and writing
         SQLiteDatabase db = this.getWritableDatabase();
-
-        // Deletes the picture file if it exists
-        if (pictureToDelete.getFile() != null && pictureToDelete.getFile().exists())
-            pictureToDelete.getFile().delete();
 
         // The constraint of the picture deletion (the unique ID's have to match)
         String whereClause = FeedTable.COLUMN_NAME_PICTURE_ID + EQUALS + pictureToDelete.getUniqueId();

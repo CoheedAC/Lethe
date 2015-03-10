@@ -63,7 +63,6 @@ public class FeedGridViewAdapter extends BaseAdapter {
      * Get the data item associated with the specified position in the data set.
      *
      * @param position Position of the item whose data we want within the adapter's data set.
-     *
      * @return The data at the specified position.
      */
     @Override
@@ -75,7 +74,6 @@ public class FeedGridViewAdapter extends BaseAdapter {
      * Get the row id associated with the specified position in the list.
      *
      * @param position The position of the item within the adapter's data set whose row id we want.
-     *
      * @return The id of the item at the specified position
      */
     @Override
@@ -86,11 +84,10 @@ public class FeedGridViewAdapter extends BaseAdapter {
     /**
      * Get a View that displays the data at the specified position in the data set.
      *
-     * @param position The position of the item within the adapter's
-     *                 data set of the item whose view we want.
+     * @param position    The position of the item within the adapter's
+     *                    data set of the item whose view we want.
      * @param convertView The old view to reuse, if possible.
-     * @param parent The parent that this view will eventually be attached to.
-     *
+     * @param parent      The parent that this view will eventually be attached to.
      * @return A View corresponding to the data at the specified position.
      */
     @Override
@@ -131,13 +128,12 @@ public class FeedGridViewAdapter extends BaseAdapter {
      * grid with the new list of images from the
      * internal database.
      */
-    public void fetchFeedFromServer(final FeedFragment feedFragment) {
+    public void fetchFeedFromServer(final FeedFragment feedFragment, String latitude, String longitude) {
         feedFragment.setEmptyGridMessage("");
         // get current location
-        String[] coordinates = NetworkUtilities.getCurrentLocation(mContext);
         String url = mContext.getString(R.string.server_recent) +
-                coordinates[0].replace(".", "a") + "," +    // latitude
-                coordinates[1].replace(".", "a");           // longitude
+                latitude.replace(".", "a") + "," +
+                longitude.replace(".", "a");
 
         HerokuRestClient.get(url, null, new AsyncHttpResponseHandler() {
 
@@ -177,7 +173,7 @@ public class FeedGridViewAdapter extends BaseAdapter {
                     }
 
                     // updates the database with the new image list
-                        // (while keeping the integrity of mImageList)
+                    // (while keeping the integrity of mImageList)
                     mDatabaseHelper.updateFeed(serverPictureMap);
 
                     // gets an updated list of pictures from the database

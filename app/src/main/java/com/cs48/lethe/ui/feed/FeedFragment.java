@@ -1,14 +1,12 @@
 package com.cs48.lethe.ui.feed;
 
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -19,17 +17,29 @@ import com.cs48.lethe.R;
 import com.cs48.lethe.ui.alertdialogs.NetworkUnavailableAlertDialog;
 import com.cs48.lethe.ui.miscellaneous.PullToRefreshGridView;
 import com.cs48.lethe.utils.NetworkUtilities;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
-public class FeedFragment extends Fragment {
+import static com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import static com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+
+public class FeedFragment extends Fragment implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener{
 
     // Logcat tag
     public static final String TAG = FeedFragment.class.getSimpleName();
 
     // Instance variables
     private FeedGridViewAdapter mFeedGridViewAdapter;
+    private GoogleApiClient mGoogleApiClient;
+    private Location mLastLocation;
+    private LocationRequest mLocationRequest;
+    int count = 0;
 
     // Initializations of UI elements
     @InjectView(R.id.feedGridView)
@@ -51,6 +61,18 @@ public class FeedFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(10000);
+        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        mGoogleApiClient.connect();
 
         mFeedGridViewAdapter = new FeedGridViewAdapter(getActivity());
     }
@@ -89,8 +111,6 @@ public class FeedFragment extends Fragment {
         mFeedGridView.setOnScrollListener(new OnScrollListener());
         mFeedPullToRefreshLayout.setOnRefreshListener(new OnRefreshListener());
 
-        fetchFeedFromServer();
-
         return rootView;
     }
 
@@ -102,6 +122,9 @@ public class FeedFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
+        if (mGoogleApiClient.isConnected())
+            startLocationUpdates();
+
         // If there is no internet and there is an empty grid,
         // then display network error on grid
         if (!NetworkUtilities.isNetworkAvailable(getActivity())) {
@@ -111,6 +134,28 @@ public class FeedFragment extends Fragment {
             mFeedGridViewAdapter.fetchFeedFromDatabase();
             setEmptyGridMessage(getString(R.string.grid_area_empty));
         }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        stopLocationUpdates();
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        stopLocationUpdates();
+    }
+
+    protected void stopLocationUpdates() {
+        LocationServices.FusedLocationApi.removeLocationUpdates(
+                mGoogleApiClient, this);
+    }
+
+    protected void startLocationUpdates() {
+        LocationServices.FusedLocationApi.requestLocationUpdates(
+                mGoogleApiClient, mLocationRequest, this);
     }
 
     /**
@@ -138,7 +183,7 @@ public class FeedFragment extends Fragment {
         // and fetch the picture feed from the server
         if (NetworkUtilities.isNetworkAvailable(getActivity())) {
             mFeedPullToRefreshLayout.setRefreshing(true);
-            mFeedGridViewAdapter.fetchFeedFromServer(this);
+            mFeedGridViewAdapter.fetchFeedFromServer(this, mLastLocation.getLatitude() + "", mLastLocation.getLongitude() + "");
         } else {
             // Else the network is not available, so disable the refresh
             // animation and display a networt alert dialog
@@ -158,6 +203,32 @@ public class FeedFragment extends Fragment {
      */
     public void stopRefreshAnimation() {
         mFeedPullToRefreshLayout.setRefreshing(false);
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                mGoogleApiClient);
+        startLocationUpdates();
+        if (mLastLocation != null && NetworkUtilities.isNetworkAvailable(getActivity())) {
+            fetchFeedFromServer();
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        mLastLocation = location;
+        Log.d(TAG, count++ + ": " + location.getLatitude() + "," + location.getLongitude());
     }
 
     /**
@@ -197,7 +268,6 @@ public class FeedFragment extends Fragment {
          * @param view        The view whose scroll state is being reported
          * @param scrollState The current scroll state. One of SCROLL_STATE_TOUCH_SCROLL
          *                    or SCROLL_STATE_IDLE.
-
          */
         @Override
         public void onScrollStateChanged(AbsListView view, int scrollState) {
@@ -205,7 +275,7 @@ public class FeedFragment extends Fragment {
             if (scrollState == SCROLL_STATE_IDLE && view.getChildAt(0).getTop() >= 0)
                 mFeedPullToRefreshLayout.setEnabled(true);
             else
-            // Else disable pull-to-refresh
+                // Else disable pull-to-refresh
                 mFeedPullToRefreshLayout.setEnabled(false);
         }
 
@@ -238,7 +308,8 @@ public class FeedFragment extends Fragment {
         public void onRefresh() {
             // Fetches the picture feed from the server
             // and updates the grid
-            fetchFeedFromServer();
+            if (mLastLocation != null)
+                fetchFeedFromServer();
         }
     }
 }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -37,14 +38,15 @@ import java.util.List;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
-public class PeekFragment extends Fragment implements OnMapReadyCallback{
+public class PeekFragment extends Fragment implements OnMapReadyCallback {
 
     public static final String TAG = PeekFragment.class.getSimpleName();
 
     private GoogleMap mMap;
     private PeekGridViewAdapter mPeekGridViewAdapter;
-    private String mLatitude;
-    private String mLongitude;
+    private double mLatitude;
+    private double mLongitude;
+    private Location mLocation;
     private Marker mMarker;
     private int mMapZoom = 14;
 
@@ -80,15 +82,14 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback{
      * If you return a View from here, you will later be called in
      * onDestroyView() when the view is being released.
      *
-     * @param inflater The LayoutInflater object that can be used
-     *                 to inflate any views in the fragment,
-     * @param container If non-null, this is the parent view that the
-     *                  fragment's UI should be attached to. The fragment
-     *                  should not add the view itself, but this can be
-     *                  used to generate the LayoutParams of the view.
+     * @param inflater           The LayoutInflater object that can be used
+     *                           to inflate any views in the fragment,
+     * @param container          If non-null, this is the parent view that the
+     *                           fragment's UI should be attached to. The fragment
+     *                           should not add the view itself, but this can be
+     *                           used to generate the LayoutParams of the view.
      * @param savedInstanceState If non-null, this fragment is being re-constructed
      *                           from a previous saved state as given here.
-     *
      * @return Return the View for the fragment's UI, or null.
      */
     @Override
@@ -100,7 +101,6 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback{
 
         // Unable to add address or pull-to-refresh until map loads
         mAddressEditText.setEnabled(false);
-        mPeekPullToRefreshLayout.setEnabled(false);
 
         // asyncronously sets up the maps object. the onMapReady will be automatically called
         // below when it is done loading
@@ -142,22 +142,14 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback{
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mAddressEditText.setEnabled(true);
-        mPeekPullToRefreshLayout.setEnabled(true);
-
-        String[] coordinates = NetworkUtilities.getCurrentLocation(getActivity());
-        mLatitude = coordinates[0];
-        mLongitude = coordinates[1];
 
         mMap = googleMap;
         mMap.getUiSettings().setAllGesturesEnabled(true);
 
+        mMap.setMyLocationEnabled(true);
         mMap.setOnMapClickListener(new OnMapClick());
+        mMap.setOnMyLocationChangeListener(new OnLocationChange());
         mMap.setOnCameraChangeListener(new OnZoomChange());
-
-        LatLng latLng = new LatLng(Double.parseDouble(mLatitude), Double.parseDouble(mLongitude));
-        mMarker = mMap.addMarker(new MarkerOptions().position(latLng));
-        setMarkerPosition(latLng);
-        mMarker.hideInfoWindow();
     }
 
     private void setMarkerPosition(LatLng latLng) {
@@ -170,7 +162,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback{
             mMarker.showInfoWindow();
         } catch (IOException e) {
             e.printStackTrace();
-        }catch (IndexOutOfBoundsException e) {
+        } catch (IndexOutOfBoundsException e) {
             mPeekGridViewAdapter.clearPeekFeed();
             mMarker.hideInfoWindow();
         }
@@ -200,9 +192,9 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback{
         mPeekPullToRefreshLayout.setRefreshing(false);
     }
 
-    private void fetchPeekFeedFromServer(String latitude, String longitude) {
+    private void fetchPeekFeedFromServer(double latitude, double longitude) {
         if (NetworkUtilities.isNetworkAvailable(getActivity())) {
-            mPeekGridViewAdapter.fetchPeekFeedFromServer(latitude, longitude);
+            mPeekGridViewAdapter.fetchPeekFeedFromServer(latitude + "", longitude + "");
         } else {
             mPeekPullToRefreshLayout.setRefreshing(false);
             if (!setEmptyGridMessage(getString(R.string.grid_no_internet_connection))) {
@@ -253,8 +245,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback{
     private class OnRefreshListener implements SwipeRefreshLayout.OnRefreshListener {
         @Override
         public void onRefresh() {
-            if (mLatitude != null && mLongitude != null)
-                fetchPeekFeedFromServer(mLatitude, mLongitude);
+            fetchPeekFeedFromServer(mLatitude, mLongitude);
         }
     }
 
@@ -268,24 +259,27 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback{
                 try {
                     Geocoder geocoder = new Geocoder(getActivity());
                     List<Address> addressList = geocoder.getFromLocationName(mAddressEditText.getText().toString(), 2);
-                    mLongitude = addressList.get(0).getLongitude() + "";
-                    mLatitude = addressList.get(0).getLatitude() + "";
+                    mLongitude = addressList.get(0).getLongitude();
+                    mLatitude = addressList.get(0).getLatitude();
 
                     fetchPeekFeedFromServer(mLatitude, mLongitude);
 
                     String address = addressList.get(0).getAddressLine(0) + " " + addressList.get(0).getAddressLine(1);
                     mAddressEditText.setText(address);
-                    LatLng latLng = new LatLng(Double.valueOf(mLatitude), Double.valueOf(mLongitude));
+                    LatLng latLng = new LatLng(mLatitude, mLongitude);
 
                     mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng, mMapZoom, 0, 0)));
+
+                    if (mMarker == null)
+                        mMarker = mMap.addMarker(new MarkerOptions().position(latLng));
                     mMarker.setPosition(latLng);
                     mMarker.setTitle(address);
                     mMarker.hideInfoWindow();
 
                     return true;
-                } catch (IOException e ) {
+                } catch (IOException e) {
                     e.printStackTrace();
-                }catch (IndexOutOfBoundsException e) {
+                } catch (IndexOutOfBoundsException e) {
                     mPeekGridViewAdapter.clearPeekFeed();
                     mMarker.hideInfoWindow();
                 }
@@ -307,12 +301,30 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback{
     private class OnMapClick implements GoogleMap.OnMapClickListener {
         @Override
         public void onMapClick(LatLng latLng) {
-            mLatitude = latLng.latitude + "";
-            mLongitude = latLng.longitude + "";
+            mLatitude = latLng.latitude;
+            mLongitude = latLng.longitude;
             mAddressEditText.setText("");
 
+            if (mMarker == null)
+                mMarker = mMap.addMarker(new MarkerOptions().position(latLng));
+
             setMarkerPosition(latLng);
-            fetchPeekFeedFromServer(mLatitude,mLongitude);
+            fetchPeekFeedFromServer(mLatitude, mLongitude);
+        }
+    }
+
+    public class OnLocationChange implements GoogleMap.OnMyLocationChangeListener {
+        @Override
+        public void onMyLocationChange(Location location) {
+            mLatitude = location.getLatitude();
+            mLongitude = location.getLongitude();
+
+            if (mLocation == null) {
+                mLocation = location;
+                LatLng latLng = new LatLng(mLatitude, mLongitude);
+                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng, 14, 0, 0)), 200, null);
+            } else
+                mLocation = location;
         }
     }
 }

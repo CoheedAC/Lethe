@@ -4,6 +4,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -14,27 +15,19 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 
 import com.cs48.lethe.R;
-import com.cs48.lethe.database.DatabaseHelper;
-import com.cs48.lethe.networking.HerokuRestClient;
 import com.cs48.lethe.networking.PostPicture;
 import com.cs48.lethe.ui.alertdialogs.NetworkUnavailableAlertDialog;
 import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.NetworkUtilities;
-import com.cs48.lethe.utils.Picture;
 import com.cs48.lethe.utils.PictureUtilities;
-import com.loopj.android.http.AsyncHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
-
-import org.apache.http.Header;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -46,7 +39,7 @@ import static android.view.View.OnClickListener;
  * An activity that deals with working with the camera hardware,
  * taking pictures, and uploading to the server.
  */
-public class CameraActivity extends ActionBarActivity {
+public class CameraActivity extends ActionBarActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     // Logcat tag
     public static final String TAG = CameraActivity.class.getSimpleName();
@@ -73,6 +66,8 @@ public class CameraActivity extends ActionBarActivity {
     private Camera mCamera;
     private CameraPreview mCameraPreview;
     private File mPictureFile;
+    private GoogleApiClient mGoogleApiClient;
+    private Location mLastLocation;
     private boolean isCurrentlyPosting;
     private int mCurrentCameraId;
     private int mOrientation;
@@ -100,6 +95,13 @@ public class CameraActivity extends ActionBarActivity {
 
         // Hides the action bar
         getSupportActionBar().hide();
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        mGoogleApiClient.connect();
 
         // Create an instance of Camera
         mCamera = getCameraInstance();
@@ -135,7 +137,7 @@ public class CameraActivity extends ActionBarActivity {
             mCancelButton.setOnClickListener(new OnCancelButtonClick());
             mCameraSwitchButton.setOnClickListener(new OnCameraSwitchButtonClick());
             mFlashButton.setOnClickListener(new OnFlashButtonClick());
-        }catch (NullPointerException e) {
+        } catch (NullPointerException e) {
             finish();
         }
 
@@ -171,13 +173,29 @@ public class CameraActivity extends ActionBarActivity {
      */
     @Override
     public void onBackPressed() {
-         // Deletes the picture file if it exists and goes back to the main activity
-         // (previous fragment) only if a picture is not currently being posted.
+        // Deletes the picture file if it exists and goes back to the main activity
+        // (previous fragment) only if a picture is not currently being posted.
         if (!isCurrentlyPosting) {
             if (mPictureFile != null && mPictureFile.exists())
                 mPictureFile.delete();
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                mGoogleApiClient);
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
     }
 
     /**
@@ -186,8 +204,8 @@ public class CameraActivity extends ActionBarActivity {
      * RuntimeException.
      *
      * @return A new Camera object, connected, locked and ready for use.
-     *         If the device does not have a back-facing camera, this
-     *         returns null.
+     * If the device does not have a back-facing camera, this
+     * returns null.
      */
     private Camera getCameraInstance() {
         Camera c = null;
@@ -196,8 +214,8 @@ public class CameraActivity extends ActionBarActivity {
             c = Camera.open();
             mCurrentCameraId = CameraInfo.CAMERA_FACING_BACK;
         } catch (Exception e) {
-             // Camera is not available (in use or does not exist)
-             // so go back to the main activity
+            // Camera is not available (in use or does not exist)
+            // so go back to the main activity
             Log.d(TAG, "Camera is not available (in use or does not exist)");
             finish();
         }
@@ -205,8 +223,8 @@ public class CameraActivity extends ActionBarActivity {
     }
 
     /**
-     *  Shows the camera switch button only if the device has more than
-     *  one camera. Otherwise, the camera switch button is hidden.
+     * Shows the camera switch button only if the device has more than
+     * one camera. Otherwise, the camera switch button is hidden.
      */
     private void showSupportedCameraSwitchButton() {
         if (Camera.getNumberOfCameras() > 1)
@@ -216,8 +234,8 @@ public class CameraActivity extends ActionBarActivity {
     }
 
     /**
-     *  Shows the camera flash button only if the device has flash
-     *  capability. Otherwise, the camera flash button is hidden.
+     * Shows the camera flash button only if the device has flash
+     * capability. Otherwise, the camera flash button is hidden.
      */
     private void showSupportedFlashButton() {
         if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
@@ -231,7 +249,7 @@ public class CameraActivity extends ActionBarActivity {
      * to keep it consistent. This is necessary because the app
      * only runs in portrait. This forces the camera to a
      * portrait orientation.
-     *
+     * <p/>
      * Source code:
      * http://stackoverflow.com/questions/16128608/camera-preview-is-in-portrait-mode-but-image-captured-is-rotated
      *
@@ -280,72 +298,6 @@ public class CameraActivity extends ActionBarActivity {
             mCamera.release();
             mCamera = null;
         }
-    }
-
-    /**
-     * TODO get this to work with text upload for lat/long (image upload works)
-     *
-     * NOT FUNCTIONING!!!
-     *
-     * This is to test working with the network library rather than using
-     * the android async class.
-     */
-    private void disfunctionalPostPicture() {
-//        try {
-        String[] currentLocation = NetworkUtilities.getCurrentLocation(this);
-
-        RequestParams params = new RequestParams();
-//            params.put("avatar", mPictureFile, "image/jpeg");
-        params.put("latitude", currentLocation[0]);
-        params.put("longitude", currentLocation[1]);
-
-        String url = getString(R.string.server) + getString(R.string.server_post);
-
-        HerokuRestClient.post(url, params, new AsyncHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                try {
-                    String jsonData = new String(responseBody);
-                    JSONObject jsonObject = new JSONObject(jsonData);
-                    DatabaseHelper databaseHelper = DatabaseHelper.getInstance(CameraActivity.this);
-                    Picture picture = new Picture(jsonObject.getString(getString(R.string.json_id)),
-                            jsonObject.getString(getString(R.string.json_date_posted)),
-                            mPictureFile, mOrientation, 0, 0);
-                    databaseHelper.insertPicture(picture);
-
-                } catch (JSONException e) {
-                    Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
-                }
-                onPostPictureFailed();
-                finish();
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                Log.d(TAG, "status code = " + statusCode);
-                for (Header header : headers)
-                    Log.d(TAG, "header = " + header);
-                Log.d(TAG, "error = " + error.getLocalizedMessage());
-                String response = new String(responseBody);
-                Log.d(TAG, "response body = " + response);
-            }
-        });
-    }
-
-    /**
-     * TESTING PURPOSES ONLY
-     *
-     * Adds the picture taken by the camera to the database.
-     * This does not post to the server.
-     */
-    private void fakePostPicture() {
-        onPostPictureStart();
-        Date date = new Date();
-        DatabaseHelper databaseHelper = DatabaseHelper.getInstance(this);
-        Picture picture = new Picture(date.getTime() + "", new SimpleDateFormat("yyyyMMdd_HHmmss").
-                format(date), mPictureFile, mOrientation, 0, 0);
-        databaseHelper.insertPicture(picture);
-        finish();
     }
 
     /**
@@ -413,6 +365,8 @@ public class CameraActivity extends ActionBarActivity {
 
             // Creates a new file for the picture to be stored
             mPictureFile = FileUtilities.getOutputMediaFile(CameraActivity.this);
+            Log.d(TAG, "path = " + mPictureFile.getAbsolutePath());
+            Log.d(TAG, "exists = " + mPictureFile.exists());
 
             // Writes the scaled bitmap picture to the file
             FileOutputStream fileOutputStream = null;
@@ -424,7 +378,7 @@ public class CameraActivity extends ActionBarActivity {
                 Log.d(TAG, "File not found: " + e.getMessage());
             } catch (IOException e) {
                 Log.d(TAG, "Error accessing file: " + e.getMessage());
-            }finally {
+            } finally {
                 if (fileOutputStream != null) {
                     try {
                         fileOutputStream.close();
@@ -433,6 +387,8 @@ public class CameraActivity extends ActionBarActivity {
                     }
                 }
             }
+            Log.d(TAG, "exists = " + mPictureFile.exists());
+
             // Hide the loading progress bar and
             // show the post and cancel buttons
             mProgressBar.setVisibility(View.GONE);
@@ -461,9 +417,9 @@ public class CameraActivity extends ActionBarActivity {
             mCameraSwitchButton.setVisibility(View.GONE);
             mFlashButton.setVisibility(View.GONE);
 
-             // Triggers an asynchronous image capture. The camera
-             // service will initiate a series of callbacks to the
-             // application as the image capture progresses.
+            // Triggers an asynchronous image capture. The camera
+            // service will initiate a series of callbacks to the
+            // application as the image capture progresses.
             mCamera.takePicture(null, null, new PictureTakenCallBack());
         }
     }
@@ -497,18 +453,18 @@ public class CameraActivity extends ActionBarActivity {
          */
         @Override
         public void onClick(View v) {
-             // Posts the picture to the server if the network is available.
-             // Otherwise, shows a network unavailable error dialog.
-            if (NetworkUtilities.isNetworkAvailable(CameraActivity.this)) {
+            // Posts the picture to the server if the network is available.
+            // Otherwise, shows a network unavailable error dialog.
+            if (NetworkUtilities.isNetworkAvailable(CameraActivity.this) && mLastLocation != null) {
                 // fixes front facing camera orientation
                 // and compensates for mirror
                 if (mCurrentCameraId == CameraInfo.CAMERA_FACING_FRONT)
                     mOrientation = (360 - mOrientation) % 360;
-                new PostPicture(CameraActivity.this, mPictureFile, mOrientation).execute();
+                new PostPicture(CameraActivity.this, mPictureFile, mOrientation).execute(mLastLocation.getLatitude() + "", mLastLocation.getLongitude() + "");
             } else {
                 try {
                     new NetworkUnavailableAlertDialog().show(getFragmentManager(), TAG);
-                }catch (IllegalStateException e) {
+                } catch (IllegalStateException e) {
                     Log.e(TAG, e.getLocalizedMessage());
                 }
             }
@@ -592,9 +548,9 @@ public class CameraActivity extends ActionBarActivity {
                 // Creates new parameter to set to the camera
                 Camera.Parameters parameters = mCamera.getParameters();
 
-                 // If the flash is currently off, then the flash turns on and the
-                 // icon is changed to the flash on icon. Otherwise, the flash turns
-                 // off and the icon is changed to the flash off icon.
+                // If the flash is currently off, then the flash turns on and the
+                // icon is changed to the flash on icon. Otherwise, the flash turns
+                // off and the icon is changed to the flash off icon.
                 if (parameters.getFlashMode().equals(Camera.Parameters.FLASH_MODE_OFF)) {
                     mFlashButton.setImageResource(R.drawable.ic_action_flash_on);
                     parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
