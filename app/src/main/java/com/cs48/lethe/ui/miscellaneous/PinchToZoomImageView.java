@@ -39,7 +39,7 @@ public class PinchToZoomImageView extends ImageView {
 
     ScaleGestureDetector mScaleDetector;
 
-    Context context;
+    Context mContext;
 
     public PinchToZoomImageView(Context context) {
         super(context);
@@ -53,7 +53,7 @@ public class PinchToZoomImageView extends ImageView {
 
     private void sharedConstructing(Context context) {
         super.setClickable(true);
-        this.context = context;
+        this.mContext = context;
         mScaleDetector = new ScaleGestureDetector(context, new ScaleListener());
         matrix = new Matrix();
         m = new float[9];
@@ -104,7 +104,6 @@ public class PinchToZoomImageView extends ImageView {
                 invalidate();
                 return true; // indicate event was handled
             }
-
         });
     }
 
@@ -120,11 +119,10 @@ public class PinchToZoomImageView extends ImageView {
          *
          * @param detector The detector reporting the event. Use this to
          *                 retrieve extended info about event state.
-         *
          * @return Whether or not the detector should continue recognizing this
-         *          gesture. For example, if a gesture is beginning with a focal
-         *          point outside of a region where it makes sense, onScaleBegin()
-         *          may return false to ignore the rest of the gesture.
+         * gesture. For example, if a gesture is beginning with a focal
+         * point outside of a region where it makes sense, onScaleBegin()
+         * may return false to ignore the rest of the gesture.
          */
         @Override
         public boolean onScaleBegin(ScaleGestureDetector detector) {
@@ -137,11 +135,10 @@ public class PinchToZoomImageView extends ImageView {
          *
          * @param detector The detector reporting the event. Use this to
          *                 retrieve extended info about event state.
-         *
          * @return Whether or not the detector should consider this event as handled. If an event
-         *         was not handled, the detector will continue to accumulate movement until an event
-         *         is handled. This can be useful if an application, for example, only wants to update
-         *         scaling factors if the change is greater than 0.01.
+         * was not handled, the detector will continue to accumulate movement until an event
+         * is handled. This can be useful if an application, for example, only wants to update
+         * scaling factors if the change is greater than 0.01.
          */
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
@@ -181,6 +178,7 @@ public class PinchToZoomImageView extends ImageView {
         if (fixTransX != 0 || fixTransY != 0)
             matrix.postTranslate(fixTransX, fixTransY);
     }
+
     float getFixTrans(float trans, float viewSize, float contentSize) {
         float minTrans, maxTrans;
 
@@ -210,7 +208,7 @@ public class PinchToZoomImageView extends ImageView {
      * Measure the view and its content to determine the measured width and
      * the measured height.
      *
-     * @param widthMeasureSpec horizontal space requirements as imposed by the parent.
+     * @param widthMeasureSpec  horizontal space requirements as imposed by the parent.
      * @param heightMeasureSpec vertical space requirements as imposed by the parent.
      */
     @Override
@@ -262,4 +260,5 @@ public class PinchToZoomImageView extends ImageView {
         }
         fixTrans();
     }
+
 }

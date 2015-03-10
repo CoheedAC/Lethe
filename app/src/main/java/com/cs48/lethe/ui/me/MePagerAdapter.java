@@ -117,36 +117,14 @@ public class MePagerAdapter extends PagerAdapter {
         mSaveButton.setOnClickListener(new OnSaveButtonClickListener(position));
 
         // Display full image
-        final Target target = new Target() {
-            @Override
-            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                mProgressBar.setVisibility(View.GONE);
-                mImageView.setImageBitmap(bitmap);
-            }
-
-            @Override
-            public void onBitmapFailed(Drawable errorDrawable) {
-                mProgressBar.setVisibility(View.GONE);
-                try {
-                    new OperationFailedAlertDialog().show(mMeFullScreenActivity.getFragmentManager(), LOG_TAG);
-                } catch (IllegalStateException e) {
-                    Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
-                }
-            }
-
-            @Override
-            public void onPrepareLoad(Drawable placeHolderDrawable) {
-                mProgressBar.setVisibility(View.VISIBLE);
-            }
-        };
-        mImageView.setTag(target);
+        mImageView.setTag(mTarget);
 
         Picasso.with(mMeFullScreenActivity)
                 .load(mPictureList.get(position).getFile())
                 .resize(PictureUtilities.MAX_FULL_WIDTH, 0)
                 .onlyScaleDown()
                 .rotate(mPictureList.get(position).getOrientation())
-                .into(target);
+                .into(mTarget);
 
         fetchPictureStatisticsFromServer(position);
 
@@ -166,6 +144,8 @@ public class MePagerAdapter extends PagerAdapter {
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
         container.removeView((RelativeLayout) object);
+        Picasso.with(mMeFullScreenActivity)
+                .cancelRequest(mTarget);
     }
 
     /**
@@ -199,6 +179,29 @@ public class MePagerAdapter extends PagerAdapter {
             }
         });
     }
+
+    private Target mTarget = new Target() {
+        @Override
+        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+            mProgressBar.setVisibility(View.GONE);
+            mImageView.setImageBitmap(bitmap);
+        }
+
+        @Override
+        public void onBitmapFailed(Drawable errorDrawable) {
+            mProgressBar.setVisibility(View.GONE);
+            try {
+                new OperationFailedAlertDialog().show(mMeFullScreenActivity.getFragmentManager(), LOG_TAG);
+            } catch (IllegalStateException e) {
+                Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+            }
+        }
+
+        @Override
+        public void onPrepareLoad(Drawable placeHolderDrawable) {
+            mProgressBar.setVisibility(View.VISIBLE);
+        }
+    };
 
     /**
      * A callback to be invoked when a view is clicked.

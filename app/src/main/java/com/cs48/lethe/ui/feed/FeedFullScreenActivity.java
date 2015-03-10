@@ -44,6 +44,7 @@ public class FeedFullScreenActivity extends ActionBarActivity {
     // Instance variables
     private DatabaseHelper mDatabaseHelper;
     private Picture mPicture;
+    private Target mTarget;
 
     // Initializations of UI elements
     @InjectView(R.id.imageView)
@@ -95,7 +96,7 @@ public class FeedFullScreenActivity extends ActionBarActivity {
         mPicture = mDatabaseHelper.getFeedPicture(uniqueId);
 
         // Represents an arbitrary listener for image loading.
-        final Target target = new Target() {
+        mTarget = new Target() {
             /**
              * Callback when an image has been successfully loaded.
              *
@@ -141,7 +142,7 @@ public class FeedFullScreenActivity extends ActionBarActivity {
             }
         };
         // Makes a strong reference to the target
-        mImageView.setTag(target);
+        mImageView.setTag(mTarget);
 
         // If the picture file doesn't exist, then the picture
         // is loaded from a URL to the imageview
@@ -151,8 +152,14 @@ public class FeedFullScreenActivity extends ActionBarActivity {
                     .resize(PictureUtilities.MAX_FULL_WIDTH, 0)
                     .onlyScaleDown()
                     .rotate(mPicture.getOrientation())
-                    .into(target);
+                    .into(mTarget);
         }else {
+            Picasso.with(this)
+                    .load(mPicture.getThumbnailUrl())
+                    .resize(PictureUtilities.MAX_FULL_WIDTH, 0)
+                    .onlyScaleDown()
+                    .rotate(mPicture.getOrientation())
+                    .into(mImageView);
             // Else the picture is a file, so load the picture
             // from the file to the imageview
             Picasso.with(this)
@@ -160,7 +167,7 @@ public class FeedFullScreenActivity extends ActionBarActivity {
                     .resize(PictureUtilities.MAX_FULL_WIDTH, 0)
                     .onlyScaleDown()
                     .rotate(mPicture.getOrientation())
-                    .into(target);
+                    .into(mTarget);
         }
 
         // Sets up the swipe gestures on the imageview

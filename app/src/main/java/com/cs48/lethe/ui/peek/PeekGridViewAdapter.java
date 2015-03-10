@@ -31,7 +31,7 @@ import java.util.List;
  */
 public class PeekGridViewAdapter extends BaseAdapter {
 
-    public static final String LOG_TAG = PeekGridViewAdapter.class.getSimpleName();
+    public static final String TAG = PeekGridViewAdapter.class.getSimpleName();
 
     private Context mContext;
     private List<Picture> mPictureList;
@@ -166,7 +166,7 @@ public class PeekGridViewAdapter extends BaseAdapter {
                     // updates the grid to reflect the new data in the image list
                     notifyDataSetChanged();
                 } catch (JSONException e) {
-                    Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                    Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                 }
             }
 
@@ -175,9 +175,9 @@ public class PeekGridViewAdapter extends BaseAdapter {
                 mPeekFragment.stopRefreshingAnimation();
                 if (!mPeekFragment.setEmptyGridMessage(mContext.getString(R.string.grid_error))) {
                     try {
-                        new OperationFailedAlertDialog().show(mPeekFragment.getActivity().getFragmentManager(), LOG_TAG);
+                        new OperationFailedAlertDialog().show(mPeekFragment.getActivity().getFragmentManager(), TAG);
                     } catch (IllegalStateException e) {
-                        Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                        Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                     }
                 }
             }

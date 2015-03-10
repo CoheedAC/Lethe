@@ -1,5 +1,6 @@
 package com.cs48.lethe.ui.peek;
 
+import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
@@ -11,6 +12,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -172,6 +174,9 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback{
             mPeekGridViewAdapter.clearPeekFeed();
             mMarker.hideInfoWindow();
         }
+        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
+                Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(mAddressEditText.getWindowToken(), 0);
     }
 
     /**
@@ -276,6 +281,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback{
                     mMarker.setPosition(latLng);
                     mMarker.setTitle(address);
                     mMarker.hideInfoWindow();
+
                     return true;
                 } catch (IOException e ) {
                     e.printStackTrace();
@@ -283,6 +289,9 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback{
                     mPeekGridViewAdapter.clearPeekFeed();
                     mMarker.hideInfoWindow();
                 }
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
+                        Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(mAddressEditText.getWindowToken(), 0);
             }
             return false;
         }

@@ -461,14 +461,6 @@ public class CameraActivity extends ActionBarActivity {
             mCameraSwitchButton.setVisibility(View.GONE);
             mFlashButton.setVisibility(View.GONE);
 
-            if (mCurrentCameraId == CameraInfo.CAMERA_FACING_FRONT) {
-                CameraInfo info = new CameraInfo();
-                Camera.getCameraInfo(mCurrentCameraId, info);
-                mOrientation = (info.orientation - 180) % 360;
-                mOrientation = (360 - mOrientation) % 360;  // compensate the mirror
-                FileUtilities.logResults(CameraActivity.this, TAG, "orientation = " + mOrientation);
-            }
-
              // Triggers an asynchronous image capture. The camera
              // service will initiate a series of callbacks to the
              // application as the image capture progresses.
@@ -508,8 +500,10 @@ public class CameraActivity extends ActionBarActivity {
              // Posts the picture to the server if the network is available.
              // Otherwise, shows a network unavailable error dialog.
             if (NetworkUtilities.isNetworkAvailable(CameraActivity.this)) {
-//                fakePostPicture();
-//                disfunctionalPostPicture();
+                // fixes front facing camera orientation
+                // and compensates for mirror
+                if (mCurrentCameraId == CameraInfo.CAMERA_FACING_FRONT)
+                    mOrientation = (360 - mOrientation) % 360;
                 new PostPicture(CameraActivity.this, mPictureFile, mOrientation).execute();
             } else {
                 try {

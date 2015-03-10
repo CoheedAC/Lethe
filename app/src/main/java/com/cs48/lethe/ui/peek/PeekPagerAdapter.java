@@ -32,12 +32,38 @@ import butterknife.InjectView;
  */
 public class PeekPagerAdapter extends PagerAdapter {
 
-    public final static String LOG_TAG = PeekPagerAdapter.class.getSimpleName();
+    public final static String TAG = PeekPagerAdapter.class.getSimpleName();
 
     private PeekFullScreenActivity mPeekFullScreenActivity;
     private List<Picture> mPictureList;
     private LayoutInflater mLayoutInflater;
     private DatabaseHelper mDatabaseHelper;
+
+    private Target mTarget = new Target() {
+        @Override
+        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+            Log.d(TAG, "loaded @ ");
+            mProgressBar.setVisibility(View.GONE);
+            mImageView.setImageBitmap(bitmap);
+        }
+
+        @Override
+        public void onBitmapFailed(Drawable errorDrawable) {
+            Log.d(TAG, "Failed");
+            mProgressBar.setVisibility(View.GONE);
+            try {
+                new OperationFailedAlertDialog().show(mPeekFullScreenActivity.getFragmentManager(), TAG);
+            } catch (IllegalStateException e) {
+                Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+            }
+        }
+
+        @Override
+        public void onPrepareLoad(Drawable placeHolderDrawable) {
+            Log.d(TAG, "prepare");
+            mProgressBar.setVisibility(View.VISIBLE);
+        }
+    };
 
     @InjectView(R.id.imageView)
     PinchToZoomImageView mImageView;
@@ -102,39 +128,24 @@ public class PeekPagerAdapter extends PagerAdapter {
         mButtonsLinearLayout.setVisibility(View.GONE);
 
         // Display full image
-        final Target target = new Target() {
-            @Override
-            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                mProgressBar.setVisibility(View.GONE);
-                mImageView.setImageBitmap(bitmap);
-            }
-
-            @Override
-            public void onBitmapFailed(Drawable errorDrawable) {
-                mProgressBar.setVisibility(View.GONE);
-                try {
-                    new OperationFailedAlertDialog().show(mPeekFullScreenActivity.getFragmentManager(), LOG_TAG);
-                } catch (IllegalStateException e) {
-                    Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
-                }
-            }
-
-            @Override
-            public void onPrepareLoad(Drawable placeHolderDrawable) {
-                mProgressBar.setVisibility(View.VISIBLE);
-            }
-        };
-        mImageView.setTag(target);
+        mImageView.setTag(mTarget);
 
         // Set up on click listeners
         mImageView.setOnClickListener(new OnPictureClickListener());
+
+        Picasso.with(mPeekFullScreenActivity)
+                .load(mPictureList.get(position).getThumbnailUrl())
+                .resize(PictureUtilities.MAX_FULL_WIDTH, 0)
+                .onlyScaleDown()
+                .rotate(mPictureList.get(position).getOrientation())
+                .into(mImageView);
 
         Picasso.with(mPeekFullScreenActivity)
                 .load(mPictureList.get(position).getFullUrl())
                 .resize(PictureUtilities.MAX_FULL_WIDTH, 0)
                 .onlyScaleDown()
                 .rotate(mPictureList.get(position).getOrientation())
-                .into(target);
+                .into(mTarget);
 
         container.addView(itemView);
 
@@ -152,6 +163,8 @@ public class PeekPagerAdapter extends PagerAdapter {
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
         container.removeView((RelativeLayout) object);
+        Picasso.with(mPeekFullScreenActivity)
+                .cancelRequest(mTarget);
 
     }
 
