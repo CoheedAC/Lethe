@@ -502,6 +502,9 @@ public class CameraActivity extends ActionBarActivity {
             if (NetworkUtilities.isNetworkAvailable(CameraActivity.this)) {
 //                fakePostPicture();
 //                disfunctionalPostPicture();
+                if (mCurrentCameraId == CameraInfo.CAMERA_FACING_FRONT)
+                    mOrientation -= Surface.ROTATION_180;
+
                 new PostPicture(CameraActivity.this, mPictureFile, mOrientation).execute();
             } else {
                 try {
