@@ -1,4 +1,4 @@
-package com.cs48.lethe.networking;
+package com.cs48.lethe.utils;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;

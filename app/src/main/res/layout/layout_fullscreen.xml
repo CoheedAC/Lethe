@@ -13,22 +13,26 @@
         android:id="@+id/imageView"
         android:scaleType="fitCenter"/>
 
-    <LinearLayout
+    <RelativeLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/statisticsLinearLayout"
-        android:background="#61000000">
+        android:id="@+id/statisticsRelativeLayout"
+        android:background="#61000000"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="false"
+        android:layout_alignParentEnd="false">
 
         <LinearLayout
             android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:id="@+id/viewsLinearLayout"
-            android:layout_weight=".5"
-            android:gravity="left"
             android:paddingStart="10dp"
-            android:paddingEnd="10dp">
+            android:paddingEnd="10dp"
+            android:layout_weight="1"
+            android:layout_alignParentStart="true"
+            >
 
             <ImageView
                 android:layout_width="30dp"
@@ -49,15 +53,32 @@
 
         </LinearLayout>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="City Name"
+            android:id="@+id/cityTextView"
+            android:layout_weight="20"
+            android:textColor="@android:color/white"
+            android:textAlignment="gravity"
+            android:gravity="center_vertical|center_horizontal"
+            android:textSize="25sp"
+            android:singleLine="true"
+            android:paddingEnd="10dp"
+            android:paddingStart="10dp"
+            android:visibility="visible"
+            android:layout_toRightOf="@+id/viewsLinearLayout"
+            android:layout_toLeftOf="@+id/likesLinearLayout"/>
+
         <LinearLayout
             android:orientation="horizontal"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:id="@+id/likesLinearLayout"
-            android:layout_weight=".5"
-            android:gravity="right"
             android:paddingEnd="10dp"
-            android:paddingStart="10dp">
+            android:paddingStart="10dp"
+            android:layout_weight="1"
+            android:layout_alignParentEnd="true">
 
             <ImageView
                 android:layout_width="25dp"
@@ -78,7 +99,7 @@
 
         </LinearLayout>
 
-    </LinearLayout>
+    </RelativeLayout>
 
     <LinearLayout
         android:orientation="horizontal"

@@ -12,17 +12,13 @@ public class Picture {
     private String thumbnailUrl;
     private String fullUrl;
     private File file;
+    private double latitude;
+    private double longitude;
     private int views;
     private int likes;
     private int orientation;
 
-    // Me picture constructor
-    public Picture(String uniqueId, String datePosted, File pictureFile, int orientation, int views, int likes) {
-        this(uniqueId, datePosted, pictureFile, null, null, orientation, views, likes);
-    }
-
-    // Feed picture constructor
-    public Picture(String uniqueId, String datePosted, File pictureFile, String thumbnailUrl, String fullUrl, int orientation, int views, int likes) {
+    public Picture(String uniqueId, double latitude, double longitude, File pictureFile, String thumbnailUrl, String fullUrl,int orientation, int views, int likes, String datePosted) {
         this.uniqueId = uniqueId;
         this.datePosted = datePosted;
         this.thumbnailUrl = thumbnailUrl;
@@ -30,12 +26,17 @@ public class Picture {
         this.orientation = orientation;
         this.views = views;
         this.likes = likes;
+        this.latitude = latitude;
+        this.longitude = longitude;
         file = pictureFile;
     }
 
-    // Peek picture constructor
-    public Picture(String uniqueId, String datePosted, String thumbnailUrl, String fullUrl, int orientation, int views, int likes) {
-        this(uniqueId, datePosted, null, thumbnailUrl, fullUrl, orientation, views, likes);
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
     }
 
     public int getOrientation() {

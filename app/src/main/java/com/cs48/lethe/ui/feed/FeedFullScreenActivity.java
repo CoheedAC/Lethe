@@ -3,6 +3,8 @@ package com.cs48.lethe.ui.feed;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -13,14 +15,15 @@ import android.widget.TextView;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
-import com.cs48.lethe.networking.HerokuRestClient;
 import com.cs48.lethe.ui.alertdialogs.OperationFailedAlertDialog;
 import com.cs48.lethe.ui.alertdialogs.PictureAlreadyLikedAlertDialog;
 import com.cs48.lethe.ui.miscellaneous.OnHorizontalSwipeListener;
 import com.cs48.lethe.ui.miscellaneous.PinchToZoomImageView;
+import com.cs48.lethe.utils.HerokuRestClient;
 import com.cs48.lethe.utils.NetworkUtilities;
 import com.cs48.lethe.utils.Picture;
 import com.cs48.lethe.utils.PictureUtilities;
+import com.google.android.gms.maps.model.LatLng;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
@@ -28,6 +31,9 @@ import com.squareup.picasso.Target;
 import org.apache.http.Header;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -57,6 +63,8 @@ public class FeedFullScreenActivity extends ActionBarActivity {
     TextView mViewsTextView;
     @InjectView(R.id.buttonsLinearLayout)
     LinearLayout mButtonsLinearLayout;
+    @InjectView(R.id.cityTextView)
+    TextView mCityTextView;
 
     /**
      * Called when the activity is starting. This is where most initialization should go:
@@ -94,6 +102,18 @@ public class FeedFullScreenActivity extends ActionBarActivity {
 
         // Get picture from feed table
         mPicture = mDatabaseHelper.getFeedPicture(uniqueId);
+
+        LatLng latLng = new LatLng(mPicture.getLatitude(), mPicture.getLongitude());
+        Geocoder geocoder = new Geocoder(this);
+        try {
+            List<Address> addressList = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+            Address address = addressList.get(0);
+            mCityTextView.setText(address.getLocality());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (IndexOutOfBoundsException e) {
+            mCityTextView.setVisibility(View.GONE);
+        }
 
         // Represents an arbitrary listener for image loading.
         mTarget = new Target() {
@@ -154,12 +174,6 @@ public class FeedFullScreenActivity extends ActionBarActivity {
                     .rotate(mPicture.getOrientation())
                     .into(mTarget);
         }else {
-            Picasso.with(this)
-                    .load(mPicture.getThumbnailUrl())
-                    .resize(PictureUtilities.MAX_FULL_WIDTH, 0)
-                    .onlyScaleDown()
-                    .rotate(mPicture.getOrientation())
-                    .into(mImageView);
             // Else the picture is a file, so load the picture
             // from the file to the imageview
             Picasso.with(this)

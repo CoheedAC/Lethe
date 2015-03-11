@@ -158,7 +158,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
             List<Address> addressList = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 5);
             mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng, mMapZoom, 0, 0)), 200, null);
             mMarker.setPosition(latLng);
-            mMarker.setTitle(addressList.get(0).getAddressLine(1));
+            mMarker.setTitle(addressList.get(0).getLocality());
             mMarker.showInfoWindow();
         } catch (IOException e) {
             e.printStackTrace();
@@ -194,7 +194,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
 
     private void fetchPeekFeedFromServer(double latitude, double longitude) {
         if (NetworkUtilities.isNetworkAvailable(getActivity())) {
-            mPeekGridViewAdapter.fetchPeekFeedFromServer(latitude + "", longitude + "");
+            mPeekGridViewAdapter.fetchPeekFeedFromServer(latitude,longitude);
         } else {
             mPeekPullToRefreshLayout.setRefreshing(false);
             if (!setEmptyGridMessage(getString(R.string.grid_no_internet_connection))) {
@@ -259,13 +259,14 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
                 try {
                     Geocoder geocoder = new Geocoder(getActivity());
                     List<Address> addressList = geocoder.getFromLocationName(mAddressEditText.getText().toString(), 2);
-                    mLongitude = addressList.get(0).getLongitude();
-                    mLatitude = addressList.get(0).getLatitude();
+                    Address address = addressList.get(0);
+                    mLongitude = address.getLongitude();
+                    mLatitude = address.getLatitude();
 
                     fetchPeekFeedFromServer(mLatitude, mLongitude);
 
-                    String address = addressList.get(0).getAddressLine(0) + " " + addressList.get(0).getAddressLine(1);
-                    mAddressEditText.setText(address);
+                    String fullAddress = address.getAddressLine(0) + " " + address.getAddressLine(1);
+                    mAddressEditText.setText(fullAddress);
                     LatLng latLng = new LatLng(mLatitude, mLongitude);
 
                     mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng, mMapZoom, 0, 0)));
@@ -273,7 +274,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
                     if (mMarker == null)
                         mMarker = mMap.addMarker(new MarkerOptions().position(latLng));
                     mMarker.setPosition(latLng);
-                    mMarker.setTitle(address);
+                    mMarker.setTitle(address.getLocality());
                     mMarker.hideInfoWindow();
 
                     return true;

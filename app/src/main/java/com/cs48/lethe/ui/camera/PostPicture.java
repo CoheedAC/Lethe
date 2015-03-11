@@ -1,6 +1,7 @@
-package com.cs48.lethe.networking;
+package com.cs48.lethe.ui.camera;
 
 import android.content.Context;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.NetworkOnMainThreadException;
 import android.util.Log;
@@ -8,7 +9,6 @@ import android.util.Log;
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.ui.alertdialogs.OperationFailedAlertDialog;
-import com.cs48.lethe.ui.camera.CameraActivity;
 import com.cs48.lethe.utils.Picture;
 
 import org.json.JSONException;
@@ -40,6 +40,7 @@ public class PostPicture extends AsyncTask<String, String, String> {
     private CameraActivity mCameraActivity;
     private File mPictureFile;
     private int mOrientation;
+    private Location mLocation;
 
     /**
      * Constructor that takes in the context and the picture file.
@@ -47,10 +48,11 @@ public class PostPicture extends AsyncTask<String, String, String> {
      * @param context Interface to global information about an application environment
      * @param pictureFile The file of the picture taken by the user
      */
-    public PostPicture(Context context, File pictureFile, int orientation) {
+    public PostPicture(Context context, File pictureFile, int orientation, Location location) {
         mCameraActivity = (CameraActivity) context;
         mPictureFile = pictureFile;
         mOrientation = orientation;
+        mLocation = location;
     }
 
     /**
@@ -101,8 +103,8 @@ public class PostPicture extends AsyncTask<String, String, String> {
             requestBody = connection.getOutputStream();
 
             // Get latitude and longitude
-            String latitude = generateForSimpleText(mCameraActivity.getString(R.string.server_latitude), location[0]);
-            String longitude = generateForSimpleText(mCameraActivity.getString(R.string.server_longitude), location[1]);
+            String latitude = generateForSimpleText(mCameraActivity.getString(R.string.server_latitude), mLocation.getLatitude() + "");
+            String longitude = generateForSimpleText(mCameraActivity.getString(R.string.server_longitude), mLocation.getLatitude() + "");
             String orientation = generateForSimpleText(mCameraActivity.getString(R.string.json_orientation), mOrientation + "");
             String combined = latitude + longitude + orientation;
 
@@ -205,8 +207,15 @@ public class PostPicture extends AsyncTask<String, String, String> {
                 // Adds the Picture from the JSON data into the database
                 databaseHelper.insertPicture(new Picture(
                         jsonObject.getString(mCameraActivity.getString(R.string.json_id)),
-                        jsonObject.getString(mCameraActivity.getString(R.string.json_date_posted)),
-                        mPictureFile, mOrientation, 0, 0));
+                        mLocation.getLatitude(),
+                        mLocation.getLongitude(),
+                        mPictureFile,
+                        null,
+                        null,
+                        mOrientation,
+                        0,
+                        0,
+                        jsonObject.getString(mCameraActivity.getString(R.string.json_date_posted))));
             } catch (JSONException e) {
                 Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             }

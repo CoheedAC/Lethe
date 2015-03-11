@@ -29,7 +29,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static DatabaseHelper sInstance;
 
     // Database version
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 1;
 
     // Database name
     private static final String DATABASE_NAME = "PictureManager.db";
@@ -38,6 +38,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TEXT_TYPE = " TEXT";
     private static final String DATE_TYPE = " DATE";
     private static final String INT_TYPE = " INT";
+    private static final String REAL_TYPE = " REAL";
     private static final String INTEGER_DEFAULT_TYPE = " INTEGER DEFAULT ";
     private static final String INTEGER_PRIMARY_KEY_TYPE = " INTEGER PRIMARY KEY";
     private static final String COMMA_SEP = ",";
@@ -55,16 +56,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             "CREATE TABLE " + FeedTable.TABLE_NAME + " (" +
                     FeedTable._ID + INTEGER_PRIMARY_KEY_TYPE + COMMA_SEP +
                     FeedTable.COLUMN_NAME_PICTURE_ID + TEXT_TYPE + COMMA_SEP +
-                    FeedTable.COLUMN_NAME_DATE_POSTED + DATE_TYPE + COMMA_SEP +
+                    FeedTable.COLUMN_NAME_LATITUDE + REAL_TYPE + COMMA_SEP +
+                    FeedTable.COLUMN_NAME_LONGITUDE + REAL_TYPE + COMMA_SEP +
                     FeedTable.COLUMN_NAME_FILE_PATH + DATE_TYPE + COMMA_SEP +
-                    FeedTable.COLUMN_NAME_ORIENTATION + INT_TYPE + COMMA_SEP +
                     FeedTable.COLUMN_NAME_THUMBNAIL_URL + TEXT_TYPE + COMMA_SEP +
                     FeedTable.COLUMN_NAME_FULL_URL + TEXT_TYPE + COMMA_SEP +
+                    FeedTable.COLUMN_NAME_ORIENTATION + INT_TYPE + COMMA_SEP +
                     FeedTable.COLUMN_NAME_VIEWS + INT_TYPE + COMMA_SEP +
                     FeedTable.COLUMN_NAME_LIKES + INT_TYPE + COMMA_SEP +
                     FeedTable.COLUMN_NAME_IS_VIEWED + INTEGER_DEFAULT_TYPE + FeedTable.FALSE + COMMA_SEP +
                     FeedTable.COLUMN_NAME_IS_LIKED + INTEGER_DEFAULT_TYPE + FeedTable.FALSE + COMMA_SEP +
-                    FeedTable.COLUMN_NAME_VISIBILITY + INTEGER_DEFAULT_TYPE + FeedTable.VISIBLE +
+                    FeedTable.COLUMN_NAME_VISIBILITY + INTEGER_DEFAULT_TYPE + FeedTable.VISIBLE + COMMA_SEP +
+                    FeedTable.COLUMN_NAME_DATE_POSTED + DATE_TYPE +
                     ")";
 
     // Peak table create statement
@@ -72,12 +75,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             "CREATE TABLE " + PeekTable.TABLE_NAME + " (" +
                     PeekTable._ID + INTEGER_PRIMARY_KEY_TYPE + COMMA_SEP +
                     PeekTable.COLUMN_NAME_PICTURE_ID + TEXT_TYPE + COMMA_SEP +
-                    PeekTable.COLUMN_NAME_DATE_POSTED + TEXT_TYPE + COMMA_SEP +
+                    PeekTable.COLUMN_NAME_LATITUDE + REAL_TYPE + COMMA_SEP +
+                    PeekTable.COLUMN_NAME_LONGITUDE + REAL_TYPE + COMMA_SEP +
                     PeekTable.COLUMN_NAME_THUMBNAIL_URL + TEXT_TYPE + COMMA_SEP +
                     PeekTable.COLUMN_NAME_FULL_URL + TEXT_TYPE + COMMA_SEP +
                     PeekTable.COLUMN_NAME_ORIENTATION + INT_TYPE + COMMA_SEP +
                     PeekTable.COLUMN_NAME_VIEWS + INT_TYPE + COMMA_SEP +
-                    PeekTable.COLUMN_NAME_LIKES + INT_TYPE +
+                    PeekTable.COLUMN_NAME_LIKES + INT_TYPE + COMMA_SEP +
+                    PeekTable.COLUMN_NAME_DATE_POSTED + TEXT_TYPE +
                     ")";
 
     // Me table create statement
@@ -85,11 +90,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             "CREATE TABLE " + MeTable.TABLE_NAME + " (" +
                     MeTable._ID + INTEGER_PRIMARY_KEY_TYPE + COMMA_SEP +
                     MeTable.COLUMN_NAME_PICTURE_ID + TEXT_TYPE + COMMA_SEP +
-                    MeTable.COLUMN_NAME_DATE_POSTED + TEXT_TYPE + COMMA_SEP +
+                    MeTable.COLUMN_NAME_LATITUDE + REAL_TYPE + COMMA_SEP +
+                    MeTable.COLUMN_NAME_LONGITUDE + REAL_TYPE + COMMA_SEP +
                     MeTable.COLUMN_NAME_FILE_PATH + TEXT_TYPE + COMMA_SEP +
                     MeTable.COLUMN_NAME_ORIENTATION + INT_TYPE + COMMA_SEP +
                     MeTable.COLUMN_NAME_VIEWS + INT_TYPE + COMMA_SEP +
-                    MeTable.COLUMN_NAME_LIKES + INT_TYPE +
+                    MeTable.COLUMN_NAME_LIKES + INT_TYPE + COMMA_SEP +
+                    MeTable.COLUMN_NAME_DATE_POSTED + TEXT_TYPE +
                     ")";
 
     // Drop table statement
@@ -196,14 +203,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String pictureFilePath = c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_FILE_PATH));
                 File pictureFile = (pictureFilePath == null) ? null : new File(pictureFilePath);
 
-                pictureList.add(new Picture(c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_PICTURE_ID)),
-                        c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_DATE_POSTED)),
+                pictureList.add(new Picture(
+                        c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_PICTURE_ID)),
+                        c.getDouble(c.getColumnIndex(FeedTable.COLUMN_NAME_LATITUDE)),
+                        c.getDouble(c.getColumnIndex(FeedTable.COLUMN_NAME_LONGITUDE)),
                         pictureFile,
                         c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_THUMBNAIL_URL)),
                         c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_FULL_URL)),
                         c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_ORIENTATION)),
                         c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_VIEWS)),
-                        c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_LIKES))));
+                        c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_LIKES)),
+                        c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_DATE_POSTED))));
             } while (c.moveToNext());
         }
 
@@ -240,13 +250,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             // For each row in the query, add the picture to the list
             do {
                 pictureList.add(new Picture(c.getString(c.getColumnIndex(PeekTable.COLUMN_NAME_PICTURE_ID)),
-                        c.getString(c.getColumnIndex(PeekTable.COLUMN_NAME_DATE_POSTED)),
+                        c.getDouble(c.getColumnIndex(PeekTable.COLUMN_NAME_LATITUDE)),
+                        c.getDouble(c.getColumnIndex(PeekTable.COLUMN_NAME_LONGITUDE)),
                         null,
                         c.getString(c.getColumnIndex(PeekTable.COLUMN_NAME_THUMBNAIL_URL)),
                         c.getString(c.getColumnIndex(PeekTable.COLUMN_NAME_FULL_URL)),
                         c.getInt(c.getColumnIndex(PeekTable.COLUMN_NAME_ORIENTATION)),
                         c.getInt(c.getColumnIndex(PeekTable.COLUMN_NAME_VIEWS)),
-                        c.getInt(c.getColumnIndex(PeekTable.COLUMN_NAME_LIKES))));
+                        c.getInt(c.getColumnIndex(PeekTable.COLUMN_NAME_LIKES)),
+                        c.getString(c.getColumnIndex(PeekTable.COLUMN_NAME_DATE_POSTED))));
             } while (c.moveToNext());
         }
 
@@ -287,11 +299,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             do {
                 pictureList.add(
                         new Picture(c.getString(c.getColumnIndex(MeTable.COLUMN_NAME_PICTURE_ID)),
-                                c.getString(c.getColumnIndex(MeTable.COLUMN_NAME_DATE_POSTED)),
+                                c.getDouble(c.getColumnIndex(PeekTable.COLUMN_NAME_LATITUDE)),
+                                c.getDouble(c.getColumnIndex(PeekTable.COLUMN_NAME_LONGITUDE)),
                                 new File(c.getString(c.getColumnIndex(MeTable.COLUMN_NAME_FILE_PATH))),
+                                null,
+                                null,
                                 c.getInt(c.getColumnIndex(MeTable.COLUMN_NAME_ORIENTATION)),
                                 c.getInt(c.getColumnIndex(MeTable.COLUMN_NAME_VIEWS)),
-                                c.getInt(c.getColumnIndex(MeTable.COLUMN_NAME_LIKES))));
+                                c.getInt(c.getColumnIndex(MeTable.COLUMN_NAME_LIKES)),
+                                c.getString(c.getColumnIndex(MeTable.COLUMN_NAME_DATE_POSTED))));
             } while (c.moveToNext());
         }
 
@@ -327,12 +343,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 // Creates the values to store into the table
                 ContentValues values = new ContentValues();
                 values.put(FeedTable.COLUMN_NAME_PICTURE_ID, picture.getUniqueId());
-                values.put(FeedTable.COLUMN_NAME_DATE_POSTED, picture.getDatePosted());
+                values.put(FeedTable.COLUMN_NAME_LATITUDE, picture.getLatitude());
+                values.put(FeedTable.COLUMN_NAME_LONGITUDE, picture.getLongitude());
                 values.put(FeedTable.COLUMN_NAME_THUMBNAIL_URL, picture.getThumbnailUrl());
                 values.put(FeedTable.COLUMN_NAME_FULL_URL, picture.getFullUrl());
                 values.put(FeedTable.COLUMN_NAME_ORIENTATION, picture.getOrientation());
                 values.put(FeedTable.COLUMN_NAME_VIEWS, picture.getViews());
                 values.put(FeedTable.COLUMN_NAME_LIKES, picture.getLikes());
+                values.put(FeedTable.COLUMN_NAME_DATE_POSTED, picture.getDatePosted());
 
                 // Inserts the new values into the feed table
                 db.insert(FeedTable.TABLE_NAME, null, values);
@@ -369,12 +387,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 // Creates the values to store into the table
                 ContentValues values = new ContentValues();
                 values.put(PeekTable.COLUMN_NAME_PICTURE_ID, picture.getUniqueId());
-                values.put(PeekTable.COLUMN_NAME_DATE_POSTED, picture.getDatePosted());
+                values.put(PeekTable.COLUMN_NAME_LATITUDE, picture.getLatitude());
+                values.put(PeekTable.COLUMN_NAME_LONGITUDE, picture.getLongitude());
                 values.put(PeekTable.COLUMN_NAME_THUMBNAIL_URL, picture.getThumbnailUrl());
                 values.put(PeekTable.COLUMN_NAME_FULL_URL, picture.getFullUrl());
                 values.put(PeekTable.COLUMN_NAME_ORIENTATION, picture.getOrientation());
                 values.put(PeekTable.COLUMN_NAME_VIEWS, picture.getViews());
                 values.put(PeekTable.COLUMN_NAME_LIKES, picture.getLikes());
+                values.put(PeekTable.COLUMN_NAME_DATE_POSTED, picture.getDatePosted());
 
                 // Inserts the new values into the feed table
                 db.insert(PeekTable.TABLE_NAME, null, values);
@@ -558,13 +578,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             // Create a new picture from the data in the Feed Table
             picture = new Picture(c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_PICTURE_ID)),
-                    c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_DATE_POSTED)),
+                    c.getDouble(c.getColumnIndex(FeedTable.COLUMN_NAME_LATITUDE)),
+                    c.getDouble(c.getColumnIndex(FeedTable.COLUMN_NAME_LONGITUDE)),
                     pictureFile,
                     c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_THUMBNAIL_URL)),
                     c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_FULL_URL)),
                     c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_ORIENTATION)),
                     c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_VIEWS)),
-                    c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_LIKES)));
+                    c.getInt(c.getColumnIndex(FeedTable.COLUMN_NAME_LIKES)),
+                    c.getString(c.getColumnIndex(FeedTable.COLUMN_NAME_DATE_POSTED)));
         }
 
         // Closes the Cursor, releasing all of its resources and making it completely invalid.
@@ -591,6 +613,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(MeTable.COLUMN_NAME_FILE_PATH, postedPicture.getFile().getAbsolutePath());
         values.put(MeTable.COLUMN_NAME_DATE_POSTED, postedPicture.getDatePosted());
         values.put(MeTable.COLUMN_NAME_ORIENTATION, postedPicture.getOrientation());
+        values.put(MeTable.COLUMN_NAME_LATITUDE, postedPicture.getLatitude());
+        values.put(MeTable.COLUMN_NAME_LONGITUDE, postedPicture.getLongitude());
 
         // Inserts the values into the respective tables
         // (other columns will go to their default values)

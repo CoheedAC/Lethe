@@ -3,6 +3,8 @@ package com.cs48.lethe.ui.peek;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.support.v4.view.PagerAdapter;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,9 +21,11 @@ import com.cs48.lethe.ui.alertdialogs.OperationFailedAlertDialog;
 import com.cs48.lethe.ui.miscellaneous.PinchToZoomImageView;
 import com.cs48.lethe.utils.Picture;
 import com.cs48.lethe.utils.PictureUtilities;
+import com.google.android.gms.maps.model.LatLng;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
+import java.io.IOException;
 import java.util.List;
 
 import butterknife.ButterKnife;
@@ -38,32 +42,7 @@ public class PeekPagerAdapter extends PagerAdapter {
     private List<Picture> mPictureList;
     private LayoutInflater mLayoutInflater;
     private DatabaseHelper mDatabaseHelper;
-
-    private Target mTarget = new Target() {
-        @Override
-        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-            Log.d(TAG, "loaded @ ");
-            mProgressBar.setVisibility(View.GONE);
-            mImageView.setImageBitmap(bitmap);
-        }
-
-        @Override
-        public void onBitmapFailed(Drawable errorDrawable) {
-            Log.d(TAG, "Failed");
-            mProgressBar.setVisibility(View.GONE);
-            try {
-                new OperationFailedAlertDialog().show(mPeekFullScreenActivity.getFragmentManager(), TAG);
-            } catch (IllegalStateException e) {
-                Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
-            }
-        }
-
-        @Override
-        public void onPrepareLoad(Drawable placeHolderDrawable) {
-            Log.d(TAG, "prepare");
-            mProgressBar.setVisibility(View.VISIBLE);
-        }
-    };
+    private Target mTarget;
 
     @InjectView(R.id.imageView)
     PinchToZoomImageView mImageView;
@@ -75,6 +54,8 @@ public class PeekPagerAdapter extends PagerAdapter {
     TextView mViewsTextView;
     @InjectView(R.id.buttonsLinearLayout)
     LinearLayout mButtonsLinearLayout;
+    @InjectView(R.id.cityTextView)
+    TextView mCityTextView;
 
     public PeekPagerAdapter(Context context) {
         mPeekFullScreenActivity = (PeekFullScreenActivity) context;
@@ -122,23 +103,54 @@ public class PeekPagerAdapter extends PagerAdapter {
 
         ButterKnife.inject(this, itemView);
 
+        Picture picture = mPictureList.get(position);
+        LatLng latLng = new LatLng(picture.getLatitude(), picture.getLongitude());
+        Geocoder geocoder = new Geocoder(mPeekFullScreenActivity);
+        try {
+            List<Address> addressList = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+            Address address = addressList.get(0);
+            mCityTextView.setText(address.getLocality());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (IndexOutOfBoundsException e) {
+            mCityTextView.setVisibility(View.GONE);
+        }
+
         mLikesTextView.setText(mPictureList.get(position).getLikes() + "");
         mViewsTextView.setText(mPictureList.get(position).getViews() + "");
 
         mButtonsLinearLayout.setVisibility(View.GONE);
 
+        mTarget = new Target() {
+            @Override
+            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                Log.d(TAG, "loaded @ ");
+                mProgressBar.setVisibility(View.GONE);
+                mImageView.setImageBitmap(bitmap);
+            }
+
+            @Override
+            public void onBitmapFailed(Drawable errorDrawable) {
+                Log.d(TAG, "Failed");
+                mProgressBar.setVisibility(View.GONE);
+                try {
+                    new OperationFailedAlertDialog().show(mPeekFullScreenActivity.getFragmentManager(), TAG);
+                } catch (IllegalStateException e) {
+                    Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                }
+            }
+
+            @Override
+            public void onPrepareLoad(Drawable placeHolderDrawable) {
+                Log.d(TAG, "prepare");
+                mProgressBar.setVisibility(View.VISIBLE);
+            }
+        };
         // Display full image
         mImageView.setTag(mTarget);
 
         // Set up on click listeners
         mImageView.setOnClickListener(new OnPictureClickListener());
-
-        Picasso.with(mPeekFullScreenActivity)
-                .load(mPictureList.get(position).getThumbnailUrl())
-                .resize(PictureUtilities.MAX_FULL_WIDTH, 0)
-                .onlyScaleDown()
-                .rotate(mPictureList.get(position).getOrientation())
-                .into(mImageView);
 
         Picasso.with(mPeekFullScreenActivity)
                 .load(mPictureList.get(position).getFullUrl())

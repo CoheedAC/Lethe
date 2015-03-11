@@ -11,7 +11,7 @@ import android.widget.ImageView;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
-import com.cs48.lethe.networking.HerokuRestClient;
+import com.cs48.lethe.utils.HerokuRestClient;
 import com.cs48.lethe.ui.alertdialogs.OperationFailedAlertDialog;
 import com.cs48.lethe.utils.NetworkUtilities;
 import com.cs48.lethe.utils.Picture;
@@ -128,12 +128,12 @@ public class FeedGridViewAdapter extends BaseAdapter {
      * grid with the new list of images from the
      * internal database.
      */
-    public void fetchFeedFromServer(final FeedFragment feedFragment, String latitude, String longitude) {
+    public void fetchFeedFromServer(final FeedFragment feedFragment, final double latitude, final double longitude) {
         feedFragment.setEmptyGridMessage("");
         // get current location
         String url = mContext.getString(R.string.server_recent) +
-                latitude.replace(".", "a") + "," +
-                longitude.replace(".", "a");
+                String.valueOf(latitude).replace(".", "a") + "," +
+                String.valueOf(longitude).replace(".", "a");
 
         HerokuRestClient.get(url, null, new AsyncHttpResponseHandler() {
 
@@ -151,12 +151,15 @@ public class FeedGridViewAdapter extends BaseAdapter {
 
                         Picture picture = new Picture(
                                 jsonObject.getString(mContext.getString(R.string.json_id)),
-                                jsonObject.getString(mContext.getString(R.string.json_date_posted)),
+                                latitude,
+                                longitude,
+                                null,
                                 jsonObject.getString(mContext.getString(R.string.json_url_thumbnail)),
                                 jsonObject.getString(mContext.getString(R.string.json_url_full)),
                                 jsonObject.getInt(mContext.getString(R.string.json_orientation)),
                                 jsonObject.getInt(mContext.getString(R.string.json_views)),
-                                jsonObject.getInt(mContext.getString(R.string.json_likes)));
+                                jsonObject.getInt(mContext.getString(R.string.json_likes)),
+                                jsonObject.getString(mContext.getString(R.string.json_date_posted)));
 
                         serverPictureMap.put(picture.getUniqueId(), picture);
                     }

@@ -15,7 +15,6 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 
 import com.cs48.lethe.R;
-import com.cs48.lethe.networking.PostPicture;
 import com.cs48.lethe.ui.alertdialogs.NetworkUnavailableAlertDialog;
 import com.cs48.lethe.utils.FileUtilities;
 import com.cs48.lethe.utils.NetworkUtilities;
@@ -460,7 +459,7 @@ public class CameraActivity extends ActionBarActivity implements GoogleApiClient
                 // and compensates for mirror
                 if (mCurrentCameraId == CameraInfo.CAMERA_FACING_FRONT)
                     mOrientation = (360 - mOrientation) % 360;
-                new PostPicture(CameraActivity.this, mPictureFile, mOrientation).execute(mLastLocation.getLatitude() + "", mLastLocation.getLongitude() + "");
+                new PostPicture(CameraActivity.this, mPictureFile, mOrientation, mLastLocation).execute();
             } else {
                 try {
                     new NetworkUnavailableAlertDialog().show(getFragmentManager(), TAG);

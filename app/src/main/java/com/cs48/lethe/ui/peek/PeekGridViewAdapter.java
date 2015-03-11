@@ -11,8 +11,8 @@ import android.widget.ImageView;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
-import com.cs48.lethe.networking.HerokuRestClient;
 import com.cs48.lethe.ui.alertdialogs.OperationFailedAlertDialog;
+import com.cs48.lethe.utils.HerokuRestClient;
 import com.cs48.lethe.utils.Picture;
 import com.cs48.lethe.utils.PictureUtilities;
 import com.loopj.android.http.AsyncHttpResponseHandler;
@@ -129,13 +129,13 @@ public class PeekGridViewAdapter extends BaseAdapter {
      * to start the refresh animation before a server response
      * and to stop on a server response.
      */
-    public void fetchPeekFeedFromServer(String latitude, String longitude) {
+    public void fetchPeekFeedFromServer(final double latitude, final double longitude) {
         clearPeekFeed();
         mPeekFragment.setEmptyGridMessage("");
         // url with specified latitude and longitude
         String url = mContext.getString(R.string.server_recent) +
-                latitude.replace(".", "a") + "," +    // latitude
-                longitude.replace(".", "a");           // longitude
+                String.valueOf(latitude).replace(".", "a") + "," +    // latitude
+                String.valueOf(longitude).replace(".", "a");           // longitude
 
         HerokuRestClient.get(url, null, new AsyncHttpResponseHandler() {
 
@@ -152,12 +152,15 @@ public class PeekGridViewAdapter extends BaseAdapter {
                         // adds a new image to the list with the info from the server
                         mPictureList.add(new Picture(
                                 jsonObject.getString(mContext.getString(R.string.json_id)),
-                                jsonObject.getString(mContext.getString(R.string.json_date_posted)),
+                                latitude,
+                                longitude,
+                                null,
                                 jsonObject.getString(mContext.getString(R.string.json_url_thumbnail)),
                                 jsonObject.getString(mContext.getString(R.string.json_url_full)),
                                 jsonObject.getInt(mContext.getString(R.string.json_orientation)),
                                 jsonObject.getInt(mContext.getString(R.string.json_views)),
-                                jsonObject.getInt(mContext.getString(R.string.json_likes))));
+                                jsonObject.getInt(mContext.getString(R.string.json_likes)),
+                                jsonObject.getString(mContext.getString(R.string.json_date_posted))));
                     }
                     mPeekFragment.setEmptyGridMessage(mContext.getString(R.string.grid_area_empty));
 

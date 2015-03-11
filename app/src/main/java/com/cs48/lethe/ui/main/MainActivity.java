@@ -49,7 +49,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         // Show app icon
         actionBar.setDisplayShowHomeEnabled(true);
-        actionBar.setIcon(R.drawable.ic_launcher);
+        actionBar.setIcon(R.drawable.ic_flik);
 
         setTitle("");
 

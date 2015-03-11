@@ -183,7 +183,7 @@ public class FeedFragment extends Fragment implements ConnectionCallbacks, OnCon
         // and fetch the picture feed from the server
         if (NetworkUtilities.isNetworkAvailable(getActivity())) {
             mFeedPullToRefreshLayout.setRefreshing(true);
-            mFeedGridViewAdapter.fetchFeedFromServer(this, mLastLocation.getLatitude() + "", mLastLocation.getLongitude() + "");
+            mFeedGridViewAdapter.fetchFeedFromServer(this, mLastLocation.getLatitude(), mLastLocation.getLongitude());
         } else {
             // Else the network is not available, so disable the refresh
             // animation and display a networt alert dialog
@@ -228,7 +228,6 @@ public class FeedFragment extends Fragment implements ConnectionCallbacks, OnCon
     @Override
     public void onLocationChanged(Location location) {
         mLastLocation = location;
-        Log.d(TAG, count++ + ": " + location.getLatitude() + "," + location.getLongitude());
     }
 
     /**
