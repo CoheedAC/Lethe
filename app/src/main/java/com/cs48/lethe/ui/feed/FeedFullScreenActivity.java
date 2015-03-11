@@ -8,13 +8,14 @@ import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
-import com.cs48.lethe.ui.alertdialogs.PictureAlreadyLikedAlertDialog;
 import com.cs48.lethe.ui.miscellaneous.OnHorizontalSwipeListener;
 import com.cs48.lethe.ui.miscellaneous.PinchToZoomImageView;
 import com.cs48.lethe.utils.HerokuRestClient;
@@ -209,25 +210,34 @@ public class FeedFullScreenActivity extends ActionBarActivity {
         }
 
         /**
-         * Swiping left likes the photo then goes back to the feed.
-         */
-        @Override
-        public void onSwipeLeft() {
-            if (!mDatabaseHelper.isPictureLiked(mPicture)) {
-                likePicture();
-                finish();
-            } else
-                new PictureAlreadyLikedAlertDialog().show(getFragmentManager(), TAG);
-        }
-
-        /**
-         * Swiping right hides the photo from the feed and dislikes
+         * Swiping left hides the photo from the feed and dislikes
          * it on the server, then returns to the feed.
          */
         @Override
-        public void onSwipeRight() {
+        public void onSwipeLeft() {
+            Toast toast = Toast.makeText(FeedFullScreenActivity.this, "Picture hidden!", Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.CENTER_HORIZONTAL,0,0);
+            toast.show();
             hidePicture();
             finish();
+        }
+
+        /**
+         * Swiping right likes the photo then goes back to the feed.
+         */
+        @Override
+        public void onSwipeRight() {
+            if (!mDatabaseHelper.isPictureLiked(mPicture)) {
+                likePicture();
+                Toast toast = Toast.makeText(FeedFullScreenActivity.this, "Liked picture!", Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.CENTER_HORIZONTAL,0,0);
+                toast.show();
+                finish();
+            } else {
+                Toast toast = Toast.makeText(FeedFullScreenActivity.this, "You have already liked this picture!", Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.CENTER_HORIZONTAL, 0, 0);
+                toast.show();
+            }
         }
 
         /**

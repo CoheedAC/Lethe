@@ -5,6 +5,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.support.v4.view.PagerAdapter;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -243,6 +244,9 @@ public class MePagerAdapter extends PagerAdapter {
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                     mDatabaseHelper.deletePictureFromDatabase(mPictureList.get(position));
+                    Toast toast = Toast.makeText(mMeFullScreenActivity, "Deleted picture!", Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.CENTER_HORIZONTAL,0,0);
+                    toast.show();
                     mMeFullScreenActivity.finish();
                 }
 
