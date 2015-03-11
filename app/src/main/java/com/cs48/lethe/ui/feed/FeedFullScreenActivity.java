@@ -37,6 +37,7 @@ import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import me.grantland.widget.AutofitHelper;
 
 /**
  * The activity that handles showing the full-sized image
@@ -108,6 +109,7 @@ public class FeedFullScreenActivity extends ActionBarActivity {
         try {
             List<Address> addressList = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
             Address address = addressList.get(0);
+            AutofitHelper.create(mCityTextView);
             mCityTextView.setText(address.getLocality());
         } catch (IOException e) {
             e.printStackTrace();

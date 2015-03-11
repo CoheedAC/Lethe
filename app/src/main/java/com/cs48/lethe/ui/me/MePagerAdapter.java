@@ -115,15 +115,13 @@ public class MePagerAdapter extends PagerAdapter {
 
         ButterKnife.inject(this, itemView);
 
-        AutofitHelper.create(mCityTextView);
-        mCityTextView.setVisibility(View.VISIBLE);
-
         Picture picture = mPictureList.get(position);
         LatLng latLng = new LatLng(picture.getLatitude(), picture.getLongitude());
         Geocoder geocoder = new Geocoder(mMeFullScreenActivity);
         try {
             List<Address> addressList = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
             Address address = addressList.get(0);
+            AutofitHelper.create(mCityTextView);
             mCityTextView.setText(address.getLocality());
         } catch (IOException e) {
             e.printStackTrace();
