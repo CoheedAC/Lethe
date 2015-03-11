@@ -242,20 +242,28 @@ public class MePagerAdapter extends PagerAdapter {
             HerokuRestClient.get(url, null, new AsyncHttpResponseHandler() {
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                    deletePicture();
+                }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                    if (statusCode == 400) {
+                        deletePicture();
+                    }else {
+                        try {
+                            new OperationFailedAlertDialog().show(mMeFullScreenActivity.getFragmentManager(), TAG);
+                        } catch (IllegalStateException e) {
+                            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                        }
+                    }
+                }
+
+                private void deletePicture() {
                     mDatabaseHelper.deletePictureFromDatabase(mPictureList.get(position));
                     Toast toast = Toast.makeText(mMeFullScreenActivity, "Deleted picture!", Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.CENTER_HORIZONTAL,0,0);
                     toast.show();
                     mMeFullScreenActivity.finish();
-                }
-
-                @Override
-                public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                    try {
-                        new OperationFailedAlertDialog().show(mMeFullScreenActivity.getFragmentManager(), TAG);
-                    }catch (IllegalStateException e) {
-                        Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
-                    }
                 }
             });
         }

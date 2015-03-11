@@ -11,8 +11,8 @@ import android.widget.ImageView;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
-import com.cs48.lethe.utils.HerokuRestClient;
 import com.cs48.lethe.ui.alertdialogs.OperationFailedAlertDialog;
+import com.cs48.lethe.utils.HerokuRestClient;
 import com.cs48.lethe.utils.NetworkUtilities;
 import com.cs48.lethe.utils.Picture;
 import com.cs48.lethe.utils.PictureUtilities;
@@ -208,16 +208,6 @@ public class FeedGridViewAdapter extends BaseAdapter {
      */
     public void fetchFeedFromDatabase() {
         mPictureList = mDatabaseHelper.getFeedPictures();
-        notifyDataSetChanged();
-    }
-
-    /**
-     * Clears the database of posted images and clears
-     * the list of images
-     */
-    public void clearCache() {
-        mDatabaseHelper.clearFeedTable();
-        mPictureList = new ArrayList<>();
         notifyDataSetChanged();
     }
 
