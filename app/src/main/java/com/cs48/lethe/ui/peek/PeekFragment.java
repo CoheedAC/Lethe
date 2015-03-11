@@ -320,7 +320,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
     public class OnLocationChange implements GoogleMap.OnMyLocationChangeListener {
         @Override
         public void onMyLocationChange(Location location) {
-            if (mCurrentLocation == null) {
+            if (mCurrentLocation == null || mMarker == null) {
                 LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                 mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng, 14, 0, 0)), 200, null);
             }
