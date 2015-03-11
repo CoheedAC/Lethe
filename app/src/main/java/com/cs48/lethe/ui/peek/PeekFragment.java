@@ -46,7 +46,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
     private PeekGridViewAdapter mPeekGridViewAdapter;
     private double mLatitude;
     private double mLongitude;
-    private Location mLocation;
+    private Location mCurrentLocation;
     private Marker mMarker;
     private int mMapZoom = 14;
 
@@ -147,6 +147,19 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
         mMap.getUiSettings().setAllGesturesEnabled(true);
 
         mMap.setMyLocationEnabled(true);
+        mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
+            @Override
+            public boolean onMyLocationButtonClick() {
+                mAddressEditText.setText("");
+                hideKeyboard();
+                mPeekGridViewAdapter.clearPeekFeed();
+                setEmptyGridMessage("");
+                if (mMarker != null)
+                    mMarker.remove();
+                mMarker = null;
+                return false;
+            }
+        });
         mMap.setOnMapClickListener(new OnMapClick());
         mMap.setOnMyLocationChangeListener(new OnLocationChange());
         mMap.setOnCameraChangeListener(new OnZoomChange());
@@ -166,9 +179,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
             mPeekGridViewAdapter.clearPeekFeed();
             mMarker.hideInfoWindow();
         }
-        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
-                Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(mAddressEditText.getWindowToken(), 0);
+        hideKeyboard();
     }
 
     /**
@@ -194,7 +205,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
 
     private void fetchPeekFeedFromServer(double latitude, double longitude) {
         if (NetworkUtilities.isNetworkAvailable(getActivity())) {
-            mPeekGridViewAdapter.fetchPeekFeedFromServer(latitude,longitude);
+            mPeekGridViewAdapter.fetchPeekFeedFromServer(latitude, longitude);
         } else {
             mPeekPullToRefreshLayout.setRefreshing(false);
             if (!setEmptyGridMessage(getString(R.string.grid_no_internet_connection))) {
@@ -245,6 +256,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
     private class OnRefreshListener implements SwipeRefreshLayout.OnRefreshListener {
         @Override
         public void onRefresh() {
+            hideKeyboard();
             fetchPeekFeedFromServer(mLatitude, mLongitude);
         }
     }
@@ -280,16 +292,22 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
                     return true;
                 } catch (IOException e) {
                     e.printStackTrace();
-                } catch (IndexOutOfBoundsException e) {
+                } catch (Exception e) {
                     mPeekGridViewAdapter.clearPeekFeed();
-                    mMarker.hideInfoWindow();
+                    if (mMarker != null)
+                        mMarker.hideInfoWindow();
+                } finally {
+                    hideKeyboard();
                 }
-                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
-                        Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(mAddressEditText.getWindowToken(), 0);
             }
             return false;
         }
+    }
+
+    private void hideKeyboard() {
+        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
+                Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(mAddressEditText.getWindowToken(), 0);
     }
 
     private class OnZoomChange implements GoogleMap.OnCameraChangeListener {
@@ -317,15 +335,13 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
     public class OnLocationChange implements GoogleMap.OnMyLocationChangeListener {
         @Override
         public void onMyLocationChange(Location location) {
-            mLatitude = location.getLatitude();
-            mLongitude = location.getLongitude();
-
-            if (mLocation == null) {
-                mLocation = location;
-                LatLng latLng = new LatLng(mLatitude, mLongitude);
+            if (mCurrentLocation == null) {
+                mCurrentLocation = location;
+                mLatitude = mCurrentLocation.getLatitude();
+                mLongitude = mCurrentLocation.getLongitude();
+                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                 mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition(latLng, 14, 0, 0)), 200, null);
-            } else
-                mLocation = location;
+            }
         }
     }
 }

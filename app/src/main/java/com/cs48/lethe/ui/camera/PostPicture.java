@@ -94,7 +94,7 @@ public class PostPicture extends AsyncTask<String, String, String> {
             // Set HTTP method to POST.
             connection.setRequestMethod("POST");
 
-            // Sets the type of request information
+            // Sets the type of request informationp
             connection.setRequestProperty("Connection", "Keep-Alive");
             connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + BOUNDARY);
             connection.setRequestProperty("Accept", "application/json");

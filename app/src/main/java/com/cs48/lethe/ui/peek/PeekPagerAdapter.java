@@ -1,6 +1,8 @@
 package com.cs48.lethe.ui.peek;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.location.Address;
 import android.location.Geocoder;
 import android.support.v4.view.PagerAdapter;
@@ -14,7 +16,6 @@ import android.widget.TextView;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
-import com.cs48.lethe.ui.alertdialogs.OperationFailedAlertDialog;
 import com.cs48.lethe.ui.miscellaneous.PinchToZoomImageView;
 import com.cs48.lethe.utils.Picture;
 import com.cs48.lethe.utils.PictureUtilities;
@@ -98,7 +99,7 @@ public class PeekPagerAdapter extends PagerAdapter {
 
         ButterKnife.inject(this, itemView);
 
-        Picture picture = mPictureList.get(position);
+        final Picture picture = mPictureList.get(position);
         LatLng latLng = new LatLng(picture.getLatitude(), picture.getLongitude());
         Geocoder geocoder = new Geocoder(mPeekFullScreenActivity);
         try {
@@ -132,8 +133,18 @@ public class PeekPagerAdapter extends PagerAdapter {
 
                     @Override
                     public void onError() {
+                        mDatabaseHelper.deletePictureFromFeedTable(picture);
+                        mDatabaseHelper.deletePictureFromPeekTable(picture);
                         try {
-                            new OperationFailedAlertDialog().show(mPeekFullScreenActivity.getFragmentManager(), TAG);
+                            new AlertDialog.Builder(mPeekFullScreenActivity)
+                                    .setTitle("Picture No Longer Available")
+                                    .setMessage("The picture has either expired or been deleted.")
+                                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            mPeekFullScreenActivity.finish();
+                                        }
+                                    })
+                                    .show();
                         } catch (IllegalStateException e) {
                             Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                         }

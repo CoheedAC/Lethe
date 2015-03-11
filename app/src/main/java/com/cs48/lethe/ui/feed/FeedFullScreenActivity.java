@@ -1,6 +1,8 @@
 package com.cs48.lethe.ui.feed;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
@@ -12,7 +14,6 @@ import android.widget.TextView;
 
 import com.cs48.lethe.R;
 import com.cs48.lethe.database.DatabaseHelper;
-import com.cs48.lethe.ui.alertdialogs.OperationFailedAlertDialog;
 import com.cs48.lethe.ui.alertdialogs.PictureAlreadyLikedAlertDialog;
 import com.cs48.lethe.ui.miscellaneous.OnHorizontalSwipeListener;
 import com.cs48.lethe.ui.miscellaneous.PinchToZoomImageView;
@@ -117,7 +118,7 @@ public class FeedFullScreenActivity extends ActionBarActivity {
                     .onlyScaleDown()
                     .rotate(mPicture.getOrientation())
                     .into(mImageView, new PictureCallBack());
-        }else {
+        } else {
             // Else the picture is a file, so load the picture
             // from the file to the imageview
             Picasso.with(this)
@@ -134,8 +135,8 @@ public class FeedFullScreenActivity extends ActionBarActivity {
         // Update view count if picture hasn't already been viewed
         if (!mDatabaseHelper.isPictureViewed(mPicture))
             viewPicture();
-        // Fetches the statistics from the server if there is internet
-        // and the picture has already been viewed before
+            // Fetches the statistics from the server if there is internet
+            // and the picture has already been viewed before
         else {
             // Displays the database statistics on the screen
             mLikesTextView.setText(mPicture.getLikes() + "");
@@ -193,7 +194,7 @@ public class FeedFullScreenActivity extends ActionBarActivity {
     /**
      * A callback to be invoked when a touch event is dispatched to this view.
      * The callback will be invoked before the touch event is given to the view.
-     *
+     * <p/>
      * This handles the swipe and tap gestures.
      */
     private class OnSwipeListener extends OnHorizontalSwipeListener {
@@ -282,7 +283,8 @@ public class FeedFullScreenActivity extends ActionBarActivity {
          */
         @Override
         public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-            Log.d(TAG, "Operation failed");
+            Log.d(TAG, "code = " + statusCode);
+            // TODO delete from server if 400
         }
     };
 
@@ -293,8 +295,18 @@ public class FeedFullScreenActivity extends ActionBarActivity {
 
         @Override
         public void onError() {
+            mDatabaseHelper.deletePictureFromFeedTable(mPicture);
+            mDatabaseHelper.deletePictureFromPeekTable(mPicture);
             try {
-                new OperationFailedAlertDialog().show(getFragmentManager(), TAG);
+                new AlertDialog.Builder(FeedFullScreenActivity.this)
+                        .setTitle("Picture No Longer Available")
+                        .setMessage("The picture has either expired or been deleted.")
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                finish();
+                            }
+                        })
+                        .show();
             } catch (IllegalStateException e) {
                 Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             }

@@ -122,6 +122,8 @@ public class FeedFragment extends Fragment implements ConnectionCallbacks, OnCon
     public void onResume() {
         super.onResume();
 
+        Log.d(TAG, "resumed");
+
         if (mGoogleApiClient.isConnected())
             startLocationUpdates();
 
@@ -139,12 +141,21 @@ public class FeedFragment extends Fragment implements ConnectionCallbacks, OnCon
     @Override
     public void onPause() {
         super.onPause();
+        Log.d(TAG, "paused");
         stopLocationUpdates();
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
+        Log.d(TAG, "detachhed");
+        stopLocationUpdates();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "destroyed");
         stopLocationUpdates();
     }
 
@@ -309,6 +320,8 @@ public class FeedFragment extends Fragment implements ConnectionCallbacks, OnCon
             // and updates the grid
             if (mLastLocation != null)
                 fetchFeedFromServer();
+            else
+                Log.d(TAG, "null");
         }
     }
 }
