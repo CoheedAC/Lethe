@@ -19,7 +19,6 @@ import com.cs48.lethe.database.DatabaseHelper;
 import com.cs48.lethe.ui.miscellaneous.OnHorizontalSwipeListener;
 import com.cs48.lethe.ui.miscellaneous.PinchToZoomImageView;
 import com.cs48.lethe.utils.HerokuRestClient;
-import com.cs48.lethe.utils.NetworkUtilities;
 import com.cs48.lethe.utils.Picture;
 import com.cs48.lethe.utils.PictureUtilities;
 import com.google.android.gms.maps.model.LatLng;
@@ -97,6 +96,13 @@ public class FeedFullScreenActivity extends ActionBarActivity {
         // Get picture from feed table
         mPicture = mDatabaseHelper.getFeedPicture(uniqueId);
 
+        // Update view count if picture hasn't already been viewed
+        if (!mDatabaseHelper.isPictureViewed(mPicture))
+            viewPicture();
+        // Displays the database statistics on the screen
+        mLikesTextView.setText(mPicture.getLikes() + "");
+        mViewsTextView.setText(mPicture.getViews() + "");
+
         LatLng latLng = new LatLng(mPicture.getLatitude(), mPicture.getLongitude());
         Geocoder geocoder = new Geocoder(this);
         try {
@@ -132,22 +138,6 @@ public class FeedFullScreenActivity extends ActionBarActivity {
 
         // Sets up the swipe gestures on the imageview
         mImageView.setOnTouchListener(new OnSwipeListener(this));
-
-        // Update view count if picture hasn't already been viewed
-        if (!mDatabaseHelper.isPictureViewed(mPicture))
-            viewPicture();
-            // Fetches the statistics from the server if there is internet
-            // and the picture has already been viewed before
-        else {
-            // Displays the database statistics on the screen
-            mLikesTextView.setText(mPicture.getLikes() + "");
-            mViewsTextView.setText(mPicture.getViews() + "");
-
-            // If there is internet, then fetch statistics
-            // from the server
-            if (NetworkUtilities.isNetworkAvailable(this))
-                fetchStatisticsFromServer();
-        }
     }
 
     /**
@@ -174,22 +164,7 @@ public class FeedFullScreenActivity extends ActionBarActivity {
     public void viewPicture() {
         // Update view count in the database
         mDatabaseHelper.viewPicture(mPicture);
-
-        // Displays the statistics on the screen
-        mLikesTextView.setText(mPicture.getLikes() + "");
-        mViewsTextView.setText(mPicture.getViews() + "");
-
         HerokuRestClient.get(mPicture.getUniqueId(), null, mStatisticsResponseHandler);
-    }
-
-    /**
-     * Gets the image statistics from the server and updates
-     * the internal database with the new statistics. Also
-     * displays the new statistics on the screen.
-     */
-    public void fetchStatisticsFromServer() {
-        String url = getString(R.string.server_statistics) + mPicture.getUniqueId();
-        HerokuRestClient.get(url, null, mStatisticsResponseHandler);
     }
 
     /**
@@ -216,7 +191,7 @@ public class FeedFullScreenActivity extends ActionBarActivity {
         @Override
         public void onSwipeLeft() {
             Toast toast = Toast.makeText(FeedFullScreenActivity.this, "Picture hidden!", Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.CENTER_HORIZONTAL,0,0);
+            toast.setGravity(Gravity.CENTER_HORIZONTAL, 0, 0);
             toast.show();
             hidePicture();
             finish();
@@ -230,7 +205,7 @@ public class FeedFullScreenActivity extends ActionBarActivity {
             if (!mDatabaseHelper.isPictureLiked(mPicture)) {
                 likePicture();
                 Toast toast = Toast.makeText(FeedFullScreenActivity.this, "Liked picture!", Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.CENTER_HORIZONTAL,0,0);
+                toast.setGravity(Gravity.CENTER_HORIZONTAL, 0, 0);
                 toast.show();
                 finish();
             } else {
@@ -294,7 +269,6 @@ public class FeedFullScreenActivity extends ActionBarActivity {
         @Override
         public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
             Log.d(TAG, "code = " + statusCode);
-            // TODO delete from server if 400
         }
     };
 

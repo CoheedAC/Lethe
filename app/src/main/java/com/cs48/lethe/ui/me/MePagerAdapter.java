@@ -52,9 +52,9 @@ public class MePagerAdapter extends PagerAdapter {
 
     @InjectView(R.id.imageView)
     PinchToZoomImageView mImageView;
-//    @InjectView(R.id.likesTextView)
+    @InjectView(R.id.likesTextView)
     TextView mLikesTextView;
-//    @InjectView(R.id.viewsTextView)
+    @InjectView(R.id.viewsTextView)
     TextView mViewsTextView;
     @InjectView(R.id.saveButton)
     ImageButton mSaveButton;
@@ -110,9 +110,6 @@ public class MePagerAdapter extends PagerAdapter {
 
         ButterKnife.inject(this, itemView);
 
-        mLikesTextView = (TextView) itemView.findViewById(R.id.likesTextView);
-        mViewsTextView = (TextView) itemView.findViewById(R.id.viewsTextView);
-
         Picture picture = mPictureList.get(position);
         LatLng latLng = new LatLng(picture.getLatitude(), picture.getLongitude());
         Geocoder geocoder = new Geocoder(mMeFullScreenActivity);
@@ -121,9 +118,7 @@ public class MePagerAdapter extends PagerAdapter {
             Address address = addressList.get(0);
             AutofitHelper.create(mCityTextView);
             mCityTextView.setText(address.getLocality());
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (IndexOutOfBoundsException e) {
+        } catch (IOException | IndexOutOfBoundsException e) {
             mCityTextView.setVisibility(View.GONE);
         }
 
