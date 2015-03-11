@@ -111,6 +111,12 @@ public class MePagerAdapter extends PagerAdapter {
         ButterKnife.inject(this, itemView);
 
         Picture picture = mPictureList.get(position);
+
+        mLikesTextView.setText(picture.getLikes() + "");
+        mViewsTextView.setText(picture.getViews() + "");
+
+        fetchPictureStatisticsFromServer(picture);
+
         LatLng latLng = new LatLng(picture.getLatitude(), picture.getLongitude());
         Geocoder geocoder = new Geocoder(mMeFullScreenActivity);
         try {
@@ -121,11 +127,6 @@ public class MePagerAdapter extends PagerAdapter {
         } catch (IOException | IndexOutOfBoundsException e) {
             mCityTextView.setVisibility(View.GONE);
         }
-
-        mLikesTextView.setText(picture.getLikes() + "");
-        mViewsTextView.setText(picture.getViews() + "");
-
-        fetchPictureStatisticsFromServer(picture);
 
         // Set up on click listeners
         mImageView.setOnClickListener(new OnPictureClickListener());

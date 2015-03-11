@@ -147,7 +147,15 @@ public class FeedFullScreenActivity extends ActionBarActivity {
     public void likePicture() {
         mDatabaseHelper.likePicture(mPicture);
         String url = getString(R.string.server_like) + mPicture.getUniqueId();
-        HerokuRestClient.get(url, null, mStatisticsResponseHandler);
+        HerokuRestClient.get(url, null, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+            }
+        });
     }
 
     /**
@@ -158,13 +166,64 @@ public class FeedFullScreenActivity extends ActionBarActivity {
     public void hidePicture() {
         mDatabaseHelper.hidePicture(mPicture);
         String url = getString(R.string.server_dislike) + mPicture.getUniqueId();
-        HerokuRestClient.get(url, null, mStatisticsResponseHandler);
+        HerokuRestClient.get(url, null, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+            }
+        });
     }
 
     public void viewPicture() {
         // Update view count in the database
         mDatabaseHelper.viewPicture(mPicture);
-        HerokuRestClient.get(mPicture.getUniqueId(), null, mStatisticsResponseHandler);
+        HerokuRestClient.get(mPicture.getUniqueId(), null, new AsyncHttpResponseHandler() {
+            /**
+             * Fired when a request returns successfully. This gets the response
+             * from the server and and updates the UI and database based upon
+             * the response.
+             *
+             * @param statusCode   the status code of the response
+             * @param headers      return headers, if any
+             * @param responseBody the body of the HTTP response from the server
+             */
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                try {
+                    String jsonData = new String(responseBody);
+                    JSONObject jsonObject = new JSONObject(jsonData);
+
+                    // Updates the picture statistics from the response
+                    mPicture.setViews(jsonObject.getInt(getString(R.string.json_views)));
+                    mPicture.setLikes(jsonObject.getInt(getString(R.string.json_likes)));
+
+                    // Updates the database with the new statistics
+                    mDatabaseHelper.updateDatabaseFromPicture(mPicture);
+
+                    // Updates the text views to show the new statistics
+                    mLikesTextView.setText(mPicture.getLikes() + "");
+                    mViewsTextView.setText(mPicture.getViews() + "");
+                } catch (JSONException e) {
+                    Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                }
+            }
+
+            /**
+             * Fired when a request fails to complete.
+             *
+             * @param statusCode   return HTTP status code
+             * @param headers      return headers, if any
+             * @param responseBody the response body, if any
+             * @param error        the underlying cause of the failure
+             */
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                Log.d(TAG, "code = " + statusCode);
+            }
+        });
     }
 
     /**
@@ -190,7 +249,7 @@ public class FeedFullScreenActivity extends ActionBarActivity {
          */
         @Override
         public void onSwipeLeft() {
-            Toast toast = Toast.makeText(FeedFullScreenActivity.this, "Picture hidden!", Toast.LENGTH_SHORT);
+            Toast toast = Toast.makeText(FeedFullScreenActivity.this, "Picture is now hidden!", Toast.LENGTH_SHORT);
             toast.setGravity(Gravity.CENTER_HORIZONTAL, 0, 0);
             toast.show();
             hidePicture();
@@ -223,54 +282,6 @@ public class FeedFullScreenActivity extends ActionBarActivity {
             finish();
         }
     }
-
-    /**
-     * Handles the response from server requests
-     */
-    private AsyncHttpResponseHandler mStatisticsResponseHandler = new AsyncHttpResponseHandler() {
-        /**
-         * Fired when a request returns successfully. This gets the response
-         * from the server and and updates the UI and database based upon
-         * the response.
-         *
-         * @param statusCode   the status code of the response
-         * @param headers      return headers, if any
-         * @param responseBody the body of the HTTP response from the server
-         */
-        @Override
-        public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-            try {
-                String jsonData = new String(responseBody);
-                JSONObject jsonObject = new JSONObject(jsonData);
-
-                // Updates the picture statistics from the response
-                mPicture.setViews(jsonObject.getInt(getString(R.string.json_views)));
-                mPicture.setLikes(jsonObject.getInt(getString(R.string.json_likes)));
-
-                // Updates the database with the new statistics
-                mDatabaseHelper.updateDatabaseFromPicture(mPicture);
-
-                // Updates the text views to show the new statistics
-                mLikesTextView.setText(mPicture.getLikes() + "");
-                mViewsTextView.setText(mPicture.getViews() + "");
-            } catch (JSONException e) {
-                Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
-            }
-        }
-
-        /**
-         * Fired when a request fails to complete.
-         *
-         * @param statusCode   return HTTP status code
-         * @param headers      return headers, if any
-         * @param responseBody the response body, if any
-         * @param error        the underlying cause of the failure
-         */
-        @Override
-        public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-            Log.d(TAG, "code = " + statusCode);
-        }
-    };
 
     private class PictureCallBack implements Callback {
         @Override
