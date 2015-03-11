@@ -129,6 +129,12 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
             fm.beginTransaction().remove(frag).commitAllowingStateLoss();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        mPeekGridViewAdapter.fetchPeekFeedFromDatabase();
+    }
+
     /**
      * Called when the map is ready to be used. Initialized the map location and a map marker
      * to the current location of the user

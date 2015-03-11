@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.cs48.lethe.R;
@@ -81,7 +80,7 @@ public class PeekPagerAdapter extends PagerAdapter {
      */
     @Override
     public boolean isViewFromObject(View view, Object object) {
-        return view == ((RelativeLayout) object);
+        return view == object;
     }
 
     /**
@@ -94,7 +93,7 @@ public class PeekPagerAdapter extends PagerAdapter {
      * @return Returns a view representing the new page.
      */
     @Override
-    public View instantiateItem(ViewGroup container, int position) {
+    public View instantiateItem(ViewGroup container, final int position) {
         View itemView = mLayoutInflater.inflate(R.layout.layout_fullscreen, container, false);
 
         ButterKnife.inject(this, itemView);
@@ -107,9 +106,7 @@ public class PeekPagerAdapter extends PagerAdapter {
             Address address = addressList.get(0);
             AutofitHelper.create(mCityTextView);
             mCityTextView.setText(address.getLocality());
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (IndexOutOfBoundsException e) {
+        } catch (IOException | IndexOutOfBoundsException e) {
             mCityTextView.setVisibility(View.GONE);
         }
 
@@ -137,8 +134,8 @@ public class PeekPagerAdapter extends PagerAdapter {
                         mDatabaseHelper.deletePictureFromPeekTable(picture);
                         try {
                             new AlertDialog.Builder(mPeekFullScreenActivity)
-                                    .setTitle("Picture No Longer Available")
-                                    .setMessage("The picture has either expired or been deleted.")
+                                    .setTitle(mPeekFullScreenActivity.getString(R.string.alert_title_picture_unavailable))
+                                    .setMessage(mPeekFullScreenActivity.getString(R.string.alert_message_picture_unavailable))
                                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int which) {
                                             mPeekFullScreenActivity.finish();
@@ -166,10 +163,7 @@ public class PeekPagerAdapter extends PagerAdapter {
      */
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
-        container.removeView((RelativeLayout) object);
-        Picasso.with(mPeekFullScreenActivity)
-                .cancelRequest(mImageView);
-
+        container.removeView((View) object);
     }
 
     /**

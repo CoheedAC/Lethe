@@ -46,6 +46,8 @@
     <string name="json_orientation">orientation</string>
     <string name="server_latitude">latitude</string>
     <string name="server_longitude">longitude</string>
+    <string name="alert_title_picture_unavailable">Picture No Longer Available</string>
+    <string name="alert_message_picture_unavailable">The picture has either expired or been deleted.</string>
 
 
 </resources>

@@ -121,6 +121,11 @@ public class PeekGridViewAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
+    public void fetchPeekFeedFromDatabase() {
+        mPictureList = mDatabaseHelper.getPeekPictures();
+        notifyDataSetChanged();
+    }
+
     /**
      * Gets the list of images from the server and adds
      * them to the internal database. Then updates the

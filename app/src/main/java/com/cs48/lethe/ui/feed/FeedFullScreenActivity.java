@@ -294,8 +294,8 @@ public class FeedFullScreenActivity extends ActionBarActivity {
             mDatabaseHelper.deletePictureFromPeekTable(mPicture);
             try {
                 new AlertDialog.Builder(FeedFullScreenActivity.this)
-                        .setTitle("Picture No Longer Available")
-                        .setMessage("The picture has either expired or been deleted.")
+                        .setTitle(getString(R.string.alert_title_picture_unavailable))
+                        .setMessage(getString(R.string.alert_message_picture_unavailable))
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 finish();
