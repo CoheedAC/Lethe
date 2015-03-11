@@ -1,8 +1,6 @@
 package com.cs48.lethe.ui.feed;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
@@ -10,7 +8,6 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.cs48.lethe.R;
@@ -25,8 +22,8 @@ import com.cs48.lethe.utils.Picture;
 import com.cs48.lethe.utils.PictureUtilities;
 import com.google.android.gms.maps.model.LatLng;
 import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 import org.apache.http.Header;
 import org.json.JSONException;
@@ -51,13 +48,10 @@ public class FeedFullScreenActivity extends ActionBarActivity {
     // Instance variables
     private DatabaseHelper mDatabaseHelper;
     private Picture mPicture;
-    private Target mTarget;
 
     // Initializations of UI elements
     @InjectView(R.id.imageView)
     PinchToZoomImageView mImageView;
-    @InjectView(R.id.progressBar)
-    ProgressBar mProgressBar;
     @InjectView(R.id.likesTextView)
     TextView mLikesTextView;
     @InjectView(R.id.viewsTextView)
@@ -98,9 +92,6 @@ public class FeedFullScreenActivity extends ActionBarActivity {
         // Get photo id passed in from the intent
         String uniqueId = getIntent().getStringExtra(getString(R.string.data_uniqueId));
 
-        // Show the loading progress bar
-        mProgressBar.setVisibility(View.VISIBLE);
-
         // Get picture from feed table
         mPicture = mDatabaseHelper.getFeedPicture(uniqueId);
 
@@ -117,55 +108,6 @@ public class FeedFullScreenActivity extends ActionBarActivity {
             mCityTextView.setVisibility(View.GONE);
         }
 
-        // Represents an arbitrary listener for image loading.
-        mTarget = new Target() {
-            /**
-             * Callback when an image has been successfully loaded.
-             *
-             * @param bitmap The bitmap of the picture
-             * @param from Describes where the image was loaded from
-             */
-            @Override
-            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                // Hides the loading progress bar
-                mProgressBar.setVisibility(View.GONE);
-
-                // Displays the picture
-                mImageView.setImageBitmap(bitmap);
-            }
-
-            /**
-             * Callback indicating the image could not be successfully loaded.
-             *
-             * @param errorDrawable Drawable that was set from
-             *                      the Picasso call
-             */
-            @Override
-            public void onBitmapFailed(Drawable errorDrawable) {
-                // Hides the loading progress bar
-                mProgressBar.setVisibility(View.GONE);
-
-                // Displays operation failed alert dialog
-                try {
-                    new OperationFailedAlertDialog().show(getFragmentManager(), TAG);
-                } catch (IllegalStateException e) {
-                    Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
-                }
-            }
-
-            /**
-             * Callback invoked right before your request is submitted.
-             *
-             * @param placeHolderDrawable Placeholder drawable that was
-             *                            set from the Picasso call
-             */
-            @Override
-            public void onPrepareLoad(Drawable placeHolderDrawable) {
-            }
-        };
-        // Makes a strong reference to the target
-        mImageView.setTag(mTarget);
-
         // If the picture file doesn't exist, then the picture
         // is loaded from a URL to the imageview
         if (mPicture.getFile() == null) {
@@ -174,7 +116,7 @@ public class FeedFullScreenActivity extends ActionBarActivity {
                     .resize(PictureUtilities.MAX_FULL_WIDTH, 0)
                     .onlyScaleDown()
                     .rotate(mPicture.getOrientation())
-                    .into(mTarget);
+                    .into(mImageView, new PictureCallBack());
         }else {
             // Else the picture is a file, so load the picture
             // from the file to the imageview
@@ -183,7 +125,7 @@ public class FeedFullScreenActivity extends ActionBarActivity {
                     .resize(PictureUtilities.MAX_FULL_WIDTH, 0)
                     .onlyScaleDown()
                     .rotate(mPicture.getOrientation())
-                    .into(mTarget);
+                    .into(mImageView, new PictureCallBack());
         }
 
         // Sets up the swipe gestures on the imageview
@@ -343,4 +285,19 @@ public class FeedFullScreenActivity extends ActionBarActivity {
             Log.d(TAG, "Operation failed");
         }
     };
+
+    private class PictureCallBack implements Callback {
+        @Override
+        public void onSuccess() {
+        }
+
+        @Override
+        public void onError() {
+            try {
+                new OperationFailedAlertDialog().show(getFragmentManager(), TAG);
+            } catch (IllegalStateException e) {
+                Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+            }
+        }
+    }
 }

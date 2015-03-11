@@ -1,8 +1,6 @@
 package com.cs48.lethe.ui.me;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.support.v4.view.PagerAdapter;
@@ -11,7 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,8 +23,8 @@ import com.cs48.lethe.utils.Picture;
 import com.cs48.lethe.utils.PictureUtilities;
 import com.google.android.gms.maps.model.LatLng;
 import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 import org.apache.http.Header;
 import org.json.JSONException;
@@ -45,18 +42,15 @@ import me.grantland.widget.AutofitHelper;
  */
 public class MePagerAdapter extends PagerAdapter {
 
-    public final static String LOG_TAG = MePagerAdapter.class.getSimpleName();
+    public final static String TAG = MePagerAdapter.class.getSimpleName();
 
     private MeFullScreenActivity mMeFullScreenActivity;
     private List<Picture> mPictureList;
     private LayoutInflater mLayoutInflater;
     private DatabaseHelper mDatabaseHelper;
-    private Target mTarget;
 
     @InjectView(R.id.imageView)
     PinchToZoomImageView mImageView;
-    @InjectView(R.id.progressBar)
-    ProgressBar mProgressBar;
     @InjectView(R.id.likesTextView)
     TextView mLikesTextView;
     @InjectView(R.id.viewsTextView)
@@ -137,39 +131,25 @@ public class MePagerAdapter extends PagerAdapter {
         mDeleteButton.setOnClickListener(new OnDeleteButtonClickListener(position));
         mSaveButton.setOnClickListener(new OnSaveButtonClickListener(position));
 
-
-        mTarget = new Target() {
-            @Override
-            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                mProgressBar.setVisibility(View.GONE);
-                mImageView.setImageBitmap(bitmap);
-            }
-
-            @Override
-            public void onBitmapFailed(Drawable errorDrawable) {
-                mProgressBar.setVisibility(View.GONE);
-                try {
-                    new OperationFailedAlertDialog().show(mMeFullScreenActivity.getFragmentManager(), LOG_TAG);
-                } catch (IllegalStateException e) {
-                    Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
-                }
-            }
-
-            @Override
-            public void onPrepareLoad(Drawable placeHolderDrawable) {
-                mProgressBar.setVisibility(View.VISIBLE);
-            }
-        };
-
-        // Display full image
-        mImageView.setTag(mTarget);
-
         Picasso.with(mMeFullScreenActivity)
                 .load(picture.getFile())
                 .resize(PictureUtilities.MAX_FULL_WIDTH, 0)
                 .onlyScaleDown()
-                .rotate(mPictureList.get(position).getOrientation())
-                .into(mTarget);
+                .rotate(picture.getOrientation())
+                .into(mImageView, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                    }
+
+                    @Override
+                    public void onError() {
+                        try {
+                            new OperationFailedAlertDialog().show(mMeFullScreenActivity.getFragmentManager(), TAG);
+                        } catch (IllegalStateException e) {
+                            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                        }
+                    }
+                });
 
         fetchPictureStatisticsFromServer(position);
 
@@ -190,7 +170,7 @@ public class MePagerAdapter extends PagerAdapter {
     public void destroyItem(ViewGroup container, int position, Object object) {
         container.removeView((RelativeLayout) object);
         Picasso.with(mMeFullScreenActivity)
-                .cancelRequest(mTarget);
+                .cancelRequest(mImageView);
     }
 
     /**
@@ -214,13 +194,13 @@ public class MePagerAdapter extends PagerAdapter {
                     mLikesTextView.setText(mPictureList.get(position).getLikes() + "");
                     mViewsTextView.setText(mPictureList.get(position).getViews() + "");
                 } catch (JSONException e) {
-                    Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                    Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                 }
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                Log.d(LOG_TAG, "Request for statistics failed");
+                Log.d(TAG, "Request for statistics failed");
             }
         });
     }
@@ -258,23 +238,20 @@ public class MePagerAdapter extends PagerAdapter {
          */
         @Override
         public void onClick(View v) {
-            mProgressBar.setVisibility(View.VISIBLE);
             String url = mMeFullScreenActivity.getString(R.string.server_delete) + mPictureList.get(position).getUniqueId();
             HerokuRestClient.get(url, null, new AsyncHttpResponseHandler() {
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-                    mProgressBar.setVisibility(View.GONE);
                     mDatabaseHelper.deletePictureFromDatabase(mPictureList.get(position));
                     mMeFullScreenActivity.finish();
                 }
 
                 @Override
                 public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                    mProgressBar.setVisibility(View.GONE);
                     try {
-                        new OperationFailedAlertDialog().show(mMeFullScreenActivity.getFragmentManager(), LOG_TAG);
+                        new OperationFailedAlertDialog().show(mMeFullScreenActivity.getFragmentManager(), TAG);
                     }catch (IllegalStateException e) {
-                        Log.e(LOG_TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                        Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                     }
                 }
             });

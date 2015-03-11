@@ -1,8 +1,6 @@
 package com.cs48.lethe.ui.peek;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.support.v4.view.PagerAdapter;
@@ -11,7 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -22,8 +19,8 @@ import com.cs48.lethe.ui.miscellaneous.PinchToZoomImageView;
 import com.cs48.lethe.utils.Picture;
 import com.cs48.lethe.utils.PictureUtilities;
 import com.google.android.gms.maps.model.LatLng;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 import java.io.IOException;
 import java.util.List;
@@ -43,12 +40,9 @@ public class PeekPagerAdapter extends PagerAdapter {
     private List<Picture> mPictureList;
     private LayoutInflater mLayoutInflater;
     private DatabaseHelper mDatabaseHelper;
-    private Target mTarget;
 
     @InjectView(R.id.imageView)
     PinchToZoomImageView mImageView;
-    @InjectView(R.id.progressBar)
-    ProgressBar mProgressBar;
     @InjectView(R.id.likesTextView)
     TextView mLikesTextView;
     @InjectView(R.id.viewsTextView)
@@ -123,34 +117,6 @@ public class PeekPagerAdapter extends PagerAdapter {
 
         mButtonsLinearLayout.setVisibility(View.GONE);
 
-        mTarget = new Target() {
-            @Override
-            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                Log.d(TAG, "loaded @ ");
-                mProgressBar.setVisibility(View.GONE);
-                mImageView.setImageBitmap(bitmap);
-            }
-
-            @Override
-            public void onBitmapFailed(Drawable errorDrawable) {
-                Log.d(TAG, "Failed");
-                mProgressBar.setVisibility(View.GONE);
-                try {
-                    new OperationFailedAlertDialog().show(mPeekFullScreenActivity.getFragmentManager(), TAG);
-                } catch (IllegalStateException e) {
-                    Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
-                }
-            }
-
-            @Override
-            public void onPrepareLoad(Drawable placeHolderDrawable) {
-                Log.d(TAG, "prepare");
-                mProgressBar.setVisibility(View.VISIBLE);
-            }
-        };
-        // Display full image
-        mImageView.setTag(mTarget);
-
         // Set up on click listeners
         mImageView.setOnClickListener(new OnPictureClickListener());
 
@@ -159,7 +125,20 @@ public class PeekPagerAdapter extends PagerAdapter {
                 .resize(PictureUtilities.MAX_FULL_WIDTH, 0)
                 .onlyScaleDown()
                 .rotate(mPictureList.get(position).getOrientation())
-                .into(mTarget);
+                .into(mImageView, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                    }
+
+                    @Override
+                    public void onError() {
+                        try {
+                            new OperationFailedAlertDialog().show(mPeekFullScreenActivity.getFragmentManager(), TAG);
+                        } catch (IllegalStateException e) {
+                            Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
+                        }
+                    }
+                });
 
         container.addView(itemView);
 
@@ -178,7 +157,7 @@ public class PeekPagerAdapter extends PagerAdapter {
     public void destroyItem(ViewGroup container, int position, Object object) {
         container.removeView((RelativeLayout) object);
         Picasso.with(mPeekFullScreenActivity)
-                .cancelRequest(mTarget);
+                .cancelRequest(mImageView);
 
     }
 
