@@ -52,9 +52,9 @@ public class MePagerAdapter extends PagerAdapter {
 
     @InjectView(R.id.imageView)
     PinchToZoomImageView mImageView;
-    @InjectView(R.id.likesTextView)
+//    @InjectView(R.id.likesTextView)
     TextView mLikesTextView;
-    @InjectView(R.id.viewsTextView)
+//    @InjectView(R.id.viewsTextView)
     TextView mViewsTextView;
     @InjectView(R.id.saveButton)
     ImageButton mSaveButton;
@@ -110,6 +110,9 @@ public class MePagerAdapter extends PagerAdapter {
 
         ButterKnife.inject(this, itemView);
 
+        mLikesTextView = (TextView) itemView.findViewById(R.id.likesTextView);
+        mViewsTextView = (TextView) itemView.findViewById(R.id.viewsTextView);
+
         Picture picture = mPictureList.get(position);
         LatLng latLng = new LatLng(picture.getLatitude(), picture.getLongitude());
         Geocoder geocoder = new Geocoder(mMeFullScreenActivity);
@@ -126,6 +129,8 @@ public class MePagerAdapter extends PagerAdapter {
 
         mLikesTextView.setText(picture.getLikes() + "");
         mViewsTextView.setText(picture.getViews() + "");
+
+        fetchPictureStatisticsFromServer(picture);
 
         // Set up on click listeners
         mImageView.setOnClickListener(new OnPictureClickListener());
@@ -152,8 +157,6 @@ public class MePagerAdapter extends PagerAdapter {
                     }
                 });
 
-        fetchPictureStatisticsFromServer(position);
-
         container.addView(itemView);
 
         return itemView;
@@ -179,21 +182,21 @@ public class MePagerAdapter extends PagerAdapter {
      * the internal database with the new statistics. Also
      * displays the new statistics on the screen.
      */
-    public void fetchPictureStatisticsFromServer(final int position) {
-        String url = mMeFullScreenActivity.getString(R.string.server_statistics) + mPictureList.get(position).getUniqueId();
+    public void fetchPictureStatisticsFromServer(final Picture picture) {
+        String url = mMeFullScreenActivity.getString(R.string.server_statistics) + picture.getUniqueId();
         HerokuRestClient.get(url, null, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 try {
                     String jsonData = new String(responseBody);
                     JSONObject jsonObject = new JSONObject(jsonData);
-                    mPictureList.get(position).setViews(jsonObject.getInt(mMeFullScreenActivity.getString(R.string.json_views)));
-                    mPictureList.get(position).setLikes(jsonObject.getInt(mMeFullScreenActivity.getString(R.string.json_likes)));
+                    picture.setViews(jsonObject.getInt(mMeFullScreenActivity.getString(R.string.json_views)));
+                    picture.setLikes(jsonObject.getInt(mMeFullScreenActivity.getString(R.string.json_likes)));
 
-                    mDatabaseHelper.updateDatabaseFromPicture(mPictureList.get(position));
+                    mDatabaseHelper.updateDatabaseFromPicture(picture);
 
-                    mLikesTextView.setText(mPictureList.get(position).getLikes() + "");
-                    mViewsTextView.setText(mPictureList.get(position).getViews() + "");
+                    mLikesTextView.setText(picture.getLikes() + "");
+                    mViewsTextView.setText(picture.getViews() + "");
                 } catch (JSONException e) {
                     Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
                 }
@@ -281,12 +284,15 @@ public class MePagerAdapter extends PagerAdapter {
         @Override
         public void onClick(View v) {
             try {
-                if (FileUtilities.savePictureForSharing(mMeFullScreenActivity, mPictureList.get(position)))
-                    Toast.makeText(mMeFullScreenActivity, "Saved picture to shared storage.", Toast.LENGTH_SHORT).show();
-                else
-                    Toast.makeText(mMeFullScreenActivity, "Picture already exists in shared storage", Toast.LENGTH_SHORT).show();
+                String message = (FileUtilities.savePictureForSharing(mMeFullScreenActivity, mPictureList.get(position))) ?
+                    "Saved picture to shared storage." : "Picture already exists in shared storage";
+                Toast toast = Toast.makeText(mMeFullScreenActivity, message, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.CENTER_HORIZONTAL,0,0);
+                toast.show();
             } catch (IOException e) {
-                Toast.makeText(mMeFullScreenActivity, "Cannot copy to shared storage.", Toast.LENGTH_SHORT).show();
+                Toast toast = Toast.makeText(mMeFullScreenActivity, "Cannot copy to shared storage.", Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.CENTER_HORIZONTAL,0,0);
+                toast.show();
             }
         }
     }
