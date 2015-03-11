@@ -2,7 +2,6 @@ package com.cs48.lethe.ui.me;
 
 import android.content.Context;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -102,8 +101,6 @@ public class MeGridViewAdapter extends BaseAdapter {
             imageView.setBackgroundColor(mContext.getResources().getColor(R.color.empty_image));
         }
 
-        Log.d(TAG, mPictureList.get(position).getFile().getAbsolutePath());
-        Log.d(TAG, "exists = " + mPictureList.get(position).getFile().exists());
 
         Picasso.with(mContext)
                 .load(mPictureList.get(position).getFile())

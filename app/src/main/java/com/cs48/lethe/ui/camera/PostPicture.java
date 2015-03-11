@@ -104,7 +104,8 @@ public class PostPicture extends AsyncTask<String, String, String> {
 
             // Get latitude and longitude
             String latitude = generateForSimpleText(mCameraActivity.getString(R.string.server_latitude), mLocation.getLatitude() + "");
-            String longitude = generateForSimpleText(mCameraActivity.getString(R.string.server_longitude), mLocation.getLatitude() + "");
+            String longitude = generateForSimpleText(mCameraActivity.getString(R.string.server_longitude), mLocation.getLongitude() + "");
+
             String orientation = generateForSimpleText(mCameraActivity.getString(R.string.json_orientation), mOrientation + "");
             String combined = latitude + longitude + orientation;
 

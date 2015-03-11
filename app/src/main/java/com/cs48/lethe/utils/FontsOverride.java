@@ -24,9 +24,7 @@ public final class FontsOverride {
                     .getDeclaredField(staticTypefaceFieldName);
             staticField.setAccessible(true);
             staticField.set(null, newTypeface);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
+        } catch (NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
         }
     }

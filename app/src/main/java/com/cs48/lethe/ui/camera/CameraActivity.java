@@ -364,8 +364,6 @@ public class CameraActivity extends ActionBarActivity implements GoogleApiClient
 
             // Creates a new file for the picture to be stored
             mPictureFile = FileUtilities.getOutputMediaFile(CameraActivity.this);
-            Log.d(TAG, "path = " + mPictureFile.getAbsolutePath());
-            Log.d(TAG, "exists = " + mPictureFile.exists());
 
             // Writes the scaled bitmap picture to the file
             FileOutputStream fileOutputStream = null;
@@ -386,7 +384,6 @@ public class CameraActivity extends ActionBarActivity implements GoogleApiClient
                     }
                 }
             }
-            Log.d(TAG, "exists = " + mPictureFile.exists());
 
             // Hide the loading progress bar and
             // show the post and cancel buttons
