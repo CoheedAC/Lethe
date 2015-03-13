@@ -9,10 +9,11 @@ import com.cs48.lethe.R;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
+/**
+ * The activity that handles showing the full-sized image
+ * whenever the user tabs on an image in the grid of user-posted images.
+ */
 public class MeFullScreenActivity extends ActionBarActivity {
-
-    private MePagerAdapter mMePagerAdapter;
-    private int mPosition;
 
     @InjectView(R.id.pager)
     ViewPager mViewPager;
@@ -31,21 +32,21 @@ public class MeFullScreenActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Sets the view to the full screen layout
         setContentView(R.layout.activity_fullscreen);
 
+        // Injects the UI elements into the activity
         ButterKnife.inject(this);
 
         // Hides the action bar
         getSupportActionBar().hide();
 
-        // Gets the position passed in the the intent
-        mPosition = getIntent().getIntExtra(getString(R.string.data_position), 0);
-
-        mMePagerAdapter = new MePagerAdapter(this);
-        mViewPager.setAdapter(mMePagerAdapter);
+        // Sets the adapter that allows a slideshow of pictures
+        mViewPager.setAdapter(new MePagerAdapter(this));
 
         // Displays the picture at the selected position
-        mViewPager.setCurrentItem(mPosition);
+        mViewPager.setCurrentItem(getIntent().getIntExtra(getString(R.string.data_position), 0));
     }
 
 }

@@ -34,12 +34,19 @@ import java.util.Map;
  */
 public class FeedGridViewAdapter extends BaseAdapter {
 
+    // Logcat tag
     public static final String LOG_TAG = FeedGridViewAdapter.class.getSimpleName();
 
+    // Instance variables
     private Context mContext;
     private List<Picture> mPictureList;
     private DatabaseHelper mDatabaseHelper;
 
+    /**
+     * Constructor that retrieves pictures from the database
+     *
+     * @param context Interface to global information about an application environment
+     */
     public FeedGridViewAdapter(Context context) {
         mContext = context;
         mDatabaseHelper = DatabaseHelper.getInstance(mContext);
@@ -104,6 +111,7 @@ public class FeedGridViewAdapter extends BaseAdapter {
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             imageView.setBackgroundColor(mContext.getResources().getColor(R.color.empty_image));
         }
+        // Load the picture into the imageview
         if (mPictureList.get(position).getFile() == null) {
             Picasso.with(mContext)
                     .load(mPictureList.get(position).getThumbnailUrl())
@@ -127,16 +135,18 @@ public class FeedGridViewAdapter extends BaseAdapter {
      * them to the internal database. Then updates the
      * grid with the new list of images from the
      * internal database.
+     *
+     * @param feedFragment A reference to the Feed Fragment
+     * @param latitude Latitude of the current location
+     * @param longitude Longitude of the current location
      */
     public void fetchFeedFromServer(final FeedFragment feedFragment, final double latitude, final double longitude) {
         feedFragment.setEmptyGridMessage("");
-        // get current location
         String url = mContext.getString(R.string.server_recent) +
                 String.valueOf(latitude).replace(".", "a") + "," +
                 String.valueOf(longitude).replace(".", "a");
 
         HerokuRestClient.get(url, null, new AsyncHttpResponseHandler() {
-
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 try {

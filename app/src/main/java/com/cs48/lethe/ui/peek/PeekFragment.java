@@ -136,7 +136,6 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
     /**
      * Deletes the map fragment.
      */
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -149,7 +148,6 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
     /**
      * Whenever the map fragment is resumed, the data is fetched from the server again.
      */
-
     @Override
     public void onResume() {
         super.onResume();
@@ -197,7 +195,6 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
     /**
      * Sets `refreshing` to false.
      */
-
     public void stopRefreshingAnimation() {
         mPeekPullToRefreshLayout.setRefreshing(false);
     }
@@ -210,7 +207,6 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
      * @param latitude The latitude from where the user requests photos.
      * @param longitude The longitude from where the user requests photos.
      */
-
     private void fetchPeekFeedFromServer(double latitude, double longitude) {
         if (NetworkUtilities.isNetworkAvailable(getActivity())) {
             mPeekGridViewAdapter.fetchPeekFeedFromServer(latitude, longitude);
@@ -229,7 +225,6 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
     /**
      * Hides the keyboard.
      */
-
     private void hideKeyboard() {
         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
                 Context.INPUT_METHOD_SERVICE);
@@ -240,7 +235,6 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
      * Removes the marker from the screen (makes it null). To do this, it checks to
      * see if the marker is null; if it isn't, it deletes it.
      */
-
     private void removeMarker() {
         if (mMarker != null) {
             mMarker.remove();
@@ -353,15 +347,14 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
     /**
      * Class for method that is called when the camera changes position.
      */
-
     private class OnZoomChange implements GoogleMap.OnCameraChangeListener {
         /**
          * When the camera's position changes, this method zooms in to where
          * the camera is.
+         *
          * @param cameraPosition CameraPosition input that contains all of the
          * camera's current position parameters.
          */
-
         @Override
         public void onCameraChange(CameraPosition cameraPosition) {
             mMapZoom = (int) cameraPosition.zoom;
@@ -372,7 +365,6 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
      * Class that contains the behavior that occurs when the user clicks on
      * the map.
      */
-
     private class OnMapClick implements GoogleMap.OnMapClickListener{
 
         /**
@@ -388,7 +380,6 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
          * @param latLng The object of the latitude and longitude information
          * of where the user clicked on the map.
          */
-
         @Override
         public void onMapClick(LatLng latLng) {
             mAddressEditText.setText("");
@@ -418,7 +409,6 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
     /**
      * Class that updates the camera according to the location.
      */
-
     public class OnLocationChange implements GoogleMap.OnMyLocationChangeListener {
 
         /**

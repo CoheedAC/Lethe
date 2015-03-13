@@ -181,17 +181,42 @@ public class CameraActivity extends ActionBarActivity implements GoogleApiClient
         }
     }
 
+    /**
+     * After calling connect(), this method will be invoked asynchronously when the
+     * connect request has successfully completed. After this callback, the application
+     * can make requests on other methods provided by the client and expect that no user
+     * intervention is required to call methods that use account and scopes provided
+     * to the client constructor.
+     *
+     * @param bundle Bundle of data provided to clients by Google Play services.
+     *               May be null if no content is provided by the service.
+     */
     @Override
     public void onConnected(Bundle bundle) {
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
     }
 
+    /**
+     * Called when the client is temporarily in a disconnected state. This can happen
+     * if there is a problem with the remote service (e.g. a crash or resource problem
+     * causes it to be killed by the system). When called, all requests have been canceled
+     * and no outstanding listeners will be executed. GoogleApiClient will automatically
+     * attempt to restore the connection.
+     *
+     * @param i The reason for the disconnection.
+     */
     @Override
-    public void onConnectionSuspended(int i) {
+    public void onConnectionSuspended(int cause) {
 
     }
 
+    /**
+     * Called when there was an error connecting the client to the service.
+     *
+     * @param connectionResult A ConnectionResult that can be used for resolving
+     *                         the error, and deciding what sort of error occurred.
+     */
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
 

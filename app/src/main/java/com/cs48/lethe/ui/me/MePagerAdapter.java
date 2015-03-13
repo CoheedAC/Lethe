@@ -42,13 +42,16 @@ import me.grantland.widget.AutofitHelper;
  */
 public class MePagerAdapter extends PagerAdapter {
 
+    // Logcat tag
     public final static String TAG = MePagerAdapter.class.getSimpleName();
 
+    // Instance variables
     private MeFullScreenActivity mMeFullScreenActivity;
     private List<Picture> mPictureList;
     private LayoutInflater mLayoutInflater;
     private DatabaseHelper mDatabaseHelper;
 
+    // Initializations of UI elements
     @InjectView(R.id.imageView)
     PinchToZoomImageView mImageView;
     @InjectView(R.id.likesTextView)

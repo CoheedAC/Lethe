@@ -18,8 +18,10 @@ import com.cs48.lethe.ui.camera.CameraActivity;
  */
 public class MainActivity extends ActionBarActivity implements ActionBar.TabListener {
 
+    // Logcat tag
     public static final String TAG = MainActivity.class.getSimpleName();
 
+    // Instance variable
     private TabsPagerAdapter mTabsPagerAdapter;
     private ViewPager mViewPager;
 
@@ -99,7 +101,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        menu.findItem(R.id.action_clear_cache).setVisible(false);
         return true;
     }
 
@@ -122,8 +123,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         }
         return super.onOptionsItemSelected(item);
     }
-
-
 
     /**
      * Called when a tab enters the selected state.

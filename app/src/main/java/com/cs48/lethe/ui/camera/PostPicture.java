@@ -47,6 +47,8 @@ public class PostPicture extends AsyncTask<String, String, String> {
      *
      * @param context Interface to global information about an application environment
      * @param pictureFile The file of the picture taken by the user
+     * @param orientation The orientation of the camera view
+     * @param location The current location of where the picture was taken
      */
     public PostPicture(Context context, File pictureFile, int orientation, Location location) {
         mCameraActivity = (CameraActivity) context;
@@ -166,26 +168,6 @@ public class PostPicture extends AsyncTask<String, String, String> {
     }
 
     /**
-     * Converts the input stream (the response from the server) into
-     * a String that can be parsed.
-     *
-     * @param inputStream The InputStream response from the server
-     * @return The String ready to be parsed
-     * @throws IOException
-     */
-    private String convertInputStreamToString(InputStream inputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        String line;
-        String result = "";
-
-        // Adds each line from the response to the result
-        while ((line = bufferedReader.readLine()) != null)
-            result += line;
-        inputStream.close();
-        return result;
-    }
-
-    /**
      * Runs on the UI thread after doInBackground(Params...). The specified
      * result is the value returned by doInBackground(Params...). This method
      * won't be invoked if the task was cancelled.
@@ -235,6 +217,26 @@ public class PostPicture extends AsyncTask<String, String, String> {
                 Log.e(TAG, e.getClass().getName() + ": " + e.getLocalizedMessage());
             }
         }
+    }
+
+    /**
+     * Converts the input stream (the response from the server) into
+     * a String that can be parsed.
+     *
+     * @param inputStream The InputStream response from the server
+     * @return The String ready to be parsed
+     * @throws IOException
+     */
+    private String convertInputStreamToString(InputStream inputStream) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        String line;
+        String result = "";
+
+        // Adds each line from the response to the result
+        while ((line = bufferedReader.readLine()) != null)
+            result += line;
+        inputStream.close();
+        return result;
     }
 
     /**

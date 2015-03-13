@@ -177,6 +177,10 @@ public class FeedFullScreenActivity extends ActionBarActivity {
         });
     }
 
+    /**
+     * Views the picture by incrementing the view count
+     * on the internal database and also on the server
+     */
     public void viewPicture() {
         // Update view count in the database
         mDatabaseHelper.viewPicture(mPicture);
@@ -283,15 +287,27 @@ public class FeedFullScreenActivity extends ActionBarActivity {
         }
     }
 
+    /**
+     * A callback when the picture loads in the imageview.
+     */
     private class PictureCallBack implements Callback {
+        /**
+         * A success to the callback
+         */
         @Override
         public void onSuccess() {
         }
 
+        /**
+         * A failure of the callback.
+         */
         @Override
         public void onError() {
+            // Deletes picture from database
             mDatabaseHelper.deletePictureFromFeedTable(mPicture);
             mDatabaseHelper.deletePictureFromPeekTable(mPicture);
+
+            // Displays alert dialog that the picture is no longer available
             try {
                 new AlertDialog.Builder(FeedFullScreenActivity.this)
                         .setTitle(getString(R.string.alert_title_picture_unavailable))

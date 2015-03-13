@@ -21,12 +21,19 @@ import java.util.List;
  */
 public class MeGridViewAdapter extends BaseAdapter {
 
+    // Logcat tag
     public static final String TAG = MeGridViewAdapter.class.getSimpleName();
 
+    // Instance variables
     private Context mContext;
     private List<Picture> mPictureList;
     private DatabaseHelper mDatabaseHelper;
 
+    /**
+     * Constructor that fetches the posted pictures from the database
+     *
+     * @param context Interface to global information about an application environment
+     */
     public MeGridViewAdapter(Context context) {
         mContext = context;
         mDatabaseHelper = DatabaseHelper.getInstance(mContext);
@@ -88,7 +95,6 @@ public class MeGridViewAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         // if it's not recycled, initialize some attributes
-        // if it's not recycled, initialize some attributes
         ImageView imageView = (ImageView) convertView;
         if (imageView == null) {
             imageView = new ImageView(mContext);
@@ -101,7 +107,7 @@ public class MeGridViewAdapter extends BaseAdapter {
             imageView.setBackgroundColor(mContext.getResources().getColor(R.color.empty_image));
         }
 
-
+        // Load the picture into the imageview
         Picasso.with(mContext)
                 .load(mPictureList.get(position).getFile())
                 .resize(PictureUtilities.MAX_THUMBNAIL_WIDTH, 0)

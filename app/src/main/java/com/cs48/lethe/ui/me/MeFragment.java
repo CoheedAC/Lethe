@@ -15,12 +15,18 @@ import com.cs48.lethe.R;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
+/**
+ * A Fragment for the feed tab
+ */
 public class MeFragment extends Fragment {
 
+    // Logcat tag
     public static final String TAG = MeFragment.class.getSimpleName();
 
+    // Instance variable
     private MeGridViewAdapter mMeGridViewAdapter;
 
+    // Initializations of UI elements
     @InjectView(R.id.meGridView)
     GridView mMeGridView;
     @InjectView(R.id.emptyGridTextView)
@@ -83,13 +89,21 @@ public class MeFragment extends Fragment {
         fetchMePicturesFromDatabase();
     }
 
-    public void setEmptyGridMessage(String errorMessage) {
+    /**
+     * If the grid is empty, then display a error message on the grid.
+     * Otherwise, the message is hidden.
+     *
+     * @param errorMessage The message to display
+     * @return True if grid is empty. False otherwise.
+     */
+    public boolean setEmptyGridMessage(String errorMessage) {
         if (mMeGridViewAdapter.getCount() == 0) {
             mEmptyGridTextView.setVisibility(View.VISIBLE);
             mEmptyGridTextView.setText(errorMessage);
-        } else {
-            mEmptyGridTextView.setVisibility(View.GONE);
+            return true;
         }
+        mEmptyGridTextView.setVisibility(View.GONE);
+        return false;
     }
 
     /**
@@ -98,15 +112,22 @@ public class MeFragment extends Fragment {
     public void fetchMePicturesFromDatabase() {
         mMeGridViewAdapter.fetchMePicturesFromDatabase();
         setEmptyGridMessage(getString(R.string.grid_no_posted_pictures));
-
-        /**
-         * A callback to be invoked when an item in this AdapterView has been clicked.
-         */}
+    }
 
     /**
      * A callback to be invoked when an item in this AdapterView has been clicked.
      */
     class OnPictureClickListener implements AdapterView.OnItemClickListener {
+        /**
+         * Callback method to be invoked when an item in this AdapterView has been clicked.
+         * This starts the full screen view of the picture.
+         *
+         * @param parent The AdapterView where the click happened.
+         * @param view The view within the AdapterView that was clicked
+         *             (this will be a view provided by the adapter)
+         * @param position The position of the view in the adapter.
+         * @param id The row id of the item that was clicked.
+         */
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Intent meFullPictureIntent = new Intent(getActivity(), MeFullScreenActivity.class);

@@ -7,9 +7,4 @@
           android:icon="@drawable/ic_action_camera"
           android:orderInCategory="100"
           app:showAsAction="always"/>
-    <item android:id="@+id/action_clear_cache"
-          android:title="@string/action_delete"
-          android:icon="@drawable/ic_action_discard"
-          android:orderInCategory="99"
-          app:showAsAction="ifRoom"/>
 </menu>

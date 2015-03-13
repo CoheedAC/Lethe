@@ -19,11 +19,17 @@ import java.util.Vector;
  */
 public class TabsPagerAdapter extends FragmentPagerAdapter {
 
+    // Instance variables
     private List<String> fragments;
     private Context mContext;
 
     /**
-     * Adds all of the fragments into the List.
+     * Implementation of PagerAdapter that represents each page as a
+     * Fragment that is persistently kept in the fragment manager as
+     * long as the user can return to the page.
+     *
+     * @param fragmentManager
+     * @param context Interface to global information about an application environment
      */
     public TabsPagerAdapter(FragmentManager fragmentManager, Context context) {
         super(fragmentManager);

@@ -29,6 +29,9 @@ import butterknife.InjectView;
 import static com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import static com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 
+/**
+ * A Fragment for the feed tab
+ */
 public class FeedFragment extends Fragment implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener{
 
     // Logcat tag
@@ -62,11 +65,13 @@ public class FeedFragment extends Fragment implements ConnectionCallbacks, OnCon
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Location request that updates ever 10,000 ms
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(10000);
         mLocationRequest.setFastestInterval(5000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
+        // Sets up the location manager that connects to Google maps
         mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
@@ -136,30 +141,29 @@ public class FeedFragment extends Fragment implements ConnectionCallbacks, OnCon
         }
     }
 
+    /**
+     * Called when the Fragment is no longer resumed.  This is generally
+     * tied to {@link android.app.Activity#onPause() Activity.onPause} of the containing
+     * Activity's lifecycle.
+     */
     @Override
     public void onPause() {
         super.onPause();
         stopLocationUpdates();
     }
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        stopLocationUpdates();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        stopLocationUpdates();
-    }
-
-    protected void stopLocationUpdates() {
+    /**
+     * Stops receiving updates from the location manager
+     */
+    private void stopLocationUpdates() {
         LocationServices.FusedLocationApi.removeLocationUpdates(
                 mGoogleApiClient, this);
     }
 
-    protected void startLocationUpdates() {
+    /**
+     * Starts receiving updates from the location manager
+     */
+    private void startLocationUpdates() {
         LocationServices.FusedLocationApi.requestLocationUpdates(
                 mGoogleApiClient, mLocationRequest, this);
     }
@@ -211,6 +215,16 @@ public class FeedFragment extends Fragment implements ConnectionCallbacks, OnCon
         mFeedPullToRefreshLayout.setRefreshing(false);
     }
 
+    /**
+     * After calling connect(), this method will be invoked asynchronously when the
+     * connect request has successfully completed. After this callback, the application
+     * can make requests on other methods provided by the client and expect that no user
+     * intervention is required to call methods that use account and scopes provided
+     * to the client constructor.
+     *
+     * @param bundle Bundle of data provided to clients by Google Play services.
+     *               May be null if no content is provided by the service.
+     */
     @Override
     public void onConnected(Bundle bundle) {
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
@@ -221,16 +235,36 @@ public class FeedFragment extends Fragment implements ConnectionCallbacks, OnCon
         }
     }
 
+    /**
+     * Called when the client is temporarily in a disconnected state. This can happen
+     * if there is a problem with the remote service (e.g. a crash or resource problem
+     * causes it to be killed by the system). When called, all requests have been canceled
+     * and no outstanding listeners will be executed. GoogleApiClient will automatically
+     * attempt to restore the connection.
+     *
+     * @param i The reason for the disconnection.
+     */
     @Override
     public void onConnectionSuspended(int i) {
 
     }
 
+    /**
+     * Called when there was an error connecting the client to the service.
+     *
+     * @param connectionResult A ConnectionResult that can be used for resolving
+     *                         the error, and deciding what sort of error occurred.
+     */
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
     }
 
+    /**
+     * Called when the location has changed. There are no restrictions
+     * on the use of the supplied Location object.
+     * @param location The new location, as a Location object.
+     */
     @Override
     public void onLocationChanged(Location location) {
         mLastLocation = location;

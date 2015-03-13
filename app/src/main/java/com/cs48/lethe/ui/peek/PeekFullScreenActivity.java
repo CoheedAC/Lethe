@@ -14,9 +14,6 @@ import butterknife.InjectView;
  */
 public class PeekFullScreenActivity extends ActionBarActivity {
 
-    private PeekPagerAdapter mPeekPagerAdapter;
-    private int mPosition;
-
     @InjectView(R.id.pager)
     ViewPager mViewPager;
 
@@ -34,20 +31,19 @@ public class PeekFullScreenActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Sets the view to the full screen layout
         setContentView(R.layout.activity_fullscreen);
 
+        // Injects the UI elements into the activity
         ButterKnife.inject(this);
 
         // Hides the action bar
         getSupportActionBar().hide();
 
-        // Gets the position passed in the the intent
-        mPosition = getIntent().getIntExtra(getString(R.string.data_position), 0);
-
-        mPeekPagerAdapter = new PeekPagerAdapter(this);
-        mViewPager.setAdapter(mPeekPagerAdapter);
+        mViewPager.setAdapter(new PeekPagerAdapter(this));
 
         // Displays the picture at the selected position
-        mViewPager.setCurrentItem(mPosition);
+        mViewPager.setCurrentItem(getIntent().getIntExtra(getString(R.string.data_position), 0));
     }
 }

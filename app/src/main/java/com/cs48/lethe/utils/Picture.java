@@ -18,6 +18,20 @@ public class Picture {
     private int likes;
     private int orientation;
 
+    /**
+     * Constructor that creates a picture object
+     *
+     * @param uniqueId
+     * @param latitude
+     * @param longitude
+     * @param pictureFile
+     * @param thumbnailUrl
+     * @param fullUrl
+     * @param orientation
+     * @param views
+     * @param likes
+     * @param datePosted
+     */
     public Picture(String uniqueId, double latitude, double longitude, File pictureFile, String thumbnailUrl, String fullUrl,int orientation, int views, int likes, String datePosted) {
         this.uniqueId = uniqueId;
         this.datePosted = datePosted;
