@@ -49,14 +49,17 @@ import butterknife.InjectView;
 
 public class PeekFragment extends Fragment implements OnMapReadyCallback {
 
+    // Logcat Tag
     public static final String TAG = PeekFragment.class.getSimpleName();
 
+    // Instance variables
     private GoogleMap mMap;
     private PeekGridViewAdapter mPeekGridViewAdapter;
     private Location mCurrentLocation;
     private Marker mMarker;
     private int mMapZoom = 14;
 
+    // Initializations of UI elements
     @InjectView(R.id.peekGridView)
     PullToRefreshGridView mPeekGridView;
     @InjectView(R.id.swipeRefreshLayout)
@@ -110,20 +113,26 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        // Sets the view to the peek fragment layout
         View rootView = inflater.inflate(R.layout.fragment_peek, container, false);
 
+        // Injects the UI elements into the activity
         ButterKnife.inject(this, rootView);
 
+        // Disables the address bar until map is loaded
         mAddressEditText.setEnabled(false);
 
+        // Asyncronously sets up the map
         SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         supportMapFragment.getMapAsync(this);
 
+        // Sets up the empty grid message
         if (!NetworkUtilities.isNetworkAvailable(getActivity()))
             setEmptyGridMessage(getString(R.string.grid_no_internet_connection));
         else
             setEmptyGridMessage("");
 
+        // Sets up action listeners
         mPeekGridView.setAdapter(mPeekGridViewAdapter);
         mPeekGridView.setOnItemClickListener(new OnPictureClickListener());
         mPeekGridView.setOnScrollListener(new OnScrollListener());
