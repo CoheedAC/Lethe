@@ -39,6 +39,14 @@ import java.util.List;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
+/**
+ * This fragment contains the interactive Google map, and it is made to display
+ * a grid view of all of the photos from the region selected by the user on the
+ * map. This class enables the user to manually enter in any address, or click on
+ * any point on the map and as a result, view the corresponding photos from
+ * within a 5 mile radius of where he clicked.
+ */
+
 public class PeekFragment extends Fragment implements OnMapReadyCallback {
 
     public static final String TAG = PeekFragment.class.getSimpleName();
@@ -64,6 +72,10 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
      * while the fragment's activity is still in the process of being created. As such, you can
      * not rely on things like the activity's content view hierarchy being initialized at this point.
      *
+     * setRetainInstance(true) enables the fragment instance to be retained
+     * across activity recreation. The member variable mPeekGridViewAdapter is
+     * initialized to a new PeekGridViewAdapter.
+     *
      * @param savedInstanceState If the fragment is being re-created from a
      *                           previous saved state, this is the state.
      */
@@ -80,6 +92,10 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
      * will be called between onCreate(Bundle) and onActivityCreated(Bundle).
      * If you return a View from here, you will later be called in
      * onDestroyView() when the view is being released.
+     *
+     * This method makes it so you are unable to add address or pull-to-refresh until the
+     * map loads. The Map object is also asynchronously set-up. The grid view and address
+     * entry event listeners are set up.
      *
      * @param inflater           The LayoutInflater object that can be used
      *                           to inflate any views in the fragment,
@@ -98,11 +114,8 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
 
         ButterKnife.inject(this, rootView);
 
-        // Unable to add address or pull-to-refresh until map loads
         mAddressEditText.setEnabled(false);
 
-        // asyncronously sets up the maps object. the onMapReady will be automatically called
-        // below when it is done loading
         SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         supportMapFragment.getMapAsync(this);
 
@@ -120,6 +133,10 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
         return rootView;
     }
 
+    /**
+     * Deletes the map fragment.
+     */
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -129,6 +146,10 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
             fm.beginTransaction().remove(frag).commitAllowingStateLoss();
     }
 
+    /**
+     * Whenever the map fragment is resumed, the data is fetched from the server again.
+     */
+
     @Override
     public void onResume() {
         super.onResume();
@@ -137,7 +158,9 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
 
     /**
      * Called when the map is ready to be used. Initialized the map location and a map marker
-     * to the current location of the user
+     * to the current location of the user. All map gestures (zooming, scrolling, tilting,
+     * etc...) are enabled. Makes it so when the user inputs an address, the camera moves
+     * to the inputted address.
      *
      * @param googleMap A non-null instance of a GoogleMap associated with the
      *                  MapFragment or MapView that defines the callback.
@@ -171,9 +194,22 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
         return false;
     }
 
+    /**
+     * Sets `refreshing` to false.
+     */
+
     public void stopRefreshingAnimation() {
         mPeekPullToRefreshLayout.setRefreshing(false);
     }
+
+    /**
+     * This method uses the inputted latitude and longitude to fetch the
+     * corresponding photos from the server. Checks if the network is
+     * available and if it isn't, it displays an error message.
+     *
+     * @param latitude The latitude from where the user requests photos.
+     * @param longitude The longitude from where the user requests photos.
+     */
 
     private void fetchPeekFeedFromServer(double latitude, double longitude) {
         if (NetworkUtilities.isNetworkAvailable(getActivity())) {
@@ -190,11 +226,20 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
+    /**
+     * Hides the keyboard.
+     */
+
     private void hideKeyboard() {
         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
                 Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mAddressEditText.getWindowToken(), 0);
     }
+
+    /**
+     * Removes the marker from the screen (makes it null). To do this, it checks to
+     * see if the marker is null; if it isn't, it deletes it.
+     */
 
     private void removeMarker() {
         if (mMarker != null) {
@@ -236,7 +281,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
     }
 
     /**
-     * Sets up the refresh listeners for pull-to-refresh feature
+     * Sets up the refresh listeners for pull-to-refresh feature.
      */
     private class OnRefreshListener implements SwipeRefreshLayout.OnRefreshListener {
         @Override
@@ -254,6 +299,22 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
      * Sets up the input listener for the address textview
      */
     private class OnAddressBarEditorActionListener implements TextView.OnEditorActionListener {
+
+        /**
+         * When the user enters in an address this method uses a Geocoder object to return a list
+         * of the address matches containing the proper latitude, longitude, and other information
+         * about the location.
+         * When the user clicks enter:
+         *  -the map camera relocates the the location of the 1st address returned by the geocoder
+         *      object.
+         *  -a marker appears on the map that has an info window with the name of the city
+         *      that it is located in.
+         *
+         * @param v The textview that the user clicked
+         * @param actionId An int of the actionID
+         * @param event A KeyEvent that reports the button event.
+         * @return Returns true if user clicked enter or the event was null. False otherwise.
+         */
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
             if (event == null || event.getAction() == KeyEvent.ACTION_DOWN) {
@@ -289,14 +350,45 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
+    /**
+     * Class for method that is called when the camera changes position.
+     */
+
     private class OnZoomChange implements GoogleMap.OnCameraChangeListener {
+        /**
+         * When the camera's position changes, this method zooms in to where
+         * the camera is.
+         * @param cameraPosition CameraPosition input that contains all of the
+         * camera's current position parameters.
+         */
+
         @Override
         public void onCameraChange(CameraPosition cameraPosition) {
             mMapZoom = (int) cameraPosition.zoom;
         }
     }
 
-    private class OnMapClick implements GoogleMap.OnMapClickListener {
+    /**
+     * Class that contains the behavior that occurs when the user clicks on
+     * the map.
+     */
+
+    private class OnMapClick implements GoogleMap.OnMapClickListener{
+
+        /**
+         * This method fetches photos from the server that are within a 5 mile radius (which is specified
+         * on the server side) of where the user clicked on the map.
+         * A geocoder object is also used to
+         * obtain the address information of the latitude and longitude located where the user clicked.
+         * A marker is dropped where the user clicks that displays the city information of
+         * that area.
+         * The map camera is also always updated so that the point where the marker has been dropped is
+         * always in the center of the screen.
+         *
+         * @param latLng The object of the latitude and longitude information
+         * of where the user clicked on the map.
+         */
+
         @Override
         public void onMapClick(LatLng latLng) {
             mAddressEditText.setText("");
@@ -323,7 +415,18 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
+    /**
+     * Class that updates the camera according to the location.
+     */
+
     public class OnLocationChange implements GoogleMap.OnMyLocationChangeListener {
+
+        /**
+         * If either mCurrentlocation or mMarker are null, then the camera is updated to where
+         * the latitude and longitdue of the location object is.
+         *
+         * @param location Location object that contains location information.
+         */
         @Override
         public void onMyLocationChange(Location location) {
             if (mCurrentLocation == null || mMarker == null) {
@@ -334,7 +437,18 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
+
+    /**
+     * Class that implements the interface for when the user clicks on the current location button.
+     */
     public class OnCurrentLocationButtonClick implements GoogleMap.OnMyLocationButtonClickListener {
+
+        /**
+         * Upon click of the current location button, the text from mAddressEditText is hidden and
+         * the GridView of photos below the map is cleared.
+         *
+         * @return Returns false upon completion.
+         */
         @Override
         public boolean onMyLocationButtonClick() {
             mAddressEditText.setText("");
