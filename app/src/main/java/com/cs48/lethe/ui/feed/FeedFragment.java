@@ -42,7 +42,6 @@ public class FeedFragment extends Fragment implements ConnectionCallbacks, OnCon
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
     private LocationRequest mLocationRequest;
-    int count = 0;
 
     // Initializations of UI elements
     @InjectView(R.id.feedGridView)

@@ -28,7 +28,7 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
      * Fragment that is persistently kept in the fragment manager as
      * long as the user can return to the page.
      *
-     * @param fragmentManager
+     * @param fragmentManager The fragment manager
      * @param context Interface to global information about an application environment
      */
     public TabsPagerAdapter(FragmentManager fragmentManager, Context context) {
