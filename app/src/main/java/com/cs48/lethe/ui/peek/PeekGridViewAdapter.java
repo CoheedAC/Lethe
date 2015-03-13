@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by maxkohne on 2/26/15.
+ * A BaseAdapter that handles the grid for the peek tab.
  */
 public class PeekGridViewAdapter extends BaseAdapter {
 
@@ -38,6 +38,12 @@ public class PeekGridViewAdapter extends BaseAdapter {
     private DatabaseHelper mDatabaseHelper;
     private PeekFragment mPeekFragment;
 
+    /**
+     * Constructor that clears all peek pictures from the database
+     *
+     * @param context Interface to global information about an application environment
+     * @param peekFragment The reference to the peek fragment
+     */
     public PeekGridViewAdapter(Context context, PeekFragment peekFragment) {
         mContext = context;
         mPeekFragment = peekFragment;
@@ -101,6 +107,8 @@ public class PeekGridViewAdapter extends BaseAdapter {
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             imageView.setBackgroundColor(mContext.getResources().getColor(R.color.empty_image));
         }
+
+        // Loads the picture
         Picasso.with(mContext)
                 .load(mPictureList.get(position).getThumbnailUrl())
                 .resize(PictureUtilities.MAX_THUMBNAIL_WIDTH, 0)

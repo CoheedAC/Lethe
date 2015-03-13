@@ -29,6 +29,8 @@ Requires Google Play Services, which be can be installed on an emulator but is c
 Also, this requires internet AND location services to be enabled. Location services mode should be set to High Accuracy to work.
 See Camera/Pictures...
 Swiping should go to the next/previous photo in full screen view.
+The map might not load for you because of the API key assigned from google.
+If that happens, emails us so we can get a new API key to enable the map.
 
 \\Me Tab
 See Camera/Pictures...

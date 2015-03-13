@@ -15,7 +15,7 @@ public abstract class OnHorizontalSwipeListener implements View.OnTouchListener 
     /**
      * Constructor that creates a gesture detector
      *
-     * @param context
+     * @param context Interface to global information about an application environment
      */
     public OnHorizontalSwipeListener(Context context) {
         gestureDetector = new GestureDetector(context, new GestureListener());

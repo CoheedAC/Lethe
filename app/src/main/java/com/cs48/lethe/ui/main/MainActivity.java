@@ -22,7 +22,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     public static final String TAG = MainActivity.class.getSimpleName();
 
     // Instance variable
-    private TabsPagerAdapter mTabsPagerAdapter;
     private ViewPager mViewPager;
 
     /**
@@ -43,7 +42,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         // Create the adapter that will return a fragment for each of the four
         // primary sections of the activity.
-        mTabsPagerAdapter = new TabsPagerAdapter(getSupportFragmentManager(), this);
+        TabsPagerAdapter tabsPagerAdapter = new TabsPagerAdapter(getSupportFragmentManager(), this);
 
         // Set up the action bar.
         final ActionBar actionBar = getSupportActionBar();
@@ -57,7 +56,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
-        mViewPager.setAdapter(mTabsPagerAdapter);
+        mViewPager.setAdapter(tabsPagerAdapter);
         mViewPager.setOffscreenPageLimit(3);
 
         // When swiping between different sections, select the corresponding
@@ -78,7 +77,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         };
 
         // For each of the sections in the app, add a tab to the action bar.
-        for (int i = 0; i < mTabsPagerAdapter.getCount(); i++) {
+        for (int i = 0; i < tabsPagerAdapter.getCount(); i++) {
             // Create a tab with text corresponding to the page title defined by
             // the adapter. Also specify this Activity object, which implements
             // the TabListener interface, as the callback (listener) for when

@@ -23,7 +23,8 @@ import butterknife.InjectView;
  */
 public class MoreFragment extends Fragment {
 
-    public static final String LOG_TAG = MoreFragment.class.getSimpleName();
+    // Logcat tag
+    public static final String TAG = MoreFragment.class.getSimpleName();
 
     @InjectView(R.id.facebookButton)
     Button mFacebookButton;

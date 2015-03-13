@@ -30,17 +30,21 @@ import butterknife.InjectView;
 import me.grantland.widget.AutofitHelper;
 
 /**
- * Created by maxkohne on 2/26/15.
+ * A custom pager adapter for the full-screen view
+ * of the peek pictures that allows the slideshow effect
  */
 public class PeekPagerAdapter extends PagerAdapter {
 
+    // Logcat tag
     public final static String TAG = PeekPagerAdapter.class.getSimpleName();
 
+    // Instance variables
     private PeekFullScreenActivity mPeekFullScreenActivity;
     private List<Picture> mPictureList;
     private LayoutInflater mLayoutInflater;
     private DatabaseHelper mDatabaseHelper;
 
+    // Initializations of UI elements
     @InjectView(R.id.imageView)
     PinchToZoomImageView mImageView;
     @InjectView(R.id.likesTextView)
@@ -52,6 +56,11 @@ public class PeekPagerAdapter extends PagerAdapter {
     @InjectView(R.id.cityTextView)
     TextView mCityTextView;
 
+    /**
+     * Constructor that gets the peek pictures from the database
+     *
+     * @param context Interface to global information about an application environment
+     */
     public PeekPagerAdapter(Context context) {
         mPeekFullScreenActivity = (PeekFullScreenActivity) context;
         mDatabaseHelper = DatabaseHelper.getInstance(mPeekFullScreenActivity);
@@ -94,11 +103,20 @@ public class PeekPagerAdapter extends PagerAdapter {
      */
     @Override
     public View instantiateItem(ViewGroup container, final int position) {
+        // Inflates the view from the full screen layout
         View itemView = mLayoutInflater.inflate(R.layout.layout_fullscreen, container, false);
 
+        // Injects the UI elements into the activity
         ButterKnife.inject(this, itemView);
 
+        // Picture at the current position
         final Picture picture = mPictureList.get(position);
+
+        // Shows the statistics
+        mLikesTextView.setText(mPictureList.get(position).getLikes() + "");
+        mViewsTextView.setText(mPictureList.get(position).getViews() + "");
+
+        // Shows the ciy name
         LatLng latLng = new LatLng(picture.getLatitude(), picture.getLongitude());
         Geocoder geocoder = new Geocoder(mPeekFullScreenActivity);
         try {
@@ -110,14 +128,13 @@ public class PeekPagerAdapter extends PagerAdapter {
             mCityTextView.setVisibility(View.GONE);
         }
 
-        mLikesTextView.setText(mPictureList.get(position).getLikes() + "");
-        mViewsTextView.setText(mPictureList.get(position).getViews() + "");
-
+        // Hides the delete and copy buttons
         mButtonsLinearLayout.setVisibility(View.GONE);
 
         // Set up on click listeners
         mImageView.setOnClickListener(new OnPictureClickListener());
 
+        // Displays the picture
         Picasso.with(mPeekFullScreenActivity)
                 .load(mPictureList.get(position).getFullUrl())
                 .resize(PictureUtilities.MAX_FULL_WIDTH, 0)
@@ -128,6 +145,10 @@ public class PeekPagerAdapter extends PagerAdapter {
                     public void onSuccess() {
                     }
 
+                    /**
+                     * Alerts the user that the pictures has expired or been deleted
+                     * by another user. Then deletes the picture from the database.
+                     */
                     @Override
                     public void onError() {
                         mDatabaseHelper.deletePictureFromFeedTable(picture);

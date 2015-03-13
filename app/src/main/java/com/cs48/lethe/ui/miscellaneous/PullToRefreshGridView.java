@@ -1,31 +1,40 @@
 package com.cs48.lethe.ui.miscellaneous;
 
-/**
- * Created by maxkohne on 2/24/15.
- */
-
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.widget.GridView;
 
 /**
- * ScrollViewの中のGridViewでも高さを可変にする<br>
  * http://stackoverflow.com/questions/8481844/gridview-height-gets-cut
  */
-
 public class PullToRefreshGridView extends GridView {
 
     boolean expanded = false;
 
+    /**
+     *
+     * @param context Interface to global information about an application environment
+     */
     public PullToRefreshGridView(Context context) {
         super(context);
     }
 
+    /**
+     *
+     * @param context Interface to global information about an application environment
+     * @param attrs Attributes of the grid view
+     */
     public PullToRefreshGridView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
+    /**
+     *
+     * @param context Interface to global information about an application environment
+     * @param attrs Attributes of the grid view
+     * @param defStyle Style of the attributes
+     */
     public PullToRefreshGridView(Context context, AttributeSet attrs,
                                  int defStyle) {
         super(context, attrs, defStyle);
@@ -44,7 +53,6 @@ public class PullToRefreshGridView extends GridView {
      */
     @Override
     public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        // HACK! TAKE THAT ANDROID!
         if (isExpanded()) {
             // Calculate entire height by providing a very large height hint.
             // View.MEASURED_SIZE_MASK represents the largest height possible.

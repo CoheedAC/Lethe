@@ -10,7 +10,8 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 /**
- * Created by maxkohne on 2/26/15.
+ * The activity that handles showing the full-sized image
+ * whenever the user tabs on an image in the grid of peek pictures.
  */
 public class PeekFullScreenActivity extends ActionBarActivity {
 

@@ -38,7 +38,8 @@ import butterknife.InjectView;
 import me.grantland.widget.AutofitHelper;
 
 /**
- * Created by maxkohne on 2/26/15.
+ * A custom pager adapter for the full-screen view
+ * of the me pictures that allows the slideshow effect
  */
 public class MePagerAdapter extends PagerAdapter {
 
@@ -65,6 +66,11 @@ public class MePagerAdapter extends PagerAdapter {
     @InjectView(R.id.cityTextView)
     TextView mCityTextView;
 
+    /**
+     * Constructor that gets the posted pictures from the database
+     *
+     * @param context Interface to global information about an application environment
+     */
     public MePagerAdapter(Context context) {
         mMeFullScreenActivity = (MeFullScreenActivity) context;
         mDatabaseHelper = DatabaseHelper.getInstance(mMeFullScreenActivity);
@@ -108,17 +114,23 @@ public class MePagerAdapter extends PagerAdapter {
      */
     @Override
     public View instantiateItem(ViewGroup container, int position) {
+        // Inflates the view from the full screen layout
         View itemView = mLayoutInflater.inflate(R.layout.layout_fullscreen, container, false);
 
+        // Injects the UI elements into the activity
         ButterKnife.inject(this, itemView);
 
+        // Picture at the current position
         Picture picture = mPictureList.get(position);
 
+        // Shows the statistics
         mLikesTextView.setText(picture.getLikes() + "");
         mViewsTextView.setText(picture.getViews() + "");
 
+        // Gets the updated stats from the server
         fetchPictureStatisticsFromServer(picture);
 
+        // Shows the ciy name
         LatLng latLng = new LatLng(picture.getLatitude(), picture.getLongitude());
         Geocoder geocoder = new Geocoder(mMeFullScreenActivity);
         try {
@@ -135,6 +147,7 @@ public class MePagerAdapter extends PagerAdapter {
         mDeleteButton.setOnClickListener(new OnDeleteButtonClickListener(position));
         mSaveButton.setOnClickListener(new OnSaveButtonClickListener(position));
 
+        // Displays the picture
         Picasso.with(mMeFullScreenActivity)
                 .load(picture.getFile())
                 .resize(PictureUtilities.MAX_FULL_WIDTH, 0)
@@ -145,6 +158,9 @@ public class MePagerAdapter extends PagerAdapter {
                     public void onSuccess() {
                     }
 
+                    /**
+                     * Alerts the user that it could not load the picture successfully
+                     */
                     @Override
                     public void onError() {
                         try {

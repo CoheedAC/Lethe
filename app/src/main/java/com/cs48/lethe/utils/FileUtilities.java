@@ -21,10 +21,14 @@ import java.util.Date;
  */
 public class FileUtilities {
 
+    // Logcat tag
     public static final String TAG = FileUtilities.class.getSimpleName();
 
     /**
-     * Returns directory where images will be stored
+     * Returns directory where pictures will be stored
+     *
+     * @param context Interface to global information about an application environment
+     * @return Directory to store files.
      */
     public static File getFileDirectory(Context context) {
         ApplicationSettings settings = new ApplicationSettings(context);
@@ -55,7 +59,9 @@ public class FileUtilities {
     }
 
     /**
-     * Returns true if external storage is mounted. False otherwise.
+     * Checks external storage is mounted.
+     *
+     * @return True if the SD card is mounted. False otherwise.
      */
     public static boolean isExternalStorageAvailable() {
         String state = Environment.getExternalStorageState();
@@ -64,6 +70,9 @@ public class FileUtilities {
 
     /**
      * Returns app subdirectory in the external public storage. If directory doesn't exist, then it's created.
+     *
+     * @param context Interface to global information about an application environment
+     * @return Directory of shared public storage.
      */
     public static File getSharedExternalDirectory(Context context) {
         File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
@@ -75,6 +84,11 @@ public class FileUtilities {
 
     /**
      * Copies the image to the public storage directory and returns the Uri
+     *
+     * @param context Interface to global information about an application environment
+     * @param picture The picture to save
+     * @return True if successfully copied. False otherwise.
+     * @throws IOException
      */
     public static boolean savePictureForSharing(Context context, Picture picture) throws IOException {
         File destination = new File(getSharedExternalDirectory(context) + File.separator + picture.getFile().getName());
@@ -94,6 +108,9 @@ public class FileUtilities {
 
     /**
      * Create a File for saving an image or video
+     *
+     * @param context Interface to global information about an application environment
+     * @return The picture file
      */
     public static File getOutputMediaFile(Context context) {
         File mediaStorageDir = getFileDirectory(context);

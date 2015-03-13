@@ -12,7 +12,7 @@ import android.view.View;
 import android.widget.ImageView;
 
 /**
- * Created by maxkohne on 2/26/15.
+ * Custom Image View that allows the pinch to zoom feature
  */
 public class PinchToZoomImageView extends ImageView {
 
@@ -41,16 +41,30 @@ public class PinchToZoomImageView extends ImageView {
 
     Context mContext;
 
+    /**
+     *
+     * @param context Interface to global information about an application environment
+     */
     public PinchToZoomImageView(Context context) {
         super(context);
         sharedConstructing(context);
     }
 
+    /**
+     *
+     * @param context Interface to global information about an application environment
+     * @param attrs Attributes of the image view
+     */
     public PinchToZoomImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
         sharedConstructing(context);
     }
 
+    /**
+     * Enables pinch-to-zoom functionality
+     *
+     * @param context Interface to global information about an application environment
+     */
     private void sharedConstructing(Context context) {
         super.setClickable(true);
         this.mContext = context;
@@ -107,6 +121,11 @@ public class PinchToZoomImageView extends ImageView {
         });
     }
 
+    /**
+     * Sets the maximum scale factor for zooming
+     *
+     * @param x Scale factor
+     */
     public void setMaxZoom(float x) {
         maxScale = x;
     }
@@ -166,6 +185,9 @@ public class PinchToZoomImageView extends ImageView {
         }
     }
 
+    /**
+     * Fixes the translation of the matrix
+     */
     void fixTrans() {
         matrix.getValues(m);
         float transX = m[Matrix.MTRANS_X];
@@ -179,6 +201,14 @@ public class PinchToZoomImageView extends ImageView {
             matrix.postTranslate(fixTransX, fixTransY);
     }
 
+    /**
+     * Gets the translation of the matrix
+     *
+     * @param trans Translation factor
+     * @param viewSize Size of the image view
+     * @param contentSize Size of the content being put into the image view
+     * @return the translation factor
+     */
     float getFixTrans(float trans, float viewSize, float contentSize) {
         float minTrans, maxTrans;
 
