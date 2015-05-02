@@ -320,7 +320,7 @@ public class PeekFragment extends Fragment implements OnMapReadyCallback {
          */
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-            if (event == null || event.getAction() == KeyEvent.ACTION_DOWN) {
+            if (event == null || event.getAction() == KeyEvent.KEYCODE_ENTER) {
                 try {
                     Geocoder geocoder = new Geocoder(getActivity());
                     List<Address> addressList = geocoder.getFromLocationName(mAddressEditText.getText().toString(), 2);
